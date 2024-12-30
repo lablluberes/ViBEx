@@ -150,11 +150,10 @@ def call_C_BASC(data):
     basca_lib.BASCA.restype = ctypes.c_double
 
     # Define your data
-    data = np.asarray(data, dtype=np.float64)
+    data = np.asarray(data.copy(), dtype=np.float64)
 
     # Call the BASCA function
-    t = basca_lib.BASCA(data, len(data))
-    return t
+    return basca_lib.BASCA(data, len(data))
 
 
 ##############

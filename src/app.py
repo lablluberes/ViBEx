@@ -583,8 +583,7 @@ def save_thr(selected_method, selected_rows, data):
 
             if(method == 'BASC A'):
                 
-                #thr = call_C_BASC(splineGene)
-                thr = BASC_A(splineGene)
+                thr = call_C_BASC(splineGene)
 
                 thr_b[row] = thr
 
