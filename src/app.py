@@ -583,12 +583,15 @@ def save_thr(selected_method, selected_rows, data):
 
             if(method == 'BASC A'):
                 
-                thr = call_C_BASC(splineGene)
+                #thr = call_C_BASC(splineGene)
+                thr = BASC_A(splineGene)
 
                 thr_b[row] = thr
 
             elif(method == 'Onestep'):
+
                 thr = call_C_Stepminer(splineGene)
+                #thr = onestep(splineGene)
 
                 thr_o[row] = thr
 
