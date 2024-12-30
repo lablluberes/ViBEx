@@ -691,7 +691,7 @@ def threshold_tabs(selected_method, selected_gene, data, thr_k, thr_o, thr_s, th
             thr_basc = thr_b[str(selected_gene)]
             #thr_a, gene_iter = three_interpolation(gene, method, 4)
             
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_basc), 'label': ["BASC A Threshold"]* size_new})
+            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_basc), 'label': ["BASC A"]* size_new})
             
             lines = alt.Chart(datas).mark_line(strokeDash=[2,1],color='red').encode(
                     x=alt.X('x'),
@@ -710,7 +710,7 @@ def threshold_tabs(selected_method, selected_gene, data, thr_k, thr_o, thr_s, th
          
             thr_onestep = thr_o[str(selected_gene)]
             
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_onestep),'label': ["Onestep Threshold"]* size_new})
+            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_onestep),'label': ["Onestep"]* size_new})
             
             lines = alt.Chart(datas).mark_line(strokeDash=[8,8], color='purple').encode(
                     x=alt.X('x'),
@@ -731,7 +731,7 @@ def threshold_tabs(selected_method, selected_gene, data, thr_k, thr_o, thr_s, th
             thr_shmu = thr_s[str(selected_gene)]
             #thr_a, gene_iter = three_interpolation(gene, method, 4)
             
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_shmu), 'label': ["Shmulevich Threshold"]* size_new})
+            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_shmu), 'label': ["Shmulevich"]* size_new})
             
             lines = alt.Chart(datas).mark_line(strokeDash=[4,2],color='orange').encode(
                     x=alt.X('x'),
@@ -752,7 +752,7 @@ def threshold_tabs(selected_method, selected_gene, data, thr_k, thr_o, thr_s, th
             thr_kmeans = thr_k[str(selected_gene)]
             #thr_a, gene_iter = three_interpolation(gene, method, 4)
             
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_kmeans), 'label': ["K-Means Threshold"]* size_new})
+            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_kmeans), 'label': ["K-Means"]* size_new})
             
             lines = alt.Chart(datas).mark_line(strokeDash=[8,4], color='green').encode(
                     x=alt.X('x'),
