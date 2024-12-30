@@ -1,0 +1,4 @@
+Gene,Rule
+otx,otx and krox and GATAe
+GATAe,otx
+krox,otx and (not krox)
