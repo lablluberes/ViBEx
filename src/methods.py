@@ -153,7 +153,7 @@ def call_C_BASC(data):
     data = np.asarray(data, dtype=np.float64)
 
     # Call the BASCA function
-    t = basca_lib.BASCA(data, len(data))
+    t = basca_lib.BASCA(data.copy(), len(data))
     return t
 
 
@@ -218,7 +218,7 @@ def call_C_Stepminer(data):
     stepminer_lib.stepminer.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), ctypes.c_int]
     stepminer_lib.stepminer.restype = ctypes.c_double
 
-    data = np.asarray(data, dtype=np.float64)
+    data = np.asarray(data.copy(), dtype=np.float64)
     return stepminer_lib.stepminer(data, len(data))
 
 #################
