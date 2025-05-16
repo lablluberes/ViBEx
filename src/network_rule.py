@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import igraph as ig
 from IPython.core.display import HTML
 from pyvis.network import Network
+from attractors import attractors
 
 # function that reads the rules of the csv and creates a boolean network of all posible states
 # the parameters is the csv file as a dataframe
@@ -144,8 +145,20 @@ def createNetwork(rules_df):
         net.add_edge(curr_state, end_state)
 
     #print(dict_net)
+
+    Atts_syn, Att_num = attractors(dict_net)
+
+    #print(Atts_syn)
+
+    for nodes in net.nodes:
+
+        if nodes['id'] in Atts_syn:
+            nodes['color'] = 'lightgray'
+
+    #print(net.nodes)
         
     # save network as html (open the file to see it)
     return net, dict_net
+        
         
         

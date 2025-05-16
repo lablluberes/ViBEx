@@ -1,4 +1,0 @@
-Gene,Rule
-A,B
-B,!A
-C,A or B

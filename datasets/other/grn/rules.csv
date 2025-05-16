@@ -1,0 +1,11 @@
+﻿Gene,Rule
+G1,not G2
+G2,G2
+G3,not G2
+G4,G3 and (not G9)
+G5,G9 and G8 and (not G3)
+G6,G3
+G7,G10 and (not G3) and (not G8)
+G8,G8
+G9,G9
+G10,G10

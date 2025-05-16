@@ -1,1384 +1,62 @@
-from dash import Dash, dash_table, dcc, html, Input, Output, callback, State
-import pandas as pd
+import dash
+# import dash_core_components as dcc
+# import dash_html_components as html
+# from dash.dependencies import Input, Output, ClientsideFunction
+from dash import dcc, html, Input, Output, ClientsideFunction, dash_table, State
 import numpy as np
-import plotly.graph_objects as go
+import pandas as pd
+import seaborn as sns
+import datetime
+import pathlib
+import io
+import base64
+import dash_bootstrap_components as dbc
 import math
-import matplotlib
+from collections import OrderedDict
+from plotly.subplots import make_subplots
+import plotly.graph_objects as go
 
 #pretty charts!
 import altair as alt
 import dash_vega_components as dvc
 
-from scipy import interpolate
-matplotlib.use('Agg')
-
-from methods import K_Means, shmulevich, BASC_A, call_C_BASC, call_C_Stepminer, onestep
-from interpolation import three_interpolation, interpolationConverge
-from network_graphs import create_boolean_network_graph, create_boolean_network_graph_votes, rules_graph, rules_graph_vote
-from voting_algos import binarizationVoting, binVoting
-from normalize import geneNorm
-from ProbabilityPerm import probBin
-from generate_matrix_probs import PDF
+from normalize import geneNorm 
+from interpolation import interpolation
+from methods import call_C_BASC, BASC_A, call_C_Stepminer, onestep, K_Means, shmulevich
+from voting_algos import election_strings
 from displacementMatrixes import getDisplacement
-from hamming import hamming_state_by_state, hamming_chain, generate_init_final_comparison
-from networks import create_boolean_network, create_boolean_network_votes
 
+from networks import create_boolean_network, create_boolean_network_votes
+from network_graphs import create_boolean_network_graph, create_boolean_network_graph_votes
 from network_rule import createNetwork
 
-import dash_bootstrap_components as dbc 
-import base64
-import io
-import dash
-from io import BytesIO
-from plotly.subplots import make_subplots
+from logicgep import LogicGep
+from mibni.Mibni import Mibni
+from bestfit.BinInfer import run_code
+from bitarray import bitarray
+from metrics import Metrics, Metrics_BN
 
-external_stylesheets = [dbc.themes.BOOTSTRAP,'https://codepen.io/chriddyp/pen/bWLwgP.css']
+from hamming import hamming_state_by_state, hamming_chain, generate_init_final_comparison, extract_path
 
-app = Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
+from ProbabilityPerm import probBin
 
-#global variables
+from stringProbabilistic import probabilistic
+from imputation_ml import imputate_missforest
+
 displacements = pd.read_csv("Displacements.csv")
 standard_dev = pd.read_csv("standard_dev.csv")
-splineGene = None
 
-df_state_transition_basc = None
-
-# layout of dashboard
-app.layout = html.Div([
-
-
-       html.Div([
-    
-                     html.Div([
-                            
-                            html.H1('ViBEx', style={'textAlign': 'center', 'font-family':'Processor', 'font-size':'70px'}), 
-                            html.H5('A Visualization Tool for Gene Expression Analysis', style={'textAlign': 'center'}),
-                            html.P('ViBEx is a tool fot the analysis and exploration of gene expression binarization. Upload a dataset of gene expression and select one, many or all out of four methods for the computation of a threshold for binarization. Visualize Boolean networks of resulting states.'),
-                            html.Br(),
-                            html.P("Upload a time-series csv file to start."),
-
-                            dcc.Upload(
-                                        id='upload-data',
-                                        children=html.Button("Upload Gene Expression File"),
-                                        multiple=False,
-                                    ),
-                            html.P("Dataset will be preprocessed to convert data to [0,1] interval"),
-                        ], style={'width':'33%'}),
-                    
-                    
-                    html.Div([
-                    
-                        dbc.Carousel(
-                        items = [
-                            {"key": "1", "src": "/assets/table.png"},
-                            {"key": "2", "src": "/assets/interp.png"},
-                            {"key": "3", "src": "/assets/net.png"},
-                        
-                        ],
-                        
-                        controls = False,
-                        indicators = False,
-                        interval = 2000,
-                        className="carousel-fade",
-                        ride="carousel",
-                        style={'width':'70%', 'margin':'auto'}
-                        )
-                        
-                        
-                    ], style={'width':'66%'})
-                
-                
-                ], id='preview-imgs', style={'display': 'flex', 'flexDirection': 'row', 'top': '10%', 'position': 'absolute'}),
-        
-
-    html.Div([
-        html.Div([
-        
-                dcc.Store(id='stored-data', storage_type='session'),
-              
-                html.Div(id='output-data-upload'),
-            
-
-                html.Div([
-                    html.Div(id='binarize-download', style={'marginRight': '20px', 'marginLeft': '20px'}),
-                    html.Div(id='dropdown-methods',  style={'marginRight': '20px', 'marginLeft': '20px'})
-                   
-                ], style={'display': 'flex', 'flexDirection': 'row'}),
-
-        ] , style={'display': 'flex', 'flexDirection': 'column', 'marginRight': '20px', 'marginLeft': '20px', 'width':'40%'}),
-        
-
-        
-        html.Div(id='tabs-website', style={'display': 'flex', 'flexDirection': 'column', 'width':'80%'}),
-    
-
-    ], style={'display': 'flex', 'flexDirection': 'row'}),
-
-
-],style={'display': 'flex', 'flexDirection': 'column', 'marginRight': '20px', 'marginLeft': '20px', 'fontFamily': 'Arial, sans-serif'})
-
-
-
-# function to parse the contents of thje selected file
-def parse_contents(contents, filename, date):
-    content_type, content_string = contents.split(',')
-
-    # decode the content
-    decoded = base64.b64decode(content_string)
-    
-    # if it is a csv then read it 
-    if 'csv' in filename:
-        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=None)
-
-        df_t = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=None)
-
-        # normalize each row of the dataframe based on this formula x' = (x-min)/(max-min) and save it to the dataframe
-        #for i in range(len(df)):
-        #    vect = df.iloc[i].values
-            
-        #    norm = (vect - min(vect))/ (max(vect)-min(vect))
-            
-        #    df.iloc[i] = norm.round(decimals=4)
-
-        df = geneNorm(df)
-        df_t = geneNorm(df_t)
-        df_t = df_t.round(5)
-
-        #print(df)
-
-        df_t.insert(0, 'ID', df_t.index + 1)
-            
-        # return a new html div that has the file name and the datatable with selectable rows
-        return html.Div([
-           html.H1('ViBEx', style={'textAlign': 'left', 'font-family':'Processor'}), 
-           html.H5('A Visualization Tool for Gene Expression Analysis', style={'textAlign': 'left'}),
-           # name of file
-           dcc.Upload(
-                    id='upload-data',
-                    children=html.Button("Upload Gene Expression File"),
-                    multiple=False,
-                ),
-           html.P("Dataset will be preprocessed to convert data to [0,1] interval"),
-
-           html.H5(filename),
-           html.P("Select genes from table to binarize:"),
-           
-           html.Button('Select All', id='select-all-button', n_clicks=0),
-           html.Button('Deselect All', id='deselect-all-button', n_clicks=0),
-           
-
-           # dash datatable of data with rows that can be selected
-           dash_table.DataTable(
-                        id='datatable-interactivity',
-                        columns=[
-                            {"name": str(i), "id": str(i)} for i in df_t.columns
-                        ],
-                        data=df_t.to_dict('records'),
-                        column_selectable="single",
-                        row_selectable="multi",
-                        selected_columns=[],
-                        selected_rows=[],
-                        page_action="native",
-                        page_current= 0,
-                        page_size= 10,
-                        style_table={'overflowX': 'auto'},
-                    ),
-            # store the read dataframe
-            dcc.Store(id='stored-data', data=df.to_dict('records')),
-            html.Hr()
-
-        ])
-    
-    else:
-        return "The file needs to be a csv."
-
-# this callout receives the contents of the file and outputs the component
-# output-data-upload
-@app.callback([Output('output-data-upload', 'children'),
-              Output('preview-imgs', 'style')],
-              Input('upload-data', 'contents'),
-              State('upload-data', 'filename'),
-              State('upload-data', 'last_modified'),
-              prevent_initial_call=True)
-# function parses and update the output of the selected dataset
-def update_output(list_of_contents, list_of_names, list_of_dates):
-    list_of_contents = [list_of_contents]
-    list_of_names = [list_of_names]
-    list_of_dates = [list_of_dates]
-    
-    # if there is a selected file
-    if list_of_contents is not None:
-        # parse the content
-        children = [
-            parse_contents(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        return children, {'display': 'none'}
-
-
-# function to parse the contents of thje selected file
-def parse_contents2(contents, filename, date):
-    content_type, content_string = contents.split(',')
-
-    # decode the content
-    decoded = base64.b64decode(content_string)
-    
-    # if it is a csv then read it 
-    if 'csv' in filename:
-        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=0)
-            
-        # return a new html div that has the file name and the datatable with selectable rows
-        return html.Div([
-      
-            # store the read dataframe
-            dcc.Store(id='stored-rules', data=df.to_dict('records')),
-            html.Hr()
-
-        ])
-    
-    else:
-        return "The file needs to be a csv."
-
-
-@app.callback(Output('output-rules-upload', 'children'),
-              Input('upload-rules', 'contents'),
-              State('upload-rules', 'filename'),
-              State('upload-rules', 'last_modified'),
-              prevent_initial_call=True)
-# function parses and update the output of the selected dataset
-def update_output2(list_of_contents, list_of_names, list_of_dates):
-    list_of_contents = [list_of_contents]
-    list_of_names = [list_of_names]
-    list_of_dates = [list_of_dates]
-
-    # if there is a selected file
-    if list_of_contents is not None:
-        # parse the content
-        children = [
-            parse_contents2(c, n, d) for c, n, d in
-            zip(list_of_contents, list_of_names, list_of_dates)]
-        return children
-
-
-#taken and modified from https://stackoverflow.com/questions/61905396/dash-datatable-with-select-all-checkbox
-# for select all and deselect all of datatable
-@app.callback(
-    Output('datatable-interactivity', 'selected_rows'),
-    Output('select-all-button', 'n_clicks'),
-    Output('deselect-all-button', 'n_clicks'),
-    Input('select-all-button', 'n_clicks'),
-    Input('deselect-all-button', 'n_clicks'),
-    State('datatable-interactivity', 'data'),
-    State('datatable-interactivity', 'selected_rows'),
-    prevent_initial_call=True)
-def select_all(n_clicks, n_clicks2, data, selected_rows):
-    # is there is data do this
-    if data is not None:
-        # if press select all enumarate all rows
-        if n_clicks:
-            return [i for i, row in enumerate(data)], 0, 0
-        # if deselect all is pressed return empty list (to deselect rows)
-        #THIS DOESNT WORK
-        elif n_clicks2:
-            return [], 0, 0
-            
-        
-# render components (button to download csv with threshold)
-@app.callback(
-    Output('binarize-download', 'children'),
-    Input('stored-data','data'),
-    Input('datatable-interactivity', 'selected_rows'),
-    prevent_initial_call=True )
-def binarize_download(data, selected_rows):
-    # if no data return nothing
-    if data is None:
-        return None
-    # if no selected rows return nothing
-    elif selected_rows is None or len(selected_rows) == 0:
-        return None
-    
-    # return components of button
-    else:  
-        return [html.B('Download the threshold of the selected rows to a csv:'), html.Button("Download CSV", id="btn_csv"),
-        dcc.Download(id="download-dataframe-csv")]
-
-# render the tabs of binarization, interpolation and network 
-@app.callback(
-        Output('tabs-website', 'children'),
-        Input('stored-data', 'data'),
-        prevent_initial_call=True
-)
-def tabs_website(data):
-    # if no data return none
-    if data is None:
-        return None
-    
-    # return tabs components
-    return [ html.Div(id='select-gene-binarize', style={"width": "33%", 'marginRight': '20px', 'marginLeft': '20px', 'padding':10}), 
-            
-					dcc.Tabs([
-                      dcc.Tab(label='Binarization', children=[
-                            html.Div([
-                                        html.P("Select rows from table and methods from dropdown to binarize genes:"),
-										
-										#dcc.Tabs([
-										
-											#dcc.Tab(label='One iteration', children=[
-											#	html.Div(id='heatmap-binarize')										
-											#]),
-											
-											#dcc.Tab(label='Four iterations', children=[
-												html.Div(id='voting-output')										
-											#])
-																			
-										#]),
-										
-									])
-								]),							
-
-                      dcc.Tab(label='Displacement', children=[
-                          html.Div([
-                                #html.P("Select rows from table and methods from dropdown to binarize genes:"),
-                                html.Div(id='section-threshold'),
-
-                                html.Div([
-                                
-                                    html.Div(id='threshold-tabs', style={"width": "100%"})
-
-
-                                ], style={'display': 'flex', 'flexDirection': 'row'}),
-
-                            ]),
-
-                      ]),
-					  
-					  dcc.Tab(label='Statistics', children=[
-                          html.Div([
-						  
-                                html.P("Select rows from table and methods from dropdown to binarize genes:"),
-                                html.Div(id='statistics-page')
-
-                            ]),
-
-                      ]),
-
-                      dcc.Tab(label='Network', children=[
-                           html.Div([
-
-                                    #html.P("Select rows from table and methods from dropdown to binarize genes:"),
-                                    html.Div(id='net-tabs')
-                                    
-                                ], style={'display': 'flex', 'flexDirection': 'column', 'flex':1, 'width':'100%'})
-                      ])
-        ], style={'display': 'flex', 'flexDirection': 'row'}), html.Div(id='process-thr')]
-
-# process the click of the download button
-# gets the threshold of the data and downsloads as a csv
-@callback(
-    Output("download-dataframe-csv", "data"),
-    Input("btn_csv", "n_clicks"),
-    Input('stored-data','data'), 
-    Input('datatable-interactivity', 'selected_rows'),
-    prevent_initial_call=True,
-)
-def download_csv(n_clicks, data, selected_rows):
-    # no data return none
-    if data is None:
-        return None
-    
-    # get data
-    df = pd.DataFrame(data)
-
-    # if no clicks return none 
-    if n_clicks is None:
-        return None
-    
-    selected_rows.sort()
-    
-    # get the selected genes values
-    genes = df.iloc[selected_rows].values
-    rows = df.shape[0]
-    
-    # column names and creating dataframe
-    col_names = {'basc_thr':[], 'kmeans_thr':[], 'onestep_thr':[], 'shmulevich_thr':[]}
-    final_df = pd.DataFrame(col_names)
-
-    
-    # get threshold of selected rows and save to dataframe
-    for i in range(len(selected_rows)):
-            k_means = K_Means(genes[i])
-            basc_a = BASC_A(genes[i])
-            one_step = onestep(genes[i])
-            shmulevich_ = shmulevich(genes[i])
-            
-            new_row = {'basc_thr':basc_a, 'kmeans_thr':k_means, 'onestep_thr':one_step, 'shmulevich_thr': shmulevich_}
-            final_df.loc[len(final_df)] = new_row
-
-    # send the dataframe and download it as thr.csv
-    return dcc.send_data_frame(final_df.to_csv, "thr.csv")
-
-# return dropdown component of binarization methods 
-@app.callback(
-    Output('dropdown-methods', 'children'),
-    Input('datatable-interactivity', 'selected_rows'),
-    prevent_initial_call=True)
-def display_selected_data(selected_rows):
-    # if no selected rows return none
-    if not selected_rows:
-        return None
-    
-    # return components of dropdown
-    return  [html.B('Select binarization method(s) to calculate thresholds and binarize genes:'),
-             html.Button('Select All', id='select-all-dropdown'), 
-            dcc.Dropdown(
-                ['BASC A', 'K-Means', 'Onestep', 'Shmulevich'],
-                placeholder="Select binarization method",
-                id="dropdown-method",
-                multi=True,
-                #persistence = True,
-                #persistence_type = 'memory',
-                searchable=False)]
-
-@app.callback(
-    Output('dropdown-method', 'value'),
-    [Input('select-all-dropdown', 'n_clicks')]
-)
-def select_all(n_clicks):
-    # if select all is not pressed do not update dash
-    if n_clicks is None:
-        return dash.no_update
-    # if pressed select all the list of the dropdown
-    else:
-        return ['BASC A', 'K-Means', 'Onestep', 'Shmulevich']
-
-# return component that has interpolation section description
-@app.callback(
-        Output('section-threshold', 'children'),
-        Input('dropdown-selected-rows', 'value'),
-        Input('dropdown-method', 'value'), 
-        prevent_initial_call=True
-)
-def header(row, methods):
-    # return none if values are none
-    if row is None:
-        return None
-    if methods is None:
-        return None
-    
-    # return components of section threshold
-    return [html.Hr(),html.P("Spline approximation of gene expression and threshold displacement for every algorithm. The voting table shows the binarization using selected algorithms and the consensus binarization.", style={'textAlign': 'center'}),
-            html.Br(), html.P("*Values that are too close to the threshold will be considered undecided with a (?) on the table.")]
-
-    #update global variable interpolation
-    #_, splineGene = three_interpolation(row.values,'K-Means',4)
-
-# returns a dropdown of the selected rows of the datatable 
-@app.callback(
-    Output('select-gene-binarize', 'children'),
-    Input('dropdown-method', 'value'),
-    Input('datatable-interactivity', 'selected_rows'),
-    Input('stored-data','data'),     
-    prevent_initial_call=True)
-def select_gene_binarize(selected_method, selected_rows, data):
-    # return none if values are none
-    if selected_method is None:
-        return None
-
-    if selected_rows is None:
-        return None
-    
-    selected_rows.sort()
-
-    # return dropdown of the select gene
-    return [html.B('Select gene to visualize and binarize:'), dcc.Dropdown(
-        options=[{'label': 'Gene ' + str(row+1), 'value': row} for row in selected_rows], 
-        value = selected_rows[0],
-        placeholder="Select rows",
-        id="dropdown-selected-rows")]
-    
-
-# returns a dropdown to select the number of iterations to interpolate
-@app.callback(
-    Output('range-table', 'children'),
-    Input('dropdown-selected-rows', 'value'),
-    Input('dropdown-method', 'value'), 
-    Input('stored-data','data'),
-    prevent_initial_call=True)
-def range_table(selected_row, selected_method, data):
-    # return none if values are none
-    if selected_row is None:
-        return None
-    if selected_method is None:
-        return None
-    if data is None:
-        return None
-    
-    # get dataframe 
-    df = pd.DataFrame(data)
-    
-    # get selected gene
-    selected = df.iloc[selected_row]
-    
-    gene = selected.values
-    # return dropdown of number of interpolations
-    generange = max(gene) - min(gene)
-    #minus 1 cos zero index
-    rangeNum = math.ceil(generange*10)-1
-    disp = displacements[['range','k-means','BASC_A', 'onestep', 'shmulevich']]
-    disp.reset_index(drop=True, inplace=True)
-    
-    
-    return  [html.B('Estimated displacement for range of gene.'), 
-            dash_table.DataTable(
-            data=disp.astype(dtype='float32').astype('str').to_dict('records'),
-            page_size= 10,
-            style_data_conditional=[{
-            "if": {"row_index": rangeNum},
-            "backgroundColor": "#cce0ff",
-            "fontWeight": "bold"
-            }],
-            )]
-
-
-@app.callback(
-    Output('process-thr', 'children'),
-    Input('dropdown-method', 'value'),
-    Input('datatable-interactivity', 'selected_rows'),
-    Input('stored-data','data'),
-    prevent_initial_call=True)
-def save_thr(selected_method, selected_rows, data):
-
-    if selected_method is None:
-        return None
-    if selected_rows is None:
-        return None
-    if data is None:
-        return None
-
-    df1 = pd.DataFrame(data)
-
-    thr_k = {}
-    thr_b = {}
-    thr_o = {}
-    thr_s = {}
-
-    splineDict = {}
-
-    for row in selected_rows:
-        selected = df1.iloc[row]
-        gene = selected.values
-
-        _, splineGene = three_interpolation(gene,'K-Means',4)
-
-        splineDict[row] = splineGene
-
-
-    for method in selected_method:
-
-        for row in selected_rows:
-            #selected = df1.iloc[row]
-            #gene = selected.values
-
-            #_, splineGene = three_interpolation(gene,method,4)
-
-            #splineDict[row] = splineGene
-
-            splineGene = splineDict[row]
-
-            if(method == 'BASC A'):
-                thr = call_C_BASC(splineGene)
-
-                thr_b[row] = thr
-
-            elif(method == 'Onestep'):
-                thr = call_C_Stepminer(splineGene)
-
-                thr_o[row] = thr
-
-            elif(method == 'Shmulevich'):
-                thr = shmulevich(splineGene)
-
-                thr_s[row] = thr
-
-            elif(method == 'K-Means'):
-                thr = K_Means(splineGene)
-
-                thr_k[row] = thr
-
-    #print(thr_k)
-
-    return [dcc.Store(id='thr_k', data=thr_k), dcc.Store(id='thr_o', data=thr_o), 
-            dcc.Store(id='thr_b', data=thr_b), dcc.Store(id='thr_s', data=thr_s),
-            dcc.Store(id='BASC A-datatable-network', data=[]), dcc.Store(id='K-Means-datatable-network', data=[]),
-            dcc.Store(id='Onestep-datatable-network', data=[]), dcc.Store(id='Shmulevich-datatable-network', data=[]),
-            dcc.Store(id='rule_network_dict', data=[]), dcc.Store(id='Elected States-datatable-network', data=[]),
-            dcc.Store(id='spline-genes', data=splineDict)]
-
-
-
-          
-
-# returns a tab component with the threshold and interpolation displacement tabs and graphs
-@app.callback(
-    Output('threshold-tabs', 'children'),
-    Input('dropdown-method', 'value'),
-    Input('dropdown-selected-rows', 'value'), 
-    Input('stored-data','data'),
-    Input('thr_k','data'),
-    Input('thr_o','data'),
-    Input('thr_s','data'),
-    Input('thr_b', 'data'),
-    Input('spline-genes', 'data'),
-    prevent_initial_call=True)
-
-def threshold_tabs(selected_method, selected_gene, data, thr_k, thr_o, thr_s, thr_b, spline_genes):
-
-    # return none if values are none
-    if selected_method is None:
-        return None
-    if selected_gene is None:
-        return None
-    if data is None:
-        return None
-        
-    selected_row = selected_gene
-    #graph 1
-    
-    # get dataframe 
-    df1 = pd.DataFrame(data)
-    
-    # get selected gene
-    selected = df1.iloc[selected_gene]
-    
-    gene = selected.values
-    sizeGene = len(gene)
-    
-    ogGene = pd.DataFrame({'x':np.arange(0,sizeGene),'y':gene, 'label': [f'Gene {str(selected_gene+1)}']* sizeGene})
-    
-    #_, splineGene = three_interpolation(gene,'K-Means',4)
-    splineGene = spline_genes[str(selected_gene)]
-    
-    gene_iter = splineGene 
-    index = 0
-    
-    size_new = len(splineGene)
-
-    dataset_gene = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':gene_iter, 'label': [f'Gene {str(selected_gene+1)} Spline']* size_new})
-        
-    data1 = alt.Chart(
-            dataset_gene
-        ).mark_line().encode(
-                x=alt.X('x',title='Timeseries'),
-                y=alt.Y('y').scale(zero=False),
-                color='label'
-        ).interactive()
-        
-    
-    ogChart = alt.Chart(
-        ogGene
-    ).mark_line(point=True).encode(
-                x=alt.X('x'),
-                y=alt.Y('y').scale(zero=False),
-                tooltip=['y','label'],
-                color='label'
-    ).interactive()
-
-
-    thr_basc = 0
-    thr_kmeans = 0
-    thr_onestep = 0
-    thr_shmu = 0
-    
-    for method in selected_method:
-
-        if(method == 'BASC A'):
-             
-
-            #thr_basc = BASC_A(splineGene)
-            thr_basc = thr_b[str(selected_gene)]
-            #thr_a, gene_iter = three_interpolation(gene, method, 4)
-            
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_basc), 'label': ["BASC A"]* size_new})
-            
-            lines = alt.Chart(datas).mark_line(strokeDash=[2,1],color='red').encode(
-                    x=alt.X('x'),
-                    y=alt.Y('y').scale(zero=False),
-                    tooltip=['y','label'],
-                    color='label'
-                    ).interactive()
-              
-            data1 = data1 + lines
-            #data1.add_trace(go.Scatter(x=np.arange(1,size_new+1), y=np.full(size_new, thr_a[-1]), line=dict(dash=type_lines[index]),
-            #                        mode="lines", name="BASC A Threshold"))
-
-        elif(method == 'Onestep'):
-         
-            #thr_onestep = onestep(splineGene)
-         
-            thr_onestep = thr_o[str(selected_gene)]
-            
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_onestep),'label': ["Onestep"]* size_new})
-            
-            lines = alt.Chart(datas).mark_line(strokeDash=[8,8], color='purple').encode(
-                    x=alt.X('x'),
-                    y=alt.Y('y').scale(zero=False),
-                    tooltip=['y','label'],
-                    color='label'
-                    ).interactive()
-              
-            data1 = data1 + lines
-            
-            #data1.add_trace(go.Scatter(x=np.arange(1,size_new+1), y=np.full(size_new, thr_a[-1]), line=dict(dash=type_lines[index]),
-            #                        mode="lines", name="Onestep Threshold"))
-
-
-        elif(method == 'Shmulevich'):
-         
-            #thr_shmu = shmulevich(splineGene)
-            thr_shmu = thr_s[str(selected_gene)]
-            #thr_a, gene_iter = three_interpolation(gene, method, 4)
-            
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_shmu), 'label': ["Shmulevich"]* size_new})
-            
-            lines = alt.Chart(datas).mark_line(strokeDash=[4,2],color='orange').encode(
-                    x=alt.X('x'),
-                    y=alt.Y('y').scale(zero=False),
-                    tooltip=['y','label'],
-                    color='label'
-                    ).interactive()
-              
-            data1 = data1 + lines
-            
-            #data1.add_trace(go.Scatter(x=np.arange(1,size_new+1), y=np.full(size_new, thr_a[-1]), line=dict(dash=type_lines[index]),
-            #                        mode="lines", name="Shmulevich Threshold"))
-
-
-        elif(method == 'K-Means'):
-      
-            #thr_kmeans = K_Means(splineGene)
-            thr_kmeans = thr_k[str(selected_gene)]
-            #thr_a, gene_iter = three_interpolation(gene, method, 4)
-            
-            datas = pd.DataFrame({'x':np.linspace(0,sizeGene-1,size_new),'y':np.full(size_new, thr_kmeans), 'label': ["K-Means"]* size_new})
-            
-            lines = alt.Chart(datas).mark_line(strokeDash=[8,4], color='green').encode(
-                    x=alt.X('x'),
-                    y=alt.Y('y').scale(zero=False),
-                    tooltip=['y','label'],
-                    color='label'
-                    ).interactive()
-              
-            data1 = data1 + lines
-            
-            #data1.add_trace(go.Scatter(x=np.arange(1,size_new+1), y=np.full(size_new, thr_a[-1]), line=dict(dash=type_lines[index]),
-            #                        mode="lines", name="K-Means Threshold"))
-            
-        index += 1
-
-    data1 = data1 + ogChart
-    #add legend and title to plot
-    data1 = data1.properties(
-        title=f'Threshold for Gene {str(selected_gene+1)}',
-        width=300,
-        height=350
-    ).configure_axis(grid=False)
-	
-    
-    
-    #graph 2
-    rangeIndex = math.ceil((max(gene)-min(gene))*10) - 1
-    disps = getDisplacement(selected_method,gene)
-    
-    
-    # if tolerance is not None:
-        
-        # # get data
-    df = pd.DataFrame(data)
-
-        # # set the subplot grid layout
-    if len(selected_method) == 1:
-        row_n = 1
-        col_n = 1
-    elif len(selected_method) == 2:
-        row_n = 1
-        col_n = 2
-    else:
-        row_n = 2
-        col_n = 2
-        
-        # # create sunplot layout
-        # #fig = make_subplots(rows=row_n, cols=col_n, shared_xaxes=False, shared_yaxes=False, subplot_titles=(["Displacement " + m for m in selected_method]))
-	#
-    #iter_row = 1
-
-    # # types of lines
-    type_lines = ["dash", "dot", "dashdot", "longdash"]
-
-    index = 0
-        
-    # # go through each method, interpolate and create plots
-    
-    # #create dataset for altair use
-    # #2d dataset
-    # #create labels dataframe
-    
-    dataset_gene = pd.DataFrame()
-    n = len(gene)
-    
-    for method in selected_method:
-
-        # # get genes
-        selected = df.iloc[selected_row]
-        gene = selected.values
-        sizeGene = len(gene)
-        
-        #_, splineGene = three_interpolation(gene,method,4)
-        
-        #get min and max
-        
-        if method == 'K-Means':
-            #thr = K_Means(splineGene)
-            thr = thr_kmeans
-            d = disps['k-means']
-        elif method == 'BASC A':
-            #thr = BASC_A(splineGene)
-            thr = thr_basc
-            d = disps['BASC_A']
-        elif method == 'Onestep':
-            #thr = onestep(splineGene)
-            thr = thr_onestep
-            d = disps['onestep']
-        else:
-            #thr = shmulevich(splineGene)
-            thr = thr_shmu
-            d = disps['shmulevich']
-            
-        thrMin = thr - d.iloc[0]
-        thrMax = thr + d.iloc[0]
-
-        if thrMax > max(gene):
-            thrMax = max(gene)
-        
-        if thrMin < min(gene):
-            thrMin = min(gene)
-        
-        # #assign vars
-        x = np.arange(0,sizeGene)
-        y = gene
-        methods_data = [method] * n
-        min_data = [thrMin] * n
-        max_data = [thrMax] * n
-        thr_data = [thr] * n
-        
-        # #create dataset
-        dataset = {'x':x,'y':y,'mn':min_data,'mx':max_data,'thr':thr_data,'label':methods_data}
-        
-        # #append dict to list
-        
-        dataset_gene = pd.concat([dataset_gene, pd.DataFrame(dataset)])
-
-
-    # #altair create chart
-    # #gene line
-    
-    if col_n == 2 and row_n == 2:
-        wd = 200
-        hg = 200
-    elif col_n == 2:
-        wd = 200
-        hg = 350
-    else:
-        wd = 300
-        hg = 350
-    
-    
-    
-    
-    gene_chart = alt.Chart().mark_line(point=True,strokeWidth=1.5).encode(
-            x=alt.X('x:Q',title='', axis=alt.Axis(format=",.0f")),
-            y=alt.Y('y:Q',title='displ, thr').scale(zero=False),
-            tooltip=['y'],
-    ).properties(
-    width=wd,
-    height=hg
-    )
-    
-    # #thresholdline 
-    
-    lines = alt.Chart().mark_line(strokeWidth=1).encode(
-                x='x',
-                y=alt.Y('thr:Q'),
-                tooltip=['thr'], 
-                color='label'
-                ).properties(
-    width=wd,
-    height=hg
-    )
-                    
-    
-    # #shading rectangles
-                              
-    displacement_chart = alt.Chart().mark_area(opacity=0.2).encode(                          
-                    x ='x:Q',
-                    y ='mn:Q',
-                    y2 ='mx:Q',
-                    color='label:N',
-                    tooltip=['mx','mn']
-                    ).properties(
-    width=wd,
-    height=hg
-    )
-    
-    # #combine all with facet 
-    
-    #fig = displacement_chart
-    
-    fig = alt.layer(gene_chart, displacement_chart, data=dataset_gene).facet(facet='label:N',columns=col_n).configure_headerFacet(title=None).configure_axis(grid=False)
-    #fig.encoding.y.title = 'displ'
-	
-
-    # # return the components if the number of interpolations and selected gene are not empty
-    #fig = alt.layer(gene_chart, displacement_chart, lines, data=dataset_gene).facet(facet='label:N',columns=col_n
-
-        # return [ dcc.Tabs([
-                        # dcc.Tab(label='Thresholds', children=[
-
-                            # html.P("Thresholds for each algorithm on selected gene."),
-                            # dvc.Vega(
-                                # id="altair0",
-                                # opt={"renderer": "svg", "actions": False},
-                                # spec=data1.to_dict(),
-                            # ),
-                    # ]),
-
-                        # dcc.Tab(label='Interpolation Thresholds', children=[
-                            
-                            # html.P("Graph of thresholds over interpolation for selected algorithms."),
-                            # dvc.Vega(
-                                # id="altair0",
-                                # opt={"renderer": "svg", "actions": False},
-                                # spec=fig.to_dict(),
-                            # ),
-                    # ])
-                # ])             
-                        
-                # ]
-    
-    # return only the selected gene plot with threshold if number of interpolation is not selected
-    if(selected_row is not None):
-
-        return [ dcc.Tabs([
-                        dcc.Tab(label='Thresholds', children=[
-
-                            html.P("Threshold for each algorithm on selected gene."),
-                            dvc.Vega(
-                                id="altair0",
-                                opt={"renderer": "svg", "actions": False},
-                                spec=data1.to_dict(),
-                            )
-                    ]),
-                    dcc.Tab(label='Displacements', children=[
-                            
-                            
-                            dvc.Vega(
-                                id="altair0",
-                                opt={"renderer": "svg", "actions": False},
-                                spec=fig.to_dict(),
-                            ),
-                    ])
-                
-                ])                   
-                ]
-    
-    # return nothing
-    else:
-        return None
-    
-
-
-# returns the tabs of networks graphs per algoritms and final vote 
-@app.callback(
-    Output('net-tabs', 'children'),
-    Input('dropdown-method', 'value'), 
-    Input('stored-data','data'),
-    Input('datatable-interactivity', 'selected_rows'),
-    Input('thr_k','data'),
-    Input('thr_o','data'),
-    Input('thr_s','data'),
-    Input('thr_b', 'data'),
-    #Input('dropdown-tolerance', 'value'),
-    #[Input({'type': 'dropdown-rule', 'index': dash.dependencies.ALL}, 'value')],
-    #[Input('stored-rules', 'data')],
-    prevent_initial_call=True)
-def net_tabs(selected_method, data, selected_rows, thr_k, thr_o, thr_s, thr_b, tolerance=4):
-    #if len(values) == 0 or None in values:
-    #    return None
-
-    # if these values are none return none to the dashboard
-    if selected_method is None:
-        return None
-    if data is None:
-        return None
-    if selected_rows is None:
-        return None
-    
-    selected_rows.sort()
-
-    #get the plot, and network of the final vote plot
-    elected_state_network = create_boolean_network_votes(selected_rows, data, selected_method, displacements, thr_k, thr_o, thr_s, thr_b)
-
-    dcc.Store(id='Elected States-datatable-network', data=elected_state_network)
-
-    transition = []
-
-    for method in selected_method:
-
-        network = create_boolean_network(selected_rows, method, data, displacements, thr_k, thr_o, thr_s, thr_b)
-
-        transition.append(transition_table(network, method))
-
-        #network_plots.append(
-        #        html.Div(
-        #                children=[
-        #                        html.B(method),
-        #                        html.Iframe(
-        #                            srcDoc=fig2.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-        #                            width="500px", height="500px",
-        #                        )
-        #                    ], style={'display': 'flex', 'flexDirection': 'column'}
-
-        #                )
-        #)
-
-    if len(selected_method) > 2:
- 
-        #network_plots = html.Div([html.Div(network_plots[:2]), html.Div(network_plots[2:])], style={'display': 'flex', 'flexDirection': 'row'})
-
-        transition_df = html.Div([html.Div(transition[:2]), html.Div(transition[2:])], style={'display': 'flex', 'flexDirection': 'row'})
-
-    else:
-        transition_df = html.Div(transition[:2])
-
-        #network_plots = html.Div([html.Div(network_plots)], style={'display': 'flex', 'flexDirection': 'row'})
-
-
-     # component of final transition table
-    final_transition_df = transition_table(elected_state_network, "Elected States")
-
-    #html.Div(
-    #    children=[
-    #        html.Iframe(
-    #            srcDoc=fig2, # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-    #            style={"height": "25%", "width": "25%"},)])
-    
-
-    # return components and tabs 
-    return [ dcc.Tabs([
-                    
-                    dcc.Tab(label='Networks', children=[
-
-                        html.P("Networks of methods"),
-                        html.Div(id='methods-networks')
-
-                        #html.Div([
-                        #    html.P("Networks of methods"),
-                            #html.Div(id='graph_rules', src=fig2, style={'height':'100%', 'width':'100%'}),
-                        #    html.Div(network_plots),
-
-                        #    html.Div([
-                        #        html.B('Network of Elected States'),
-                        #        html.Iframe(
-                        #                srcDoc=fig.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                        #                width="500px", height="500px")
-                        #    ], style={'display': 'flex', 'flexDirection': 'column'}),
-                            
-                
-                        #], style={'display': 'flex', 'flexDirection': 'column'})
-                    ]),
-                        
-                        dcc.Tab(label='Network State Table', children=[
-                            html.Br(),
-
-                            html.Div([transition_df, final_transition_df], style={'display': 'flex', 'flexDirection': 'row'}),
-                            
-                            
-                        ]),
-
-                     dcc.Tab(label='Upload Transition', children=[
-
-                            html.P("Upload transition rules to create network"),
-                            dcc.Upload(
-                                        id='upload-rules',
-                                        children=html.Button("Upload Rules"),
-                                        multiple=False,
-                                    ),
-                            
-                            html.Div(id='output-rules-upload'),
-                            html.Div(id='generate-network')
-                   
-                          
-                    ]),
-
-
-                    #dcc.Tab(label='Analysis', children=[
-
-                    #        html.P("Upload transition rules to see network analysis"),
-                        
-                    #        html.Div(id='analysis-output')
-                   
-                          
-                    #]),
-
-                ])             
-                        
+app = dash.Dash(
+    __name__,
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP
     ]
+)
+app.title = "ViBEx: A Visualization Tool for Gene Expression Analysis"
 
-@app.callback(
-    Output('methods-networks', 'children'),
-    #Input('datatable-interactivity', 'selected_rows'),
-    Input('dropdown-method', 'value'), 
-    #Input('stored-data','data'),
-    #Input('thr_b','data'),
-    #Input('thr_k','data'),
-    #Input('thr_s','data'),
-    #Input('thr_o','data'),
-    Input('BASC A-datatable-network', 'data'),
-    Input('K-Means-datatable-network', 'data'),
-    Input('Onestep-datatable-network', 'data'),
-    Input('Shmulevich-datatable-network', 'data'),
-    Input('Elected States-datatable-network', 'data'),
-    prevent_initial_call=False)
-def create_bool(methods, basc, kmeans, onestep, shmulevich, elected_network):
-
-
-    #print("aqui", methods, basc)
-    if methods is None:
-            return "blah"
-    
-    network_plots = []
-
-    for method in methods:
-
-        if method == "BASC A":
-            data = pd.DataFrame(basc)
-        elif method == 'K-Means':
-            data = pd.DataFrame(kmeans) 
-        elif method == 'Onestep':
-            data = pd.DataFrame(onestep)
-        elif method == 'Shmulevich':
-            data = pd.DataFrame(shmulevich)
-        
-
-        fig2, _ = create_boolean_network_graph(data)
-
-        #transition.append(transition_table(network, method))
-
-        network_plots.append(
-                    html.Div(
-                            children=[
-                                    html.B(method),
-                                    html.Iframe(
-                                        srcDoc=fig2.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                        width="500px", height="500px",
-                                    )
-                                ], style={'display': 'flex', 'flexDirection': 'column'}
-
-                            )
-            )
-
-
-    if len(methods) > 2:
- 
-        network_plots = html.Div([html.Div(network_plots[:2]), html.Div(network_plots[2:])], style={'display': 'flex', 'flexDirection': 'row'})
-    
-
-    else:
-
-        network_plots = html.Div([html.Div(network_plots)], style={'display': 'flex', 'flexDirection': 'row'})
-
-
-    fig, _ = create_boolean_network_graph_votes(elected_network)
-
-    return    html.Div([
-                            html.P("Networks of methods"),
-                            #html.Div(id='graph_rules', src=fig2, style={'height':'100%', 'width':'100%'}),
-                            html.Div(network_plots),
-
-                            html.Div([
-                                html.B('Network of Elected States'),
-                                html.Iframe(
-                                        srcDoc=fig.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                        width="500px", height="500px")
-                            ], style={'display': 'flex', 'flexDirection': 'column'}),
-                            
-                
-                ], style={'display': 'flex', 'flexDirection': 'column'})
-
-@app.callback(
-    Output('save-basc-states', 'children'),
-    Input('BASC A-datatable-network', 'data'),
-    prevent_initial_call=True)
-def save_basc_states(basc):
-
-    dcc.Store(id='BASC A-datatable-network', data=pd.DataFrame(basc))
-
-@app.callback(
-    Output('save-kmeans-states', 'children'),
-    Input('K-Means-datatable-network', 'data'),
-    prevent_initial_call=True)
-def save_kmeans_states(kmeans):
-
-    dcc.Store(id='K-Means-datatable-network', data=pd.DataFrame(kmeans))
-
-
-@app.callback(
-    Output('save-onestep-states', 'children'),
-    Input('Onestep-datatable-network', 'data'),
-    prevent_initial_call=True)
-def save_onestep_states(onestep):
-
-    dcc.Store(id='Onestep-datatable-network', data=pd.DataFrame(onestep))
-
-
-@app.callback(
-    Output('save-shmulevich-states', 'children'),
-    Input('Shmulevich-datatable-network', 'data'),
-    prevent_initial_call=True)
-def save_shmulevich_states(shmulevich):
-
-    dcc.Store(id='Shmulevich-datatable-network', data=pd.DataFrame(shmulevich))
-
-@app.callback(
-    Output('save-elected-states', 'children'),
-    Input('Elected States-datatable-network', 'data'),
-    prevent_initial_call=True)
-def save_elected_states(states_network):
-
-    dcc.Store(id='Elected States-datatable-network', data=pd.DataFrame(states_network))
-
-#@app.callback(
-#    Output('save-rules', 'children'),
-#    Input('stored-rules', 'data'),
-#    prevent_initial_call=True)
-#def save_elected_states(rules):
-
-#    print(rules)
-
-#    dcc.Store(id='stored-rules', data=rules)
-
-    
-@app.callback(
-    Output('generate-network', 'children'),
-    Input('datatable-interactivity', 'selected_rows'),
-    Input('dropdown-method', 'value'), 
-    Input('stored-data','data'),
-    Input('stored-rules','data'),
-    Input('thr_b','data'),
-    Input('thr_k','data'),
-    Input('thr_s','data'),
-    Input('thr_o','data'),
-    prevent_initial_call=True)
-def rules_network(rows, methods, data, rules, thr_b, thr_k, thr_s, thr_o):
-
-    if rows is None and methods is None and data is None and rules is None:
-        return None
-    
-    #print(rules)
-    
-    df = pd.DataFrame(rules)
-    #df.columns = df.iloc[0]
-    #dfa = df[1:]
-    
-    net, dict_net = createNetwork(df)
-
-    #print(df)
-
-    return  html.Div([
-                    #html.B("Table of Rules"),
-                    #dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], editable=True, id="stored-rules"),
-                    html.B("Network Based on Rules"),
-                    dcc.Store(id='rule_network_dict', data=dict_net),
-                    html.Iframe(
-                                    srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                    width="500px",
-                                    height="500px"
-                    )
-                ], style={'display': 'flex', 'flexDirection': 'column'})
-                    
-
-@app.callback(
-    Output('analysis-output', 'children'),
-    Input('dropdown-method', 'value'), 
-    Input('BASC A-datatable-network', 'data'),
-    Input('K-Means-datatable-network', 'data'),
-    Input('Onestep-datatable-network', 'data'),
-    Input('Shmulevich-datatable-network', 'data'),
-    Input('rule_network_dict', 'data'),
-    Input('Elected States-datatable-network', 'data'),
-    prevent_initial_call=False)   
-def generate_analysis(methods, basc, kmeans, onestep, shmulevich, rule_network, elected_network):
-
-    if methods is None or len(elected_network) == 0 or len(rule_network) == 0:
-        return None
-    
-    df = pd.DataFrame()
-
-    data_algos = pd.DataFrame()
-
-    #print(rule_network, kmeans)
-
-    #return [dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns]),
-    #        dash_table.DataTable(data_algos.to_dict('records'), [{"name": i, "id": i} for i in data_algos.columns])]
-
-    for method in methods:
-
-        if method == "BASC A":
-            data = turn_df_to_array(basc)
-            df_analysis = hamming_state_by_state(rule_network, data, method)
-
-            df_bin = pd.DataFrame({method:data})
-            data_algos = pd.concat([data_algos, df_bin], axis=1)
-
-        elif method == 'K-Means':
-            data = turn_df_to_array(kmeans) 
-            df_analysis = hamming_state_by_state(rule_network, data, method)
-
-            df_bin = pd.DataFrame({method:data})
-            data_algos = pd.concat([data_algos, df_bin], axis=1)
-
-        elif method == 'Onestep':
-            data = turn_df_to_array(onestep)
-            df_analysis = hamming_state_by_state(rule_network, data, method)
-
-            df_bin = pd.DataFrame({method:data})
-            data_algos = pd.concat([data_algos, df_bin], axis=1)
-
-        elif method == 'Shmulevich':
-            data = turn_df_to_array(shmulevich)
-            df_analysis = hamming_state_by_state(rule_network, data, method)
-
-            df_bin = pd.DataFrame({method:data})
-            data_algos = pd.concat([data_algos, df_bin], axis=1)
-
-        df = pd.concat([df, df_analysis], axis=1)
-
-    
-    df_init_final = generate_init_final_comparison(data_algos, rule_network)
-
-    df_chain_elected, cond = hamming_chain(rule_network, turn_df_to_array(elected_network))
-
-    if cond == False:
-
-        chain_hamming = html.P("Cannot analyze network because initial state does not exist in Boolean Function Network")
-
-    else:
-
-        chain_hamming = dash_table.DataTable(df_chain_elected.to_dict('records'), [{"name": i, "id": i} for i in df_chain_elected.columns])
-
-
-    return [dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns]),
-           chain_hamming,
-           dash_table.DataTable(df_init_final.to_dict('records'), [{"name": i, "id": i} for i in df_init_final.columns])]
+server = app.server
+app.config.suppress_callback_exceptions = True
 
 
 def turn_df_to_array(df):
@@ -1396,17 +74,1174 @@ def turn_df_to_array(df):
 
     return array_net
 
-# returns a datatable with the voting table with the selected methods         
+def description_card():
+    """
+
+    :return: A Div containing dashboard title & descriptions.
+    """
+    return html.Div(
+        id="description-card",
+        children=[
+            html.H5("ViBEx"),
+            html.H3("Welcome to ViBEx"),
+            html.Div(
+                id="intro",
+                children=[html.H5('A Visualization Tool for Gene Expression Analysis', style={'textAlign': 'center'}), "ViBEx is a tool for the analysis and exploration of gene expression binarization. Upload a dataset of gene expression and select one, many or all out of four methods for the computation of a threshold for binarization. Visualize Boolean networks of resulting states.",
+                          html.P("This tool only accepts CSV files. The files need to be formated in the next manner. The first column are the genes names (they need to be strings). The rest of the columns need to be the gene expressions of the corresponding genes. The dataset cannot have header names, only a matrix of gene expression with first column as gene names."),
+                          html.P("Dataset will be preprocessed to convert data to [0,1] interval")],
+            ),
+            dcc.Upload(
+                id='upload-data',
+                children=html.Div([
+                    'Drag and Drop or ',
+                    html.A('Selected File:')
+                ]),
+                style={
+                    'width': '100%',
+                    'height': '60px',
+                    'lineHeight': '60px',
+                    'borderWidth': '1px',
+                    'borderStyle': 'dashed',
+                    'borderRadius': '5px',
+                    'textAlign': 'center',
+                    'margin': '10px'
+                },
+                multiple=False
+            ),
+
+        ],
+    )
+
+def generate_control_card():
+    """
+
+    :return: A Div containing controls for graphs.
+    """
+    return html.Div(
+        id="control-card",
+        children=[
+            html.Br(),
+            html.P("Select threshold computation methods:"),
+            html.Button('Select all', id='methods-all'),
+            dcc.Dropdown(
+                ['BASC A', 'K-Means', 'Onestep', 'Shmulevich'],
+                placeholder="Select binarization method",
+                id="dropdown-method",
+                multi=True,
+                #persistence = True,
+                #persistence_type = 'memory',
+                searchable=False),
+            
+            html.Br(),
+            html.B('Download the threshold of the selected rows to a csv:'), 
+            html.Button("Download CSV", id="btn_csv"),
+            dcc.Download(id="download-dataframe-csv"),
+            html.Br(),
+
+            dcc.Store(id='thr_k', data={}), 
+            dcc.Store(id='thr_o', data={}),
+            dcc.Store(id='thr_b', data={}), 
+            dcc.Store(id='thr_s', data=None),
+            dcc.Store(id='spline-genes', data={}),
+            dcc.Store(id='Elected-table', data={}),
+            dcc.Store(id='K-Means-table', data={}),
+            dcc.Store(id='Shmulevich-table', data={}),
+            dcc.Store(id='BASC A-table', data={}),
+            dcc.Store(id='Onestep-table', data={}),
+            dcc.Store(id='rule_network_dict', data={}),
+            dcc.Store(id='stored-rules', data={}),
+            dcc.Store(id='inferred_net_rules', data={}),
+
+            dcc.Store(id='Elected-data', data={}),
+            dcc.Store(id='K-Means-data', data={}),
+            dcc.Store(id='Shmulevich-data', data={}),
+            dcc.Store(id='BASC A-data', data={}),
+            dcc.Store(id='Onestep-data', data={}),
+
+            hidden_buttons()
+            
+        ],
+        
+    )
+
+def hidden_buttons():
+
+    return html.Div([html.Button('Statistics', id='stat-impu-button', style={'display': 'none'}),
+           html.Button('Reset Imputations', id='reset-imputation', style={'display': 'none'}),
+
+            html.Button('Imputate 1', id='all-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='all-to-0', style={'display': 'none'}),
+            html.Button('Imputate 1', id='gene-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='gene-to-0', style={'display': 'none'}),
+            html.Button('Imputate 1', id='time-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='time-to-0', style={'display': 'none'}),
+            html.Button('Imputate MissForest', id='missforest-button', style={'display':'none'}),
+            
+        
+            dcc.Dropdown(
+                    [],
+                    placeholder="Select method binarization to use",
+                    id="dropdown-state-table-select",
+                    multi=False,
+                    searchable=False, style={'display':'none'}),
+
+            dcc.Dropdown(
+                            [],
+                            placeholder="Select method table",
+                            id="imputate-method",
+                            multi=False,
+                            searchable=False, style={'display':'none'}),
+            
+            dcc.Dropdown(
+                            options=[{'label': 'Global Imputation (ex: changes all "?" to either 0 or 1)', 'value':0},
+                             {'label': 'Gene Imputation (ex: imputates a value for only one gene)', 'value':1},
+                             {'label': 'Time Impuation (ex: imputates values based on time course)', 'value':2},
+                             {'label': 'Framework Statistics Algorithm', 'value':3}],
+                            placeholder="Select option",
+                            id="imputate-option",
+                            multi=False,
+                            searchable=False, style={'display':'none'}),
+            
+            dcc.Dropdown(
+                [],
+                placeholder="Select gene",
+                id="imputate-gene",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'}),
+
+            dcc.Dropdown(
+                [],
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'})])
+
+# process the click of the download button
+# gets the threshold of the data and downsloads as a csv
 @app.callback(
-    Output('voting-output', 'children'),
-    Input('dropdown-selected-rows', 'value'),
-    Input('dropdown-method', 'value'), 
-    Input('stored-data','data'),
-    Input('thr_b','data'),
-    Input('thr_k','data'),
-    Input('thr_s','data'),
-    Input('thr_o','data'),
+    Output("download-dataframe-csv", "data"),
+    Output("btn_csv", "n_clicks"),
+    Input("btn_csv", "n_clicks"),
+    Input('datatable-interactivity','data'), 
+    Input('datatable-interactivity', 'selected_rows'),
+    prevent_initial_call=True,
+)
+def download_csv(n_clicks, data, selected_rows):
+    # no data return none
+    if data is None:
+        return None, None
+    
+    if selected_rows == [] or selected_rows is None:
+
+        return None, None
+    
+      # if no clicks return none 
+    if n_clicks is None:
+        return None, None
+    
+    # get data
+    df = pd.DataFrame(data)
+    labels = df['Gene ID']
+    df = df.loc[:, df.columns!='Gene ID']
+    
+    selected_rows.sort()
+    
+    # get the selected genes values
+    genes = df.iloc[selected_rows].values
+    labels = labels.iloc[selected_rows].values
+    rows = df.shape[0]
+    
+    # column names and creating dataframe
+    col_names = {'Gene ID':[],'basc_thr':[], 'kmeans_thr':[], 'onestep_thr':[], 'shmulevich_thr':[]}
+    final_df = pd.DataFrame(col_names)
+
+    #print(genes, labels)
+    # get threshold of selected rows and save to dataframe
+    for i in range(len(selected_rows)):
+            k_means = K_Means(genes[i])
+            basc_a = BASC_A(genes[i])
+            one_step = onestep(genes[i])
+            shmulevich_ = shmulevich(genes[i])
+
+            label = labels[i]
+            
+            new_row = {'Gene ID':label, 'basc_thr':basc_a, 'kmeans_thr':k_means, 'onestep_thr':one_step, 'shmulevich_thr': shmulevich_}
+            final_df.loc[len(final_df)] = new_row
+
+    # send the dataframe and download it as thr.csv
+    return dcc.send_data_frame(final_df.to_csv, "thr.csv"), None
+
+@app.callback(
+    Output('BASC A-table', 'data'),
+    Input('BASC A-table-dropdown', 'data'),
     prevent_initial_call=True)
+def save_basc(data):
+
+    if data == None or data == [] or data == {}:
+        return {}
+        
+    return data
+
+@app.callback(
+    Output('K-Means-table', 'data'),
+    Input('K-Means-table-dropdown', 'data'),
+    prevent_initial_call=True)
+def save_kmeans(data):
+
+    if data == None or data == [] or data == {}:
+        return {}
+        
+    return data
+
+@app.callback(
+    Output('Onestep-table', 'data'),
+    Input('Onestep-table-dropdown', 'data'),
+    prevent_initial_call=True)
+def save_onestep(data):
+
+    if data == None or data == [] or data == {}:
+        return {}
+        
+    return data
+
+@app.callback(
+    Output('Shmulevich-table', 'data'),
+    Input('Shmulevich-table-dropdown', 'data'),
+    prevent_initial_call=True)
+def save_shmulevich(data):
+
+    if data == None or data == [] or data == {}:
+        return {}
+        
+    return data
+
+@app.callback(
+    Output('Elected-table', 'data'),
+    Input('Elected-table-dropdown', 'data'),
+    prevent_initial_call=True)
+def save_elected(data):
+
+    if data == None or data == [] or data == {}:
+        return {}
+    
+    #print(data)
+        
+    return data
+
+def network_nav():
+    
+    return dcc.Tabs([
+
+        dcc.Tab(label='Binarization State Table', children=[
+
+            dash_table.DataTable(
+                    id='Elected-table-dropdown',
+                    columns=[
+                        {'name': 'Gene', 'id': 'gene'},
+                        {'name': 'Value', 'id': 'value'}
+                    ],
+                    data=[], style_table={'display': 'none'}),
+
+            dash_table.DataTable(
+                    id='BASC A-table-dropdown',
+                    columns=[
+                        {'name': 'Gene', 'id': 'gene'},
+                        {'name': 'Value', 'id': 'value'}
+                    ],
+                    data=[], style_table={'display': 'none'}),
+
+            dash_table.DataTable(
+                    id='K-Means-table-dropdown',
+                    columns=[
+                        {'name': 'Gene', 'id': 'gene'},
+                        {'name': 'Value', 'id': 'value'}
+                    ],
+                    data=[], style_table={'display': 'none'}),
+    
+            dash_table.DataTable(
+                    id='Onestep-table-dropdown',
+                    columns=[
+                        {'name': 'Gene', 'id': 'gene'},
+                        {'name': 'Value', 'id': 'value'}
+                    ],
+                    data=[], style_table={'display': 'none'}),
+
+            dash_table.DataTable(
+                    id='Shmulevich-table-dropdown',
+                    columns=[
+                        {'name': 'Gene', 'id': 'gene'},
+                        {'name': 'Value', 'id': 'value'}
+                    ],
+                    data=[], style_table={'display': 'none'}),
+
+            html.Div(style={"height": "20px"}),
+            dbc.Card(
+                    dbc.CardBody([
+                        html.P("This section includes the Binarization State tables based on each selected threshold method and elected methodlogy."),
+                        html.P("Each row are a different binarized time course state of the original gene expression."),
+                        html.P("The next dropdown allows the imputation of values on undecided states."),
+                        html.P("There are three options of imputation values: Global imputation, gene imputation, and time course based imputation."),
+                        html.P("This can also be done by the arrow dropdown in each field of each table."),
+                    ]),
+                className="mb-3",
+            ),
+
+            html.Div(style={"height": "20px"}),
+            dbc.Card(
+                    dbc.CardBody([
+                        html.Div(id="imputate-dropdowns"),
+                    ]),
+                className="mb-3",
+            ),
+
+            html.Div(id='network-state-table-output'),
+
+        ]),
+
+        dcc.Tab(label='Binarization Path Network', children=[
+            html.Div(id="generate-networks")
+        ]),
+
+        dcc.Tab(label='Inference Boolean Network', children=[
+
+            html.Div([
+                
+                html.Div(style={"height": "20px"}),
+                dbc.Card(
+                        dbc.CardBody([
+                            html.P("This tab allows to infer the Boolean Functions of the set of selected genes."),
+                            html.P("The Boolean Network based on the Boolean Functions infered are drawn."),
+                            html.P("First, selected the inference method from a dropdown these are: Bestfit, LogicGep, and MIBNI."),
+                            html.P("In addition, selected which binarization to use (based on Binarization state tables). Make sure that the table in the 'Binarization State Tab' have no '?' values."),
+                        ]),
+                    className="mb-3"),
+
+                html.Div(style={"height": "20px"}),
+                dbc.Card(
+                        dbc.CardBody([
+                            html.Div([
+                                html.B('Select an inference method to infer Boolean Functions and Network:'),
+                                    dcc.Dropdown(
+                                        ['MIBNI', 'LogicGep', 'Bestfit'],
+                                        placeholder="Select inference method",
+                                        id="inference-method",
+                                        multi=False,
+                                        searchable=False),
+                                    html.Div(id='generate-state-dropdown'),
+                            ], style={"width": "33%", 'marginTop': '20px', 'marginBottom': '20px'}),
+                            html.Button("Infer Boolean Network and Functions", id="btn_inference"),
+                            html.Br(),
+                        ]),
+                    className="mb-3"),
+               
+                html.Div(id='inference_plots')
+
+            ])
+
+        ]),
+
+        dcc.Tab(label='Upload Boolean Functions', children=[
+
+            html.Div(children = [
+                
+                html.Div(style={"height": "20px"}),
+                dbc.Card(
+                    dbc.CardBody([
+                            html.P("This tab provides the ability to upload a Boolean Function file representing a GRN."),
+                            html.P("The file needs to be a CSV with two columns: Gene (gene names), Rule (corresponding boolean function). The rules need to be Python style boolean expressions."),
+                            html.P("This means using 'and', 'or', 'not', '^'(xor)."),
+                            html.P("In addition, selecting a binarization method from the dropdown will create a comparison table of the path taken based on the first state of the binarization."),
+                            html.P("Upload transition rules to create network"),
+                        ]),
+                className="mb-3"),
+
+                dcc.Upload(
+                    id='upload-rules',
+                    children=html.Button("Upload Rules"),
+                    multiple=False,
+                ),
+
+                html.Div(style={"height": "20px"}),
+                
+                html.Div(id='output-rules-upload'),
+              
+                html.Div(id='generate-network-rules')
+               
+                                
+            ])
+
+        ]),
+
+        dcc.Tab(label='Analysis', children=[
+                        
+            html.Div(id='analysis-output')
+
+        ]),
+    ])
+
+@app.callback(
+    Output('generate-state-dropdown', 'children'),
+    Input('dropdown-method', 'value'),
+    prevent_initial_call=True)
+def generate_dropdown(methods):
+
+    if methods == [] or methods == None:
+
+        return html.B("Select the binarization method to infer the network:"), dcc.Dropdown(
+                    [],
+                    placeholder="Select method binarization to use",
+                    id="dropdown-state-table-select",
+                    multi=False,
+                    searchable=False)
+    
+    else:
+
+        return html.B("Select the binarization method to infer the network:"), dcc.Dropdown(
+                    methods+['Elected'],
+                    placeholder="Select method binarization to use",
+                    id="dropdown-state-table-select",
+                    multi=False,
+                    searchable=False),
+
+
+def tabs_nav():
+
+    return dcc.Tabs([
+                dcc.Tab(label='Binarization', children=[
+                    html.Div(style={"height": "20px"}),
+                    dbc.Card(
+                        dbc.CardBody([html.Div(id="binarization-output")]),
+                        className="mb-3",
+                    ),
+                    
+                ]),
+                 dcc.Tab(label='Displacements', children=[
+                    html.Div(id='displacements-output')
+                ]),
+                dcc.Tab(label='Statistics', children=[
+
+                    dcc.Loading(
+                       children=[html.Div(id='statistics-output')],
+                    type="circle"),
+                
+                ]),
+                dcc.Tab(label='Networks', children=[
+                    network_nav()
+                ]),
+            ])
+
+app.layout = html.Div(
+    id="app-container",
+    children=[
+        # Banner
+        #html.Div(
+        #    id="banner",
+        #    className="banner",
+        #    children=[html.Img(src=app.get_asset_url("plotly_logo.png"))],
+        #),
+        # Left column
+        html.Div(
+            id="left-column",
+            className="four columns",
+            children=[description_card(), html.Div(id = 'output-data-upload')],
+            style={'overflowY': 'auto', 'maxHeight': '500px'}
+        ),
+        # Right column
+        html.Div(
+            id="right-column",
+            className="eight columns",
+            children=[
+
+                html.Div(id='app-content-tabs')
+                
+            ], style={'overflowX': 'auto', 'maxHeight': '500px'}
+        )
+    ],
+)
+
+@app.callback(
+        Output('app-content-tabs', 'children'),
+        Input('upload-data', 'contents'),
+        prevent_initial_call=False
+)
+def content_tabs(data):
+
+    #print("fuera if")
+    if data is None or data == {}:
+        #print("dentro if")
+        carousel = dbc.Carousel(
+            items=[
+                {"key": "1", "src": "/assets/table.png"},
+                {"key": "2", "src": "/assets/thr.png"},
+                {"key": "3", "src": "/assets/bn.png"},
+                {"key": "4", "src": "/assets/inference.png"},
+            ],
+            controls=False,
+            indicators=False,
+            interval=2000,
+            #className="carousel-fade",
+            #ride="carousel",
+            style={'width':'90%', 'margin':'auto'}
+        )
+
+        return html.Div(
+                        carousel, 
+                        style={
+                            'display': 'flex',
+                            'justifyContent': 'center',
+                            'alignItems': 'center',    
+                            'paddingTop': '5vh',   
+                        })
+    
+    return html.Div(id='dropdown-gene-select', children=[
+                    dcc.Dropdown(
+                        id="dropdown-gene",
+                        options=[],  # Initially empty
+                        value=None,
+                        placeholder="Select gene"
+                    )
+                ]), dcc.Loading(
+                    children=[html.Div(id='process-tabs-thr')],
+                    type="circle",
+                ), tabs_nav()
+                #html.Div(id='process-tabs-thr'),
+                
+
+def parse_contents(contents, filename, date):
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df_labels = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')), header=None)
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df_labels = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ])
+
+    # normalize each row of the dataframe based on this formula x' = (x-min)/(max-min) and save it to the dataframe
+
+    df_t = geneNorm(df_labels.loc[ : , df_labels.columns!=0].copy())
+    #df_t = df_t.round(5)
+
+    #print(df)
+
+    df_t.insert(0, 'Gene ID', df_labels[0])
+
+    return html.Div(
+        id='process-data',
+        children=[
+
+            html.H5(filename),
+            html.Button('Select all', id='table-all'),
+            html.Button('Deselect all', id='table-deselect'),
+            dash_table.DataTable(
+                            id='datatable-interactivity',
+                            columns=[
+                               {"name": str(i), "id": str(i), "type": "numeric", "format": dash_table.Format.Format(precision=4)}
+                                if df_t[i].dtype in [np.float64, np.float32, float] else
+                                {"name": str(i), "id": str(i)}
+                                for i in df_t.columns
+                            ],
+                            data=df_t.to_dict('records'),
+                            column_selectable="single",
+                            row_selectable="multi",
+                            selected_columns=[],
+                            selected_rows=[],
+                            page_action="native",
+                            page_current= 0,
+                            page_size= 10,
+                            style_table={'overflowX': 'auto', 'maxWidth': '500px'},
+                            style_header={'backgroundColor': 'lightgrey', 'fontWeight': 'bold'}
+            ),
+            generate_control_card()
+        ])
+
+@app.callback(Output('output-data-upload', 'children'),
+              Input('upload-data', 'contents'),
+              State('upload-data', 'filename'),
+              State('upload-data', 'last_modified'),
+              prevent_initial_call=True)
+def update_output(list_of_contents, list_of_names, list_of_dates):
+    list_of_contents = [list_of_contents]
+    list_of_names = [list_of_names]
+    list_of_dates = [list_of_dates]
+
+    if list_of_contents is not None:
+        children = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
+    
+
+
+# function to parse the contents of thje selected file
+def parse_contents_rules(contents, filename, date):
+    content_type, content_string = contents.split(',')
+
+    # decode the content
+    decoded = base64.b64decode(content_string)
+    
+    # if it is a csv then read it 
+    if 'csv' in filename:
+        df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=0)
+
+        return dcc.Store(id='rule_network_dict', data=df.to_dict('records'))
+    
+    else:
+        return "The file needs to be a csv."
+    
+
+@app.callback(Output('generate-network-rules', 'children'),
+              Input('rule_network_dict', 'data'),
+              Input('inferred_net_rules', 'data'),
+              prevent_initial_call=True)
+def generate_net_rules(rules, inferred_rules):
+    if rules == {} or rules is None:
+        return None
+    
+    df = pd.DataFrame(rules)
+
+    net, dict_net = createNetwork(df)
+
+    #print(dict_net)
+
+    if len(net.nodes) > 1000:
+        return html.Div([
+
+                        html.Div(style={"height": "20px"}),
+                        dbc.Card(
+                            dbc.CardBody([
+                                    html.B("Table of Uploaded Boolean Functions"),
+                                    dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], id="stored-rules"),
+                                    html.Br(),
+                                ]),
+                        className="mb-3"),
+
+                        html.P("Cannot display Boolean Network because it has too many nodes"),
+
+                        output_metrics(inferred_rules, rules),
+                        #output_metricsBN(dict_net, get_inferred_network_dict(inferred_rules))
+                
+                    ], style={'display': 'flex', 'flexDirection': 'column'})
+
+    return  html.Div([
+
+                        html.Div(style={"height": "20px"}),
+                        dbc.Card(
+                            dbc.CardBody([
+                                    html.B("Table of Uploaded Boolean Functions"),
+                                    dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], id="stored-rules"),
+                                    html.Br(),
+                                ]),
+                        className="mb-3"),
+
+                        html.Div([
+
+                            dbc.Card(
+                                dbc.CardBody([
+                                        html.Div([
+                                        html.P('Grey nodes are the attractors in the Boolean Network.'),
+                                        html.B("Network Based on Uploaded Boolean Functions"),
+                                        html.Iframe(
+                                                        srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                                        width="500px",
+                                                        height="500px"
+                                        ),
+                                    ], style={'display': 'flex', 'flexDirection': 'column'}),
+                                    ]),
+                            className="mb-3"),
+
+                            show_inferred_network(inferred_rules)
+
+                        ], style={'display': 'flex', 'flexDirection': 'row'}),
+
+                        output_metrics(inferred_rules, rules),
+                        #output_metricsBN(dict_net, get_inferred_network_dict(inferred_rules))
+                
+                    ], style={'display': 'flex', 'flexDirection': 'column'})
+    
+
+def show_inferred_network(net_rules):
+
+    if net_rules == {} or net_rules is None:
+        return None
+    
+    df_infer_rules = pd.DataFrame(net_rules)
+
+    net, dict_net = createNetwork(df_infer_rules)
+
+    comp = dbc.Card(
+                dbc.CardBody([
+                        html.Div([
+                        html.P('Grey nodes are the attractors in the Boolean Network.'),
+                        html.B("Network Based on Inferred Boolean Functions"),
+                        html.Iframe(
+                                srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                width="500px",
+                                height="500px"
+                        ),
+                    ], style={'display': 'flex', 'flexDirection': 'column'}),
+                ]),
+        className="mb-3")
+
+    
+    return comp
+
+def get_inferred_network_dict(net_rules):
+
+    if net_rules == {} or net_rules is None:
+        return None
+    
+    df_infer_rules = pd.DataFrame(net_rules)
+
+    _, dict_net = createNetwork(df_infer_rules)
+
+    #print("aqui", dict_net)
+
+    return dict_net
+
+
+def output_metrics(net_rules, rules):
+
+    if net_rules == {} or net_rules is None or rules is None or rules == {}:
+        return None
+    
+    df_infer_rules = pd.DataFrame(net_rules)
+    df_uploaded_rules = pd.DataFrame(rules)
+
+    metrics = Metrics(df_uploaded_rules, df_infer_rules)
+
+    metrics = pd.DataFrame(metrics)
+
+    return dbc.Card(
+                    dbc.CardBody([
+                        html.P("The next section shows a metrics table comparing the performance of the inferred Boolean Functions with the Ground Truth Functions."),
+                        dash_table.DataTable(metrics.to_dict('records'), [{"name": str(i), "id": str(i)} for i in metrics.columns])
+                ]),
+        className="mb-3")
+
+def output_metricsBN(dict_net, dict_inferred):
+
+    if dict_net is None or dict_inferred is None:
+        return None
+    
+    metrics = Metrics_BN(dict_net, dict_inferred)
+
+    metrics = pd.DataFrame(metrics)
+
+    return dbc.Card(
+                    dbc.CardBody([
+                        html.P("The next section shows a metrics table comparing the performance of the inferred Boolean Network with the Ground Truth Boolean Network."),
+                        dash_table.DataTable(metrics.to_dict('records'), [{"name": str(i), "id": str(i)} for i in metrics.columns])
+                ]),
+        className="mb-3")
+        
+
+@app.callback(Output('output-rules-upload', 'children'),
+              Input('upload-rules', 'contents'),
+              State('upload-rules', 'filename'),
+              State('upload-rules', 'last_modified'),
+              prevent_initial_call=True)
+# function parses and update the output of the selected dataset
+def update_output_rules(list_of_contents, list_of_names, list_of_dates):
+    list_of_contents = [list_of_contents]
+    list_of_names = [list_of_names]
+    list_of_dates = [list_of_dates]
+
+    # if there is a selected file
+    if list_of_contents is not None:
+        # parse the content
+        children = [
+            parse_contents_rules(c, n, d) for c, n, d in
+            zip(list_of_contents, list_of_names, list_of_dates)]
+        return children
+
+
+@app.callback(Output('dropdown-gene-select', 'children'),
+              Input('datatable-interactivity', 'selected_rows'),
+              Input('datatable-interactivity', 'data'),
+              prevent_initial_call=True)
+def dropdown_gene_select(rows, data):
+    if rows == [] or data == None or rows == None:
+         return html.Div(style={"height": "20px"}), dbc.Card(
+                        dbc.CardBody([html.B('Select gene to visualize and binarize:'), dcc.Dropdown(
+                            options=[], 
+                            value = None,
+                            placeholder="Select gene",
+                            id="dropdown-gene")]),
+                        className="mb-3",
+                    ),
+    
+    df1 = pd.DataFrame(data)
+    labels = df1['Gene ID']
+
+    rows.sort()
+    
+    return html.Div(style={"height": "20px"}), dbc.Card(
+            dbc.CardBody([html.B('Select gene to visualize and binarize:'), dcc.Dropdown(
+                    options=[{'label': labels[row], 'value': row} for row in rows], 
+                    value = rows[0],
+                    persistence = True,
+                    persistence_type = 'memory',
+                    placeholder="Select gene",
+                    id="dropdown-gene")]),
+                className="mb-3",
+            ),
+
+
+@app.callback(Output('process-tabs-thr', 'children'),
+              Input('datatable-interactivity', 'selected_rows'),
+              Input('datatable-interactivity', 'data'),
+              Input('dropdown-method', 'value'),
+              prevent_initial_call=True)
+def process_thr(selected_rows, data, selected_method):
+
+    if selected_method is None or selected_rows is None or data is None:
+        return "Select genes, methods or upload dataset."
+
+    df1 = pd.DataFrame(data)
+    df1 = df1.loc[:, df1.columns!='Gene ID']
+
+    thr_k = {}
+    thr_b = {}
+    thr_o = {}
+    thr_s = {}
+
+    splineDict = {}
+
+    selected_rows.sort()
+
+    for row in selected_rows:
+        selected = df1.iloc[row]
+
+        gene = selected.values
+
+        splineGene = interpolation(gene)
+
+        splineDict[row] = splineGene
+
+
+    for method in selected_method:
+
+        for row in selected_rows:
+
+            splineGene = splineDict[row]
+
+            if(method == 'BASC A'):
+                thr = call_C_BASC(splineGene.copy())
+
+                thr_b[row] = thr
+
+            elif(method == 'Onestep'):
+                thr = call_C_Stepminer(splineGene)
+
+                thr_o[row] = thr
+
+            elif(method == 'Shmulevich'):
+                thr = shmulevich(splineGene)
+
+                thr_s[row] = thr
+
+            elif(method == 'K-Means'):
+                thr = K_Means(splineGene)
+
+                thr_k[row] = thr
+    
+    return html.Div(
+            children=[
+                dcc.Store(id='thr_k', data=thr_k), 
+                dcc.Store(id='thr_o', data=thr_o),
+                dcc.Store(id='thr_b', data=thr_b), 
+                dcc.Store(id='thr_s', data=thr_s),
+                dcc.Store(id='spline-genes', data=splineDict), 
+            ])
+
+def verify_thr_is_in_dict(gene, methods, thr_k, thr_b, thr_o, thr_s):
+    for method in methods:
+        if(method == 'BASC A'):
+            if not all(key in thr_b for key in str(gene)):
+                return True
+
+        elif(method == 'Onestep'):
+            if not all(key in thr_o for key in str(gene)):
+                return True  
+
+        elif(method == 'Shmulevich'):
+            if not all(key in thr_s for key in str(gene)):
+                return True
+
+        elif(method == 'K-Means'):
+            if not all(key in thr_k for key in str(gene)):
+                return True
+    
+    return False
+
+def make_grid_disp(methods, gene, data, thr_k, thr_o, thr_s, thr_b, disps):
+    
+    #methods = ['BASC A', 'K-Means', 'Onestep']
+    
+    fig = make_subplots(rows=2, cols=2, subplot_titles=["Displacement of " + m for m in methods])
+    
+    y = list(data[gene].values())
+    label = y[-1]
+    y.pop(-1)
+    
+    row = 1
+    col = 1
+    
+    legend = True
+
+    fillcolor = ['#dae5ef', '#ffdddd', '#ddf5dd', '#ffe7d2']
+    
+    
+    for i in range(len(methods)):
+        
+        if methods[i] == "BASC A":
+            dis = disps['BASC_A'].values[0]
+            thr = thr_b[str(gene)]
+            
+        elif methods[i] == "Onestep":
+            dis = disps['onestep'].values[0]
+            thr = thr_o[str(gene)]
+            
+        elif methods[i] == "K-Means":
+            dis = disps['k-means'].values[0]
+            thr = thr_k[str(gene)]
+            
+        else:
+            dis = disps['shmulevich'].values[0]
+            thr = thr_s[str(gene)]
+            #print(thr, dis)
+        
+        minY = thr - dis
+        maxY = thr + dis
+        
+        if minY <= min(y):
+            minY = min(y)
+            
+        if maxY >= max(y):
+            maxY = max(y)
+            
+        if i >= 1:
+            legend = False
+        
+        x = np.arange(len(y))
+        
+        fig.add_trace(
+            go.Scatter(x=x, y=y, name=label, showlegend=legend, line_color='blue'),
+            row=row, col=col
+        )
+        
+        x_dis = [0, 0, len(y)-1, len(y)-1, 0]
+        y_dis = [minY, maxY, maxY, minY, minY]
+        
+        fig.add_trace(
+            go.Scatter(x=x_dis, y=y_dis, fill="toself", mode='none', name=methods[i], hoverinfo="skip", fillcolor=fillcolor[i], opacity=0.7), row=row, col=col
+        )
+
+        #fillcolor=fillcolor[i], opacity=0.8
+
+        fig.update_xaxes(
+        range=[0, len(y)-1])
+        
+        fig.update_yaxes(
+            range=[min(y), max(y)+0.01])
+        
+        #fig.add_trace(fig.add_hrect(y0=minY, y1=maxY, line_width=0, fillcolor="red", opacity=0.2),
+        #              row=row, col=col)
+    
+        
+        if col == 2:
+            row += 1
+            col = 1
+        else:
+            col += 1
+        
+    fig.update_xaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey')
+        
+    fig.update_yaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black',
+            gridcolor='lightgrey')
+        
+    fig.update_layout(height=800, width=800, plot_bgcolor='white')
+    
+    return fig
+    
+
+def make_plot(methods, gene, data, thr_k, thr_o, thr_s, thr_b, splineGenes):
+    
+    fig = go.Figure()
+
+    fillcolor = ['#dae5ef', '#ffdddd', '#ddf5dd', '#ffe7d2']
+    fillcolor = ['red', 'blue', 'green', 'orange']
+    
+    ySpline = splineGenes[str(gene)]
+    y = list(data[gene].values())
+    label = y[-1]
+    y.pop(-1)
+    
+    x = np.arange(len(y))
+        
+    fig.add_trace(
+            go.Scatter(x=x, y=y, name=label, showlegend=True, line_color='blue')
+    )
+    
+    xSpline = np.linspace(0, len(y)-1, len(ySpline))
+    
+    fig.add_trace(
+            go.Scatter(x=xSpline, y=ySpline, name=label+" Spline", showlegend=True, line_color='red')
+    )
+    
+    dash = ['dot', 'dash', 'longdash', 'dashdot']
+    index= 0 
+    
+    for m in methods:
+        
+        if m == "BASC A":
+            thr = thr_b[str(gene)]
+            
+        elif m == "Onestep":
+            thr = thr_o[str(gene)]
+            
+        elif m == "K-Means":
+            thr = thr_k[str(gene)]
+            
+        else:
+            thr = thr_s[str(gene)]
+            
+        yThr = np.full(len(y), thr)
+        
+        fig.add_trace(
+            go.Scatter(x=x, y=yThr, name=m, showlegend=True, line=dict(dash=dash[index], color=fillcolor[index]))
+            
+        )
+        index += 1
+        
+    fig.update_xaxes(
+        mirror=True,
+        ticks='outside',
+        showline=True,
+        linecolor='black',
+        gridcolor='lightgrey',
+        range=[0, len(y)-1])
+        
+    fig.update_yaxes(
+            mirror=True,
+            ticks='outside',
+            showline=True,
+            linecolor='black',
+            gridcolor='lightgrey',
+            range=[min(y), max(y)+0.01])
+        
+    fig.update_layout(height=800, width=800, plot_bgcolor='white', title="Threshold for "+label,
+                     xaxis_title="Time Series", yaxis_title="Expression Level")
+        
+    
+    return fig    
+
+@app.callback(Output('displacements-output', 'children'),
+              Input('dropdown-gene', 'value'),
+              Input('datatable-interactivity', 'data'),
+              Input('dropdown-method', 'value'),
+              Input('thr_k', 'data'),
+              Input('thr_o', 'data'),
+              Input('thr_s', 'data'),
+              Input('thr_b', 'data'),
+              Input('spline-genes', 'data'),
+              prevent_initial_call=True)
+def displacement_tabs(gene, data, methods, thr_k, thr_o, thr_s, thr_b, spline_genes):
+    if gene == [] or methods == None or methods == [] or gene == None:
+        return "Select genes or threshold methods to binarize."
+    
+    cond = verify_thr_is_in_dict(gene, methods, thr_k, thr_b, thr_o, thr_s)
+
+    if cond:
+        return None
+    
+    gene_selected = list(data[(gene)].values())
+    gene_selected.pop(-1)
+    
+    
+    disps = getDisplacement(methods,gene_selected)
+
+    #print(thr_s)
+
+    return [ html.Div(style={"height": "20px"}), dbc.Card(
+                dbc.CardBody([
+                    html.Hr(),html.P("Spline approximation of gene expression and threshold displacement for every algorithm. The voting table shows the binarization using selected algorithms and the consensus binarization.", style={'textAlign': 'center'}),
+                    html.Br(), html.P("*Values that are too close to the threshold will be considered undecided with a (?) on the table."),
+                ]),
+                className="mb-3",
+            ),
+        
+            #make_displacement_graphs(methods, gene, data, thr_k, thr_o, thr_s, thr_b, spline_genes)
+            dcc.Tabs([
+                        dcc.Tab(label='Thresholds', children=[
+                            html.Div(style={"height": "20px"}),
+                            dbc.Card(
+                                dbc.CardBody(html.P("Threshold for each algorithm on selected gene."),),
+                                className="mb-3",
+                            ),
+                            html.Div(style={"height": "20px"}),
+                            dbc.Card(
+                                dbc.CardBody(dcc.Graph(figure=make_plot(methods, gene, data, thr_k, thr_o, thr_s, thr_b, spline_genes))),
+                                className="mb-3",
+                            ),
+                            
+                    ]),
+                    dcc.Tab(label='Displacements', children=[
+                            
+                            html.Div(style={"height": "20px"}),
+                            dbc.Card(
+                                dbc.CardBody(dcc.Graph(figure=make_grid_disp(methods, gene, data, thr_k, thr_o, thr_s, thr_b, disps))),
+                                className="mb-3",
+                            ),
+                    
+                    ])
+                
+                ])               
+              
+            ]
+
+@app.callback(Output('binarization-output', 'children'),
+              Input('dropdown-gene', 'value'),
+              Input('datatable-interactivity', 'data'),
+              Input('dropdown-method', 'value'),
+              Input('thr_k', 'data'),
+              Input('thr_o', 'data'),
+              Input('thr_s', 'data'),
+              Input('thr_b', 'data'),
+              prevent_initial_call=True)
+def binarization_tab(gene, data, methods, thr_k, thr_o, thr_s, thr_b): 
+
+    if gene == [] or methods == None or methods == [] or gene == None:
+        return "Select genes or threshold methods to binarize."
+    
+    cond = verify_thr_is_in_dict(gene, methods, thr_k, thr_b, thr_o, thr_s)
+
+    if cond:
+        return None
+    
+    return vote_table(gene, methods, data, thr_b, thr_k, thr_s, thr_o)
+
+
 def vote_table(row, selected_method, data, thr_b, thr_k, thr_s, thr_o):
     
     # if they are none return nothing to the dashboard
@@ -1415,102 +1250,49 @@ def vote_table(row, selected_method, data, thr_b, thr_k, thr_s, thr_o):
     
     # get dataframe
     df = pd.DataFrame(data)
-    
+    labels = df['Gene ID']
+    df = df.loc[:, df.columns!='Gene ID']
+
     # get selected gene
     selected = df.iloc[row]
     gene = selected.values
        
-    selected_range = max(gene) - min(gene)
     disps = getDisplacement(selected_method,gene)
-    
-    range_displacement_index = math.ceil((max(gene)-min(gene))*10) - 1
-    #ranges is a pandas series object
-    #ranges = displacements.iloc[range_displacement_index]
 
-    #_, geneSpline = three_interpolation(gene, 'K-Means', 4)
-     
+    #print(disps)
+    
     t = []
     d = []
 
-    vote_binary = []
-    
     # go through each method and interpolate n times given by the user
     for method in selected_method:
         if(method == 'BASC A'):
             # get threshold of orignal gene
             t.append(thr_b[str(row)])
-            #t.append(BASC_A(geneSpline))
-
-            # get list of thresholds by the interpolations
-            #t_b, _ = interpolationConverge(gene, 'BASC A', tolerance)
-            
-            # add displacement 
+        
             d.append(disps['BASC_A'].iloc[0])
-
-            # get vote of method
-            #vote_binary.append(binVoting(gene, [BASC_A(gene)], [max(t_b) - min(t_b)]))
-
-            
+ 
         elif(method == 'K-Means'):
             # get threshold of orignal gene
             t.append(thr_k[str(row)])
-            #t.append(K_Means(geneSpline))
-
-             # get list of thresholds by the interpolations
-            #t_k, _ = interpolationConverge(gene, 'K-Means', tolerance)
-            
-             # add displacement 
-            #d.append(max(t_k) - min(t_k))
-
+           
             d.append(disps['k-means'].iloc[0])
-            # get vote of method
-            #vote_binary.append(binVoting(gene, [K_Means(gene)], [max(t_k) - min(t_k)]))
-            
-            
+       
         elif(method == 'Onestep'):
             # get threshold of orignal gene
             t.append(thr_o[str(row)])
-            #t.append(onestep(geneSpline))
-
-            # get list of thresholds by the interpolations
-            #t_o, _ = interpolationConverge(gene, 'Onestep', tolerance)
-            
-            # add displacement 
-            #d.append(max(t_o) - min(t_o))
-
+        
             d.append(disps['onestep'].iloc[0])
-            # get vote of method
-            #vote_binary.append(binVoting(gene, [onestep(gene)], [max(t_o) - min(t_o)]))
             
         else:
             # get threshold of orignal gene
             t.append(thr_s[str(row)])
-            #t.append(shmulevich(geneSpline))
-
-            # get list of thresholds by the interpolations
-            #t_s, _ = interpolationConverge(gene, 'Shmulevich', tolerance)
             
             d.append(disps['shmulevich'].iloc[0])
-            # add displacement 
-            #d.append(max(t_s) - min(t_s))
-
-            # get vote of method
-            #vote_binary.append(binVoting(gene, [shmulevich(gene)], [max(t_s) - min(t_s)]))
    
+    #print(gene, t, d)
     # find the voting table of that gene 
-    votes = binarizationVoting(gene, t, d)
-    
-    # save votes
-    #votes = [vote_binary]
-
-    #hamming, size_vect = HammingDistance(votes)
-
-    #hamming_vect = [[hamming]]
-
-    #ham_col = ['Hamming Distance']
-
-    # add final vote of all algos
-    #votes.append(binVoting(gene, t, d))
+    votes = election_strings(gene, t, d)
     
     rows_data = []
     
@@ -1524,42 +1306,32 @@ def vote_table(row, selected_method, data, thr_b, thr_k, thr_s, thr_o):
     
     # append final label
     selected_method.append("Elected")
-
     
     # create dataframe of voting table 
     vote_df = pd.DataFrame(data=rows_data, index=selected_method)
     vote_df.reset_index(inplace=True)
-
-
-    #ham_df = pd.DataFrame(data=hamming_vect, index=ham_col)
-    #ham_df.reset_index(inplace=True)
-
-
+   
     # return components and table 
-    return [ html.Div(style={'height': '5%'}), html.B('Voting Table of Gene ' + str(row+1)), 
-            dash_table.DataTable(vote_df.to_dict('records'), [{"name": i, "id": i} for i in vote_df.columns],
+    return  html.B('Voting Table of ' + labels[row]), dash_table.DataTable(vote_df.to_dict('records'), [{"name": str(i), "id": str(i)} for i in vote_df.columns],
             style_data = {'borderBottom': '5px solid white'},
             style_cell={'minWidth': '50px', 'maxWidth': '50px'},
             style_data_conditional=[
                {
                    'if': {
-                       'filter_query': '{{{col}}} = "?"'.format(col=col),
-                       'column_id': col,
+                       'filter_query': '{{{col}}} = "?"'.format(col=str(col)),
+                       'column_id': str(col),
                        'row_index': 'odd'
                    },
-                   #'backgroundColor': 'rgb(220, 220, 220)'
                    'backgroundColor': 'rgb(255, 255, 192, 0.3)',
-                   #'color': 'rgb(255, 255, 192, 0.3)',
                } for col in vote_df.columns
             ] +
             [
                {
                    'if': {
-                       'filter_query': '{{{col}}} = "?"'.format(col=col),
-                       'column_id': col,
+                       'filter_query': '{{{col}}} = "?"'.format(col=str(col)),
+                       'column_id': str(col),
                        'row_index': 'even'
                    },
-                   #'color': 'rgb(255, 255, 192, 0.5)',
                    'backgroundColor': 'rgb(255, 255, 192, 0.3)',
                } for col in vote_df.columns
             ] +
@@ -1567,165 +1339,52 @@ def vote_table(row, selected_method, data, thr_b, thr_k, thr_s, thr_o):
             [
                 {
                     'if': {
-                        'filter_query': '{{{col}}} = 1'.format(col=col),
-                        'column_id': col,
+                        'filter_query': '{{{col}}} = 1'.format(col=str(col)),
+                        'column_id': str(col),
                         'row_index': 'odd'
                     },
-                    #'backgroundColor': 'rgb(220, 220, 220)',
-                    #'color': 'rgb(13, 45, 27)',
                     'backgroundColor': 'rgb(113, 209, 129, 0.3)',
                 } for col in vote_df.columns
             ] +
             [
                 {
                     'if': {
-                        'filter_query': '{{{col}}} = 0'.format(col=col),
-                        'column_id': col,
+                        'filter_query': '{{{col}}} = 0'.format(col=str(col)),
+                        'column_id': str(col),
                         'row_index': 'odd'
                     },
-                    #'backgroundColor': 'rgb(220, 220, 220)',
-                    #'color': 'rgb(55, 15, 15)',
                     'backgroundColor': 'rgb(191, 102, 99, 0.3)',
                 } for col in vote_df.columns
             ] +
             [
                 {
                     'if': {
-                        'filter_query': '{{{col}}} = 0'.format(col=col),
-                        'column_id': col,
+                        'filter_query': '{{{col}}} = 0'.format(col=str(col)),
+                        'column_id': str(col),
                         'row_index': 'even'
                     },
-                    #'color': 'rgb(55, 15, 15)',
                     'backgroundColor': 'rgb(191, 102, 99, 0.3)',
                 } for col in vote_df.columns
             ] +
             [
                 {
                     'if': {
-                        'filter_query': '{{{col}}} = 1'.format(col=col),
-                        'column_id': col,
+                        'filter_query': '{{{col}}} = 1'.format(col=str(col)),
+                        'column_id': str(col),
                         'row_index': 'even'
                     },
-                    #'color': 'rgb(13, 45, 27)',
                     'backgroundColor': 'rgb(113, 209, 129, 0.3)',
                 } for col in vote_df.columns
             ],
             style_table={'height': '300px', 'overflowY': 'auto', 'overflowX':'auto'}
             ), 
-            
-            #dash_table.DataTable(ham_df.to_dict('records'), [{"name": i, "id": i} for i in ham_df.columns])
-            ]
-
-
-
-# returns datatable with the transition table of each method
-# this is for the networks of each method
-def transition_table(final, method):
-     # if no final network return none
-    if final is None:
-        return None
-    
-    tables = []
-
-    label = method + '-datatable-network'
-    
-    # create datatable component of final transition table
-    table = dash_table.DataTable(final.to_dict('records'), [{"name": i, "id": i} for i in final.columns],
-    editable=True, id=label,
-    #dropdown={
-    #        i: {
-    #            'options': [{'label': "0", 'value': "0"}, {'label': "1", 'value': "1"}, {'label': "?", 'value': "?"}]
-    #        } for i in final.columns
-    #        },
-    style_data = {'borderBottom': '5px solid white'},
-    style_data_conditional=[
-               {
-                   'if': {
-                       'filter_query': '{{{col}}} = "?"'.format(col=col),
-                       'column_id': col,
-                       'row_index': 'odd'
-                   },
-                     #'backgroundColor': 'rgb(220, 220, 220)',
-                     'backgroundColor': 'rgb(255, 255, 192, 0.3)',
-               } for col in final.columns
-            ] +
-            [
-               {
-                   'if': {
-                       'filter_query': '{{{col}}} = "?"'.format(col=col),
-                       'column_id': col,
-                       'row_index': 'even'
-                   },
-                  'backgroundColor': 'rgb(255, 255, 192, 0.3)',
-               } for col in final.columns
-            ] +
-            
-            [
-                {
-                    'if': {
-                        'filter_query': '{{{col}}} = 1'.format(col=col),
-                        'column_id': col,
-                        'row_index': 'odd'
-                    },
-                    #'backgroundColor': 'rgb(220, 220, 220)',
-                    # 'color': 'rgb(13, 45, 27)',
-                   'backgroundColor': 'rgb(113, 209, 129, 0.3)',
-                } for col in final.columns
-            ] +
-            [
-                {
-                    'if': {
-                        'filter_query': '{{{col}}} = 0'.format(col=col),
-                        'column_id': col,
-                        'row_index': 'odd'
-                    },
-                     #'color': 'rgb(55, 15, 15)',
-                     #'backgroundColor': 'rgb(220, 220, 220)',
-                     'backgroundColor': 'rgb(191, 102, 99, 0.3)',
-                } for col in final.columns
-            ] +
-            [
-                {
-                    'if': {
-                        'filter_query': '{{{col}}} = 0'.format(col=col),
-                        'column_id': col,
-                        'row_index': 'even'
-                    },
-                    #'color': 'rgb(55, 15, 15)',
-                    'backgroundColor': 'rgb(191, 102, 99, 0.3)',
-                } for col in final.columns
-            ] +
-            [
-                {
-                    'if': {
-                        'filter_query': '{{{col}}} = 1'.format(col=col),
-                        'column_id': col,
-                        'row_index': 'even'
-                    },
-                     #'color': 'rgb(13, 45, 27)',
-                     'backgroundColor': 'rgb(113, 209, 129, 0.3)',
-                } for col in final.columns
-            ] + [
-            {
-                'if': {
-                'column_id': 'Hamming',
-                    },
-                    'backgroundColor': 'white',
-            }],
-            style_table={'height': '300px', 'overflowY': 'auto'})
-    
-    tables.append(html.Label(method))
-    tables.append(table)
-        
-    # return table 
-    return html.Div(tables, style={'margin': '20px'})
 
 
 @app.callback(
-    Output('statistics-page', 'children'),
+    Output('statistics-output', 'children'),
     Input('dropdown-method', 'value'),
-    Input('dropdown-selected-rows', 'value'), 
-    Input('stored-data','data'),
+    Input('dropdown-gene', 'value'), 
+    Input('datatable-interactivity', 'data'),
     Input('thr_k','data'),
     Input('thr_o','data'),
     Input('thr_s','data'),
@@ -1734,20 +1393,27 @@ def transition_table(final, method):
 def statistics_page(selected_method, selected_gene, data, thr_k, thr_o, thr_s, thr_b):
 
     # return none if values are none
-    if selected_method is None:
+    if selected_method is None or selected_method == []:
             return None
-    if selected_gene is None:
+    if selected_gene is None or selected_gene == []:
             return None
-    if data is None:
+    if data is None or data == []:
             return None
+    
+    cond = verify_thr_is_in_dict(selected_gene, selected_method, thr_k, thr_b, thr_o, thr_s)
 
-            
+    if cond:
+        return None
+         
     #create dataframe to access gene
     df = pd.DataFrame(data)
+    labels = df['Gene ID']
+    df = df.loc[:, df.columns!='Gene ID']
+
     selected = df.iloc[selected_gene]
     gene = selected.values
     sizeGene = len(gene)
-    ogGene = pd.DataFrame({'x':np.arange(0,sizeGene),'y':gene, 'label': [f'Gene {str(selected_gene+1)}']* sizeGene})
+    ogGene = pd.DataFrame({'x':np.arange(0,sizeGene),'y':gene, 'label': [f'{labels[selected_gene]}']* sizeGene})
 
     xx = np.arange(0,sizeGene)
     #dict of thresholds and labels for graph display
@@ -2009,6 +1675,1545 @@ def statistics_page(selected_method, selected_gene, data, thr_k, thr_o, thr_s, t
     else:
             return None
 
+def state_transition_table(df, method):
 
-if __name__ == '__main__':
-    app.run_server(debug=False)
+    return html.Div(
+        
+        style={'padding': 5, 'display':'flex', 'flexDirection':'column', 'textAlign':'center'},
+        children=[
+         dcc.Store(id=f"{method}-data", data=df.to_dict('records')),
+         html.B(method +" Binarization States"),
+         dash_table.DataTable(
+                    id=method+'-table-dropdown',
+                    data=df.to_dict('records'),
+                    columns=[
+                       
+                       {'id': col, 'name': col, 'presentation': 'dropdown'} for col in df.columns
+                    ],
+                    editable=True,
+                    dropdown={
+                        col:{
+                            'options':[
+                                {'label': '1', 'value': 1},
+                                {'label': '0', 'value': 0},
+                                {'label': '?', 'value': '?'}
+                            ]
+                        }
+                        for col in df.columns
+                    },
+                    style_data = {'borderBottom': '5px solid white'},
+                    style_table={'maxHeight': '500px', 'overflowY': 'auto', 'maxWidth': '500px', 'overflowY': 'auto'},
+                    style_data_conditional=[
+                            {
+                                'if': {
+                                    'filter_query': '{{{col}}} = "?"'.format(col=col),
+                                    'column_id': col,
+                                    'row_index': 'odd'
+                                },
+                                    'backgroundColor': 'rgb(255, 255, 192, 0.3)',
+                            } for col in df.columns
+                            ] +
+                            [
+                            {
+                                'if': {
+                                    'filter_query': '{{{col}}} = "?"'.format(col=col),
+                                    'column_id': col,
+                                    'row_index': 'even'
+                                },
+                                'backgroundColor': 'rgb(255, 255, 192, 0.3)',
+                            } for col in df.columns
+                            ] +
+                            
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 1'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'odd'
+                                    },
+                                'backgroundColor': 'rgb(113, 209, 129, 0.3)',
+                                } for col in df.columns
+                            ] +
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 0'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'odd'
+                                    },
+                                    'backgroundColor': 'rgb(191, 102, 99, 0.3)',
+                                } for col in df.columns
+                            ] +
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 0'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'even'
+                                    },
+                                    'backgroundColor': 'rgb(191, 102, 99, 0.3)',
+                                } for col in df.columns
+                            ] +
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 1'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'even'
+                                    },
+                                    'backgroundColor': 'rgb(113, 209, 129, 0.3)',
+                                } for col in df.columns
+                            ] + [
+                            {
+                                'if': {
+                                'column_id': 'Hamming',
+                                    },
+                                    'backgroundColor': 'white',
+                            }],
+                )
+    ])
+
+
+def state_transition_table2(df):
+
+    return dash_table.DataTable(
+                    id='table-dropdown',
+                    data=df.to_dict('records'),
+                    columns=[
+                       
+                       {'id': col, 'name': col} for col in df.columns
+                    ],
+                    style_data = {'borderBottom': '5px solid white'},
+                    style_table={'maxHeight': '500px', 'overflowY': 'auto', 'maxWidth': '500px', 'overflowY': 'auto'},
+                    style_data_conditional=[
+                            {
+                                'if': {
+                                    'filter_query': '{{{col}}} = "?"'.format(col=col),
+                                    'column_id': col,
+                                    'row_index': 'odd'
+                                },
+                                    'backgroundColor': 'rgb(255, 255, 192, 0.3)',
+                            } for col in df.columns
+                            ] +
+                            [
+                            {
+                                'if': {
+                                    'filter_query': '{{{col}}} = "?"'.format(col=col),
+                                    'column_id': col,
+                                    'row_index': 'even'
+                                },
+                                'backgroundColor': 'rgb(255, 255, 192, 0.3)',
+                            } for col in df.columns
+                            ] +
+                            
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 1'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'odd'
+                                    },
+                                'backgroundColor': 'rgb(113, 209, 129, 0.3)',
+                                } for col in df.columns
+                            ] +
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 0'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'odd'
+                                    },
+                                    'backgroundColor': 'rgb(191, 102, 99, 0.3)',
+                                } for col in df.columns
+                            ] +
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 0'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'even'
+                                    },
+                                    'backgroundColor': 'rgb(191, 102, 99, 0.3)',
+                                } for col in df.columns
+                            ] +
+                            [
+                                {
+                                    'if': {
+                                        'filter_query': '{{{col}}} = 1'.format(col=col),
+                                        'column_id': col,
+                                        'row_index': 'even'
+                                    },
+                                    'backgroundColor': 'rgb(113, 209, 129, 0.3)',
+                                } for col in df.columns
+                            ] + [
+                            {
+                                'if': {
+                                'column_id': 'Hamming',
+                                    },
+                                    'backgroundColor': 'white',
+                            }],
+                )
+
+
+def verify_thr_is_in_dict2(genes, methods, thr_k, thr_b, thr_o, thr_s):
+
+    for gene in genes:
+        for method in methods:
+            if(method == 'BASC A'):
+                if not all(key in thr_b for key in str(gene)):
+                    return True
+
+            elif(method == 'Onestep'):
+                if not all(key in thr_o for key in str(gene)):
+                    return True  
+
+            elif(method == 'Shmulevich'):
+                if not all(key in thr_s for key in str(gene)):
+                    return True
+
+            elif(method == 'K-Means'):
+                if not all(key in thr_k for key in str(gene)):
+                    return True
+
+    return False
+
+@app.callback(
+    Output('network-state-table-output', 'children'),
+    Input('dropdown-method', 'value'), 
+    Input('datatable-interactivity','data'),
+    Input('datatable-interactivity', 'selected_rows'),
+    Input('thr_k','data'),
+    Input('thr_o','data'),
+    Input('thr_s','data'),
+    Input('thr_b', 'data'), 
+    prevent_initial_call=True)
+def nets_state_tables(selected_method, data, selected_rows, thr_k, thr_o, thr_s, thr_b):
+
+     # if these values are none return none to the dashboard
+    if selected_method is None or selected_method == []:
+        return None
+    if data is None or data == []:
+        return None
+    if selected_rows is None or selected_rows == []:
+        return None
+    
+    cond = verify_thr_is_in_dict2(selected_rows, selected_method, thr_k, thr_b, thr_o, thr_s)
+
+    if cond:
+        return None
+    
+    selected_rows.sort()
+
+    df = pd.DataFrame(data)
+    labels = df['Gene ID']
+    df = df.loc[:, df.columns!='Gene ID']
+
+    #get the plot, and network of the final vote plot
+    elected_state_network = create_boolean_network_votes(selected_rows, df, selected_method, displacements, thr_k, thr_o, thr_s, thr_b, labels)
+
+    transition = []
+
+    for method in selected_method:
+
+        network = create_boolean_network(selected_rows, method, df, displacements, thr_k, thr_o, thr_s, thr_b, labels)
+
+        transition.append(
+            html.Div(children = [
+                html.Div(style={"height": "20px"}),
+                dbc.Card(
+                        dbc.CardBody([
+                            state_transition_table(network, method)
+                        ]),
+                    className="mb-3")
+                ], style={"marginRight": "20px"})
+            )
+
+
+    if len(selected_method) > 2:
+ 
+        transition_df = html.Div([html.Div(transition[:2]), html.Div(transition[2:])], style={'display': 'flex', 'flexDirection': 'row'})
+
+    else:
+        transition_df = html.Div(transition[:2])
+
+     # component of final transition table
+    final_transition_df = html.Div(children = [
+                html.Div(style={"height": "20px"}),
+                dbc.Card(
+                        dbc.CardBody([
+                            state_transition_table(elected_state_network, "Elected")
+                        ]),
+                    className="mb-3")
+                ], style={"marginRight": "20px"})
+    
+    
+
+    # return components and tabs 
+
+    return  html.Div(children = [transition_df, final_transition_df], style={'display': 'flex', 'flexDirection': 'row'})
+
+
+@app.callback(
+    Output("generate-networks", 'children'),
+    Input('Elected-table', 'data'),
+    Input('K-Means-table', 'data'),
+    Input('Shmulevich-table', 'data'),
+    Input('BASC A-table', 'data'),
+    Input('Onestep-table', 'data'),
+    Input('dropdown-method', 'value'),
+    Input('datatable-interactivity', 'selected_rows'),
+    prevent_initial_call=True)
+def generate_networks(elected, kmeans, shmulevich, basca, onestep, methods, rows):
+
+    if methods == [] or methods == None:
+        return "Select threshold methods to show Boolean Network."
+    if rows == [] or rows == None:
+        return "Select genes from table to show Boolean Network."
+
+    network_plots = []
+
+    rows.sort()
+
+    #print(kmeans)
+
+    for method in methods:
+
+        if method == "BASC A":
+            data = pd.DataFrame(basca)
+        elif method == 'K-Means':
+            data = pd.DataFrame(kmeans) 
+        elif method == 'Onestep':
+            data = pd.DataFrame(onestep)
+        elif method == 'Shmulevich':
+            data = pd.DataFrame(shmulevich)
+        
+
+        fig2, _, legend = create_boolean_network_graph(data)
+
+        #transition.append(transition_table(network, method))
+        legend_comps = []
+        for a in legend:
+            comp = html.P(f"{str(a)} = {str(legend[a])}")
+            legend_comps.append(comp)
+
+        if legend_comps != []:
+
+            legend_comps.insert(0, html.P("Letters are for edges where there are many loops"))
+
+
+        network_plots.append(
+                    html.Div(
+                            children=[
+
+                                    dbc.Card(
+                                        dbc.CardBody([
+                                            html.B(f"Network of {method} States Binarization", style={'textAlign': 'center'}),
+                                            html.Div(legend_comps),
+                                            html.Iframe(
+                                                srcDoc=fig2.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                                width="500px", height="500px",
+                                            )
+                                        ], style={'display': 'flex', 'flexDirection': 'column'}),
+                                        className="mb-3",
+                                    ),
+                            
+                                ], style={'display': 'flex', 'flexDirection': 'column', "marginRight": "20px"}
+
+                            )
+            )
+
+
+    if len(methods) > 2:
+ 
+        network_plots = html.Div([html.Div(network_plots[:2]), html.Div(network_plots[2:])], style={'display': 'flex', 'flexDirection': 'row'})
+    
+
+    else:
+
+        network_plots = html.Div([html.Div(network_plots)], style={'display': 'flex', 'flexDirection': 'row'})
+
+
+    fig, _, legend_votes = create_boolean_network_graph_votes(elected)
+
+    legend_comps_vote = []
+    for a in legend_votes:
+            comp = html.P(f"{str(a)} = {str(legend_votes[a])}")
+            legend_comps_vote.append(comp)
+
+    if legend_comps_vote != []:
+
+            legend_comps_vote.insert(0, html.P("Letters are for edges where there are many loops"))
+
+
+    return    html.Div([
+                            html.Div(style={"height": "20px"}),
+                            dbc.Card(
+                                dbc.CardBody([
+                                    html.P("This section provides the Boolean Network of the Binarization by each selected method and elected method."),
+                                    html.P("Each number in the edges are the time series steps until the final state. The table representation of these networks are in 'Binarization State Table',"),
+                                ]),
+                                className="mb-3",
+                            ),
+                            
+                            #html.Div(id='graph_rules', src=fig2, style={'height':'100%', 'width':'100%'}),
+                            html.Div(network_plots),
+
+                            html.Div([
+
+                                dbc.Card(
+                                        dbc.CardBody([
+                                            html.Div([
+                                    
+                                                html.B('Network of Elected States Binarization', style={'textAlign': 'center'}),
+                                                html.Div(legend_comps_vote),
+                                                html.Iframe(
+                                                        srcDoc=fig.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                                        width="500px", height="500px"),
+                                                
+                                            ], style={'display': 'flex', 'flexDirection': 'column'}),
+                                        ], style={'display': 'flex', 'flexDirection': 'column'}),
+                                        className="mb-3",
+                                ),
+
+                                html.Div([
+                                    html.Div(id='generate-network-dict')
+                                ], style={'display': 'flex', 'flexDirection': 'column'})
+                            ], style={'display': 'flex', 'flexDirection': 'row'})
+                            
+                            
+                ], style={'display': 'flex', 'flexDirection': 'column'})
+
+
+@app.callback(
+    Output('analysis-output', 'children'),
+    Input('dropdown-method', 'value'), 
+    Input('BASC A-table', 'data'),
+    Input('K-Means-table', 'data'),
+    Input('Onestep-table', 'data'),
+    Input('Shmulevich-table', 'data'),
+    Input('rule_network_dict', 'data'),
+    Input('Elected-table', 'data'),
+    prevent_initial_call=True)   
+def generate_analysis(methods, basc, kmeans, onestep, shmulevich, rule_network, elected_network):
+    
+    #print(rule_network)
+    if methods is None or methods == [] or rule_network == {} or rule_network is None:
+        return "Upload transition rules to see network analysis or selected genes or methods"
+
+    df = pd.DataFrame()
+
+    data_algos = pd.DataFrame()
+
+    rule_network = pd.DataFrame(rule_network)
+
+    _, rule_network = createNetwork(rule_network)
+
+    for method in methods:
+
+        if method == "BASC A":
+            data = turn_df_to_array(basc)
+            df_analysis = hamming_state_by_state(rule_network, data, method)
+
+            df_bin = pd.DataFrame({method:data})
+            data_algos = pd.concat([data_algos, df_bin], axis=1)
+
+        elif method == 'K-Means':
+            data = turn_df_to_array(kmeans) 
+            #print(data, rule_network)
+            df_analysis = hamming_state_by_state(rule_network, data, method)
+
+            df_bin = pd.DataFrame({method:data})
+            data_algos = pd.concat([data_algos, df_bin], axis=1)
+
+        elif method == 'Onestep':
+            data = turn_df_to_array(onestep)
+            df_analysis = hamming_state_by_state(rule_network, data, method)
+
+            df_bin = pd.DataFrame({method:data})
+            data_algos = pd.concat([data_algos, df_bin], axis=1)
+
+        elif method == 'Shmulevich':
+            data = turn_df_to_array(shmulevich)
+            df_analysis = hamming_state_by_state(rule_network, data, method)
+
+            df_bin = pd.DataFrame({method:data})
+            data_algos = pd.concat([data_algos, df_bin], axis=1)
+
+        df = pd.concat([df, df_analysis], axis=1)
+
+    df_bin = pd.DataFrame({'Elected':turn_df_to_array(elected_network)})
+    data_algos = pd.concat([data_algos, df_bin], axis=1)
+    
+    df_init_final = generate_init_final_comparison(data_algos, rule_network)
+
+    df_chain_elected, cond = hamming_chain(rule_network, turn_df_to_array(elected_network))
+
+    if cond == False:
+
+        chain_hamming = html.P("Cannot analyze network because initial state does not exist in Boolean Function Network")
+
+    else:
+
+        chain_hamming = dash_table.DataTable(df_chain_elected.to_dict('records'), [{"name": i, "id": i} for i in df_chain_elected.columns], style_table={'overflowY': 'auto'})
+
+
+    return [
+
+        dbc.Card(
+            dbc.CardBody([
+                html.P("The following table analyzes the state by state transition based on the Boolen Functions chain."),
+                html.B("State by State Analysis"),
+                dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], style_table={'overflowY': 'auto'}),
+            ]),
+            className="mb-3",
+        ),
+
+        dbc.Card(
+            dbc.CardBody([
+                html.P("The next table analyses the elected binarization path to the one extracted from the Boolean Functions."),
+                html.B("Chain Analysis"),
+                chain_hamming,
+            ]),
+            className="mb-3",
+        ),
+
+        dbc.Card(
+            dbc.CardBody([
+                html.P("The followng analysis compares the initial and final states of each binarization methods with the ones from the Boolean Functions."),
+                html.P("In addition, the number of different values in the intermediate states are given."),
+                html.P("Furthermore, a similarity and transition match scores are given."),
+                html.B("Initial and Final State Analysis"),
+                dash_table.DataTable(df_init_final.to_dict('records'), [{"name": i, "id": i} for i in df_init_final.columns], style_table={'overflowY': 'auto'})
+            ]),
+            className="mb-3",
+        )]
+
+def states_in_graph(net, path, n):
+
+    #for state in path:
+
+    for node in net.nodes:
+
+        if node['label'] in path:
+            node['color']= 'yellow'
+
+    return net
+
+@app.callback(
+    Output('inference_plots', 'children'),
+    Output('btn_inference', 'n_clicks'),
+    Input('btn_inference', 'n_clicks'),
+    Input('datatable-interactivity','data'), 
+    Input('datatable-interactivity', 'selected_rows'),
+    Input('Elected-table', 'data'),
+    Input('K-Means-table', 'data'),
+    Input('Shmulevich-table', 'data'),
+    Input('BASC A-table', 'data'),
+    Input('Onestep-table', 'data'),
+    Input('dropdown-method', 'value'),
+    Input('inference-method', 'value'),
+    Input('dropdown-state-table-select', 'value'),
+    prevent_initial_call=True,
+)
+def inference(n_clicks, data, selected_rows, elected_binarizations, kmeans_binarizations, 
+              shmulevich_binarizations, basca_binarizations, onestep_binarizations, 
+              methods, inference_method, bin_method):
+
+    #print(n_clicks)
+
+    if n_clicks is None:
+        return None, None
+    
+    selected_rows.sort()
+    
+    #print(inference_method)
+    if inference_method is None or inference_method == []:
+        return None, None
+    if methods is None or methods == []:
+        return "Select a threshold method to infer rules.", None
+    
+
+    if bin_method is None or bin_method == []:
+        return "Select a binarization method to infer the network.", None
+    
+    if bin_method == "Elected":
+        bin_dict = elected_binarizations
+        df_binary = pd.DataFrame(elected_binarizations)
+
+    elif bin_method == "BASC A":
+        bin_dict = basca_binarizations
+        df_binary = pd.DataFrame(basca_binarizations)
+
+    elif bin_method == "Onestep":
+        bin_dict = onestep_binarizations
+        df_binary = pd.DataFrame(onestep_binarizations)
+
+    elif bin_method == "K-Means":
+        bin_dict = kmeans_binarizations
+        df_binary = pd.DataFrame(kmeans_binarizations)
+
+    else:
+        bin_dict = shmulevich_binarizations
+        df_binary = pd.DataFrame(shmulevich_binarizations)
+    
+    if (df_binary == '?').any().any():
+        return f"Make sure that the state table of {bin_method} has no '?' values.", None
+    
+    dict_data = {}
+    df_data = pd.DataFrame(data)
+
+    labels = df_data['Gene ID']
+
+    df_data = df_data.loc[:, df_data.columns!='Gene ID']
+
+    for row in selected_rows:
+        dict_data[labels[row]] = df_data.iloc[row]
+
+    df_data = pd.DataFrame(dict_data)
+
+    #print(df_data)
+    #print(df_binary)
+
+    df_data = df_data.apply(pd.to_numeric)
+    df_binary = df_binary.apply(pd.to_numeric)
+
+    df_data.index = df_data.index.astype(int)
+    df_binary.index = df_binary.index.astype(int)
+
+    if inference_method == "LogicGep":
+
+        df_infer_rules = LogicGep(df_binary, df_data)
+
+    elif inference_method == 'MIBNI':
+
+        mibni = Mibni(10, df_binary, "dynamics.tsv")
+        result = mibni.run()
+
+        rules_infered = {'Gene':[],
+                         'Rule':[]}
+        for r in result:
+
+            rul = r.split(" = ")
+            rules_infered['Gene'].append(rul[0])
+            rules_infered['Rule'].append(rul[1])
+
+        df_infer_rules = pd.DataFrame(rules_infered)
+        
+    else:
+    
+        #data_converted = {key: [int(b[key]) for b in bin_dict] for key in bin_dict[0]}
+
+        #for elt in data_converted:
+        #    arr = bitarray(data_converted[elt])
+        #    data_converted[elt] = arr
+        
+        #print("antes")
+        result = run_code(df_binary)
+        #print("aqui")
+        #print(result)
+        
+        #genes_names = df_binary.columns
+
+        #rules = {'Gene':[],
+        #         'Rule':[]}
+        
+        #r = []
+
+        #for g in genes_names:
+            
+        #    r.append(result[g])
+
+        #rules['Gene'] = genes_names
+        #rules['Rule'] = r
+
+        if result is None:
+
+            return html.P("Best fit was not able to infer all Boolean Functions. Try again, user other binarizations or imputate different values."), None
+
+        df_infer_rules = pd.DataFrame(result)
+
+    net, dict_net = createNetwork(df_infer_rules)
+
+    #df_net_table = pd.DataFrame(dict_net.items(), columns=['t', 't+1'])
+
+    #print(df_binary.iloc[0].values, dict_net, len(df_binary), df_binary.columns)
+
+    state = df_binary.iloc[0].values
+
+    state = ''.join(str(s) for s in state)
+
+    path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+
+    #net = states_in_graph(net, state, len(df_binary))
+
+    if len(net.nodes) > 1000:
+
+        return html.Div([
+
+            dcc.Store(id='inferred_net_rules', data=df_infer_rules.to_dict('records')), 
+            dbc.Card(
+                    dbc.CardBody([
+                            html.B("Table of Inferred Boolean Functions"),
+                            dash_table.DataTable(df_infer_rules.to_dict('records'), [{"name": i, "id": i} for i in df_infer_rules.columns]),
+                            html.Br(),
+                        ]),
+            className="mb-3"),
+
+            html.P("Cannot display Boolean Network because it has too many nodes"),
+
+
+            dbc.Card(
+                dbc.CardBody([
+                    html.P("The first table is the extracted binary path based on first state of second table."),
+                    html.P("The second table is the binarization path by the selected threshold method."),
+                    html.Div([
+                        
+                        html.Div([ 
+                            html.B("Binary Path State Table based on First State of "+bin_method),
+                            state_transition_table2(pd.DataFrame(path))
+                        ], style={'display':'flex', 'flexDirection': 'column', 'marginRight':'20px'}),
+
+                        html.Div([ 
+                            html.B("Binarization Using " +bin_method),
+                            state_transition_table2(df_binary)
+                        ], style={'display':'flex', 'flexDirection': 'column'})
+
+                        ], style={'display':'flex', 'flexDirection': 'row'})
+                ]),
+                className="mb-3"),
+    
+    ], style={'display': 'flex', 'flexDirection': 'column'}), None
+
+    return  html.Div([
+
+            dcc.Store(id='inferred_net_rules', data=df_infer_rules.to_dict('records')), 
+            dbc.Card(
+                    dbc.CardBody([
+                            html.B("Table of Inferred Boolean Functions"),
+                            dash_table.DataTable(df_infer_rules.to_dict('records'), [{"name": i, "id": i} for i in df_infer_rules.columns]),
+                            html.Br(),
+                        ]),
+            className="mb-3"),
+
+            html.Div([
+
+                        dbc.Card(
+                            dbc.CardBody([
+                                    html.Div([
+                                    html.B("Network Based on Inferred Boolean Functions"),
+                                    html.P("Grey nodes are attractors, and green nodes are the extracted path based on first state of the selected method"),
+                                
+                                    html.Iframe(
+                                                    srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                                    width="500px",
+                                                    height="500px"
+                                    ),
+                                
+                                ], style={'display': 'flex', 'flexDirection': 'column', 'marginRight':'20px'}),
+                                ]),
+                        className="mb-3"),
+
+            ], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
+
+
+            dbc.Card(
+                dbc.CardBody([
+                    html.P("The first table is the extracted binary path based on first state of second table."),
+                    html.P("The second table is the binarization path by the selected threshold method."),
+                    html.Div([
+                        
+                        html.Div([ 
+                            html.B("Binary Path State Table based on First State of "+bin_method),
+                            state_transition_table2(pd.DataFrame(path))
+                        ], style={'display':'flex', 'flexDirection': 'column', 'marginRight':'20px'}),
+
+                        html.Div([ 
+                            html.B("Binarization Using " +bin_method),
+                            state_transition_table2(df_binary)
+                        ], style={'display':'flex', 'flexDirection': 'column'})
+
+                        ], style={'display':'flex', 'flexDirection': 'row'})
+                ]),
+                className="mb-3"),
+    
+    ], style={'display': 'flex', 'flexDirection': 'column'}), None
+
+@app.callback(
+    Output('generate-network-dict', 'children'),
+    Input('datatable-interactivity', 'selected_rows'),
+    Input('dropdown-method', 'value'), 
+    Input('datatable-interactivity','data'),
+    Input('stored-rules','data'),
+    Input('thr_b','data'),
+    Input('thr_k','data'),
+    Input('thr_s','data'),
+    Input('thr_o','data'),
+    prevent_initial_call=True)
+def generate_rule_net_dict(rows, methods, data, rules, thr_b, thr_k, thr_s, thr_o):  
+
+    if rows is None and methods is None and data is None and rules is None or methods == [] or rules == [] or rows == []:
+        return None 
+    
+    if rules == {}:
+        return None
+    
+    rows.sort()
+
+    net, _ = createNetwork(pd.DataFrame(rules)) 
+
+    if len(net.nodes)  > 1000:
+
+        return html.P("Cannot generate Boolean Network because its too big.")
+
+    return html.Div([
+                    html.B("Network Based on Uploaded Boolean Functions"),
+                    html.Iframe(
+                        srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                        width="500px",
+                        height="500px"
+                    ),
+            ], style={'display': 'flex', 'flexDirection': 'column'})
+
+@app.callback(
+    Output('dropdown-method', 'value'),
+    Input('methods-all', 'n_clicks'),
+    prevent_initial_call=True
+)
+def select_all_methods(n_clicks):
+    if n_clicks is None:
+        return None
+    
+    return ['BASC A', 'K-Means', 'Onestep', 'Shmulevich']
+
+@app.callback(
+    Output('datatable-interactivity', 'selected_rows'),
+    Output('table-all', 'n_clicks'),
+    Output('table-deselect', 'n_clicks'),
+    Input('table-all', 'n_clicks'),
+    Input('table-deselect', 'n_clicks'),
+    Input('datatable-interactivity', 'data'),
+    prevent_initial_call=True
+)
+def select_deselect_table(n_clicks, n_clicks2, data):
+    if data is None:
+        return None
+    if n_clicks is None and n_clicks2 is None:
+        return None
+    
+    if n_clicks != None:
+
+        array = np.arange(0, len(data))
+
+        return array, None, None
+    
+    elif n_clicks2 != None:
+        
+        return [], None, None
+
+
+@app.callback(
+    Output("imputate-dropdowns", 'children'),
+    Input('dropdown-method', 'value'), 
+    prevent_initial_call=True)
+def imputate_dropdowns(methods):
+
+    if methods is None or methods == []:
+         methods = []
+    #    return None
+
+    return html.Div(children = [
+        
+        html.B('Select method state table to imputate values:'),
+                        dcc.Dropdown(
+                            methods+['Elected'],
+                            placeholder="Select method table",
+                            id="imputate-method",
+                            multi=False,
+                            searchable=False),
+        
+        html.B('Select an option to imputate values:'),
+                        dcc.Dropdown(
+                            options=[{'label': 'Global Imputation (ex: changes all "?" to either 0 or 1)', 'value':0},
+                             {'label': 'Gene Imputation (ex: imputates a value for only one gene)', 'value':1},
+                             {'label': 'Time Impuation (ex: imputates values based on time course)', 'value':2},
+                             {'label': 'Framework Statistics Algorithm', 'value':3},
+                             {'label': 'MissForest Imputation', 'value':4}],
+                            placeholder="Select option",
+                            id="imputate-option",
+                            multi=False,
+                            searchable=False),
+        
+        
+        html.Button('Statistics', id='stat-impu-button', style={'display': 'none'}),
+
+        html.Button('Imputate MissForest', id='missforest-button', style={'display':'none'}),
+        
+        html.Div(id='dropdown-imputate-options'),
+
+        html.Button('Reset Imputations', id='reset-imputation'),
+
+        #html.Div(id='reset-comp'),
+
+        
+        html.Button('Imputate 1', id='all-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='all-to-0', style={'display': 'none'}),
+    
+        
+
+   
+        html.Button('Imputate 1', id='gene-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='gene-to-0', style={'display': 'none'}),
+        
+
+    
+        html.Button('Imputate 1', id='time-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='time-to-0', style={'display': 'none'}),
+        
+
+        dcc.Dropdown(
+            [],
+            placeholder="Select gene",
+            id="imputate-gene",
+            multi=True,
+            searchable=False,
+            style={'display': 'none'}),
+
+        dcc.Dropdown(
+                [],
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'}),
+
+        #html.Button('Imputate 1', id='all-to-1'), html.Button('Imputate 0', id='all-to-0')
+    ])
+
+
+@app.callback(
+    Output('Elected-table-dropdown', 'data', allow_duplicate=True),
+    Output('BASC A-table-dropdown', 'data', allow_duplicate=True),
+    Output('K-Means-table-dropdown', 'data', allow_duplicate=True),
+    Output('Shmulevich-table-dropdown', 'data', allow_duplicate=True),
+    Output('Onestep-table-dropdown', 'data', allow_duplicate=True),
+    Output('reset-imputation', 'n_clicks'),
+    Input('reset-imputation', 'n_clicks'),
+    Input('Elected-data', 'data'),
+    Input('K-Means-data', 'data'),
+    Input('Shmulevich-data', 'data'),
+    Input('BASC A-data', 'data'),
+    Input('Onestep-data', 'data'),
+    Input('imputate-method', 'value'),
+    prevent_initial_call=True
+)
+def reset_table(n_clicks, elected, kmeans, shmulevich, basc, onestep, table):
+
+    if n_clicks is None or table is None or table == []:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None
+    
+    result = [dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None]
+
+
+    #print(n_clicks, table)
+
+    #print(basc)
+    
+    if table == "Elected":
+       
+       result[0] = elected
+
+       return tuple(result)
+    
+    elif table == "BASC A":
+
+        result[1] = basc
+
+        return tuple(result) 
+    
+    elif table == "K-Means":
+
+        result[2] = kmeans
+
+        return tuple(result)
+        
+    elif table == "Onestep":
+
+        result[4] = onestep
+
+        return tuple(result)
+    
+    else:
+
+        result[3] = shmulevich
+
+        return tuple(result)
+
+
+@app.callback(
+    Output("dropdown-imputate-options", 'children'),
+    Input('imputate-option', 'value'),
+    Input('datatable-interactivity', 'selected_rows'),
+    Input('datatable-interactivity','data'),
+    prevent_initial_call=True)
+def imputate_options(option, rows, data):
+
+    if option is None or option == []:
+        return None
+    
+    rows.sort()
+
+    if option == 0:
+
+        return html.Div([
+        html.Button('Imputate 1', id='all-to-1'),
+        html.Button('Imputate 0', id='all-to-0'),
+
+        html.Button('Imputate 1', id='gene-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='gene-to-0', style={'display': 'none'}),
+        
+
+    
+        html.Button('Imputate 1', id='time-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='time-to-0', style={'display': 'none'}),
+
+        html.Button('Statistics', id='stat-impu-button', style={'display': 'none'}),
+
+        html.Button('Imputate MissForest', id='missforest-button', style={'display':'none'}),
+        
+
+        dcc.Dropdown(
+            [],
+            placeholder="Select gene",
+            id="imputate-gene",
+            multi=True,
+            searchable=False,
+            style={'display': 'none'}),
+
+        dcc.Dropdown(
+                [],
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'}),
+    ])
+
+    elif option == 1:
+
+        df = pd.DataFrame(data)
+        df = df['Gene ID']
+
+        labels = df[rows]
+
+        return html.Div(children = [
+            html.B('Select a gene to imputate values:'),
+            dcc.Dropdown(
+                labels,
+                placeholder="Select gene",
+                id="imputate-gene",
+                multi=True,
+                searchable=False),
+            html.Button('Imputate 1', id='gene-to-1'), html.Button('Imputate 0', id='gene-to-0'),
+
+        
+        html.Button('Imputate 1', id='all-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='all-to-0', style={'display': 'none'}),
+
+    
+        html.Button('Imputate 1', id='time-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='time-to-0', style={'display': 'none'}),
+
+        html.Button('Statistics', id='stat-impu-button', style={'display': 'none'}),
+
+        html.Button('Imputate MissForest', id='missforest-button', style={'display':'none'}),
+    
+        dcc.Dropdown(
+                [],
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'}),
+        ])
+
+    elif option == 2:
+
+        df = pd.DataFrame(data)
+
+        df = len(df['Gene ID'])
+
+        options = [{'label':"Time " + str(i), 'value': i} for i in np.arange(0, df)]
+
+        #print(options)
+
+        return html.Div(children = [
+            html.B('Select an time courses to imputate values:'),
+            dcc.Dropdown(
+                options,
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False),
+            html.Button('Imputate 1', id='time-to-1'), html.Button('Imputate 0', id='time-to-0'),
+
+        html.Button('Imputate 1', id='all-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='all-to-0', style={'display': 'none'}),
+   
+        html.Button('Imputate 1', id='gene-to-1', style={'display': 'none'}),
+        html.Button('Imputate 0', id='gene-to-0', style={'display': 'none'}),
+
+        html.Button('Imputate MissForest', id='missforest-button', style={'display':'none'}),
+
+        html.Button('Statistics', id='stat-impu-button', style={'display': 'none'}),
+        
+        dcc.Dropdown(
+            [],
+            placeholder="Select gene",
+            id="imputate-gene",
+            multi=True,
+            searchable=False,
+            style={'display': 'none'}),
+
+     
+        ])
+    
+    elif option == 3:
+
+        return html.Div([
+
+            html.Button('Imputate MissForest', id='missforest-button', style={'display':'none'}),
+            
+            html.Button('Imputate Strings based on Statistics', id='stat-impu-button'),
+
+            html.Button('Imputate 1', id='all-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='all-to-0', style={'display': 'none'}),
+    
+            html.Button('Imputate 1', id='gene-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='gene-to-0', style={'display': 'none'}),
+
+            html.Button('Imputate 1', id='time-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='time-to-0', style={'display': 'none'}),
+            
+            dcc.Dropdown(
+                [],
+                placeholder="Select gene",
+                id="imputate-gene",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'}),
+
+            dcc.Dropdown(
+                [],
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'})
+
+        ])
+
+    elif option == 4:
+
+        return html.Div([
+            html.Button('Imputate MissForest', id='missforest-button'),
+
+            html.Button('Imputate Strings based on Statistics', id='stat-impu-button', style={'display': 'none'}),
+
+            html.Button('Imputate 1', id='all-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='all-to-0', style={'display': 'none'}),
+    
+            html.Button('Imputate 1', id='gene-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='gene-to-0', style={'display': 'none'}),
+
+            html.Button('Imputate 1', id='time-to-1', style={'display': 'none'}),
+            html.Button('Imputate 0', id='time-to-0', style={'display': 'none'}),
+            
+            dcc.Dropdown(
+                [],
+                placeholder="Select gene",
+                id="imputate-gene",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'}),
+
+            dcc.Dropdown(
+                [],
+                placeholder="Select time courses",
+                id="imputate-time",
+                multi=True,
+                searchable=False,
+                style={'display': 'none'})
+
+        ])
+    
+    else:
+        return None
+        
+
+def imputate_value_all(data, value):
+
+    df = pd.DataFrame(data)
+
+    df.replace("?", value, inplace=True)
+
+    return df.to_dict('records')
+
+
+@app.callback(
+    Output('Elected-table-dropdown', 'data', allow_duplicate=True),
+    Output('BASC A-table-dropdown', 'data', allow_duplicate=True),
+    Output('K-Means-table-dropdown', 'data', allow_duplicate=True),
+    Output('Shmulevich-table-dropdown', 'data', allow_duplicate=True),
+    Output('Onestep-table-dropdown', 'data', allow_duplicate=True),
+    Output('all-to-1', 'n_clicks'),
+    Output('all-to-0', 'n_clicks'),
+    Input('all-to-1', 'n_clicks'),
+    Input('all-to-0', 'n_clicks'),
+    Input('imputate-option', 'value'),
+    Input('imputate-method', 'value'),
+    State('Elected-table', 'data'),
+    State('BASC A-table', 'data'),
+    State('K-Means-table', 'data'),
+    State('Shmulevich-table', 'data'),
+    State('Onestep-table', 'data'),
+    prevent_initial_call=True)
+def imputate_table(n_clicks, n_clicks2, option, method, elected, basc, kmeans, shmulevich, onestep):
+    
+    if n_clicks is None and n_clicks2 is None or option == None or method == [] or method is None:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, None
+    
+    if method == "Elected":
+        indx = 0
+        data = elected
+    
+    elif method == "BASC A":
+        indx = 1
+        data = basc
+    
+    elif method == "K-Means":
+        indx = 2
+        data = kmeans
+
+    elif method == "Onestep":
+        indx = 4
+        data = onestep
+    
+    else:
+        indx = 3
+        data = shmulevich
+    
+    result = [dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, None]
+    
+    if n_clicks != None and option == 0:
+
+        data = imputate_value_all(data, 1)
+
+        result[indx] = data
+
+        #print(result)
+      
+        return tuple(result)
+    
+    elif n_clicks2 != None and option == 0:
+
+        data = imputate_value_all(data, 0)
+
+        result[indx] = data
+
+        return tuple(result)
+
+
+def imputate_value_gene(df, value, genes):
+
+    df = pd.DataFrame(df)
+
+    for g in genes:
+
+        df[g] = df[g].replace("?", value)
+
+    #print(df)
+
+    return df.to_dict('records')
+
+@app.callback(
+    Output('BASC A-table-dropdown', 'data', allow_duplicate=True),
+    Output('K-Means-table-dropdown', 'data', allow_duplicate=True),
+    Output('Shmulevich-table-dropdown', 'data', allow_duplicate=True),
+    Output('Onestep-table-dropdown', 'data', allow_duplicate=True),
+    Output('stat-impu-button', 'n_clicks'),
+
+    Input('stat-impu-button', 'n_clicks'),
+    Input('imputate-method', 'value'),
+    Input('datatable-interactivity','data'),
+    Input('datatable-interactivity', 'selected_rows'),
+    prevent_initial_call=True)
+def imputate_based_statistics(n_clicks, method, dataset, rows):
+    
+    if n_clicks is None or method == [] or method is None or method == "Elected":
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, None
+    
+    result = [dash.no_update, dash.no_update, dash.no_update, dash.no_update, None]
+
+    if n_clicks != None:
+
+        data = pd.DataFrame(dataset)
+
+        rows.sort()
+
+        labels = data['Gene ID']
+
+        data = data.loc[:, data.columns!='Gene ID']
+
+        genes = data.iloc[rows].values.astype(float)
+
+        labels = [labels[i] for i in rows]
+
+        string_dict = {} 
+
+        for i in range(len(genes)):
+
+            disps = getDisplacement([method], genes[i])
+
+            if(method == 'BASC A'):
+               
+                d = disps['BASC_A'].iloc[0]
+    
+            elif(method == 'K-Means'):
+             
+                d = disps['k-means'].iloc[0]
+        
+            elif(method == 'Onestep'):
+              
+                d = disps['onestep'].iloc[0]
+                
+            else:
+                d = disps['shmulevich'].iloc[0]
+
+            Z = probabilistic(np.array(genes[i]), [method], d)
+
+            string_high_P = max(Z, key=Z.get)
+
+            array_high_P = [e for e in string_high_P]
+
+            string_dict[labels[i]] = array_high_P
+
+        #print(string_dict)
+
+        df = pd.DataFrame(string_dict)
+        
+        if(method == 'BASC A'):
+            result[0] = df.to_dict('records')
+        
+    
+        elif(method == 'K-Means'):
+            result[1] = df.to_dict('records')
+    
+        
+        elif(method == 'Onestep'):
+            result[3] = df.to_dict('records')
+             
+        else:
+            result[2] = df.to_dict('records')
+        
+        return tuple(result)
+
+            #bin_array = bin_strings[labels[i]].tolist()
+
+            #bin_s = ""
+
+            #for e in bin_array:
+
+            #    bin_s += str(e)
+            
+
+
+            #high_P = Z[string_high_P]
+
+@app.callback(
+    Output('Elected-table-dropdown', 'data', allow_duplicate=True),
+    Output('BASC A-table-dropdown', 'data', allow_duplicate=True),
+    Output('K-Means-table-dropdown', 'data', allow_duplicate=True),
+    Output('Shmulevich-table-dropdown', 'data', allow_duplicate=True),
+    Output('Onestep-table-dropdown', 'data', allow_duplicate=True),
+    Output('missforest-button', 'n_clicks'),
+
+    Input('missforest-button', 'n_clicks'),
+    Input('imputate-method', 'value'),
+    State('Elected-table', 'data'),
+    State('BASC A-table', 'data'),
+    State('K-Means-table', 'data'),
+    State('Shmulevich-table', 'data'),
+    State('Onestep-table', 'data'),
+
+    prevent_initial_call=True)
+def imputate_based_missforest(n_clicks, method, elected, basc, kmeans, shmule, onestep):
+    
+    if n_clicks is None or method == [] or method is None or method == []:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update,dash.no_update, None
+    
+    result = [dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None]
+
+    if n_clicks != None:
+        
+        if(method == 'Elected'):
+
+            result[0] = imputate_missforest(elected)
+        
+        
+        if(method == 'BASC A'):
+            result[1] = imputate_missforest(basc)
+        
+    
+        elif(method == 'K-Means'):
+            result[2] = imputate_missforest(kmeans)
+    
+        
+        elif(method == 'Onestep'):
+            result[4] = imputate_missforest(onestep)
+             
+        else:
+            result[3] = imputate_missforest(shmule)
+        
+        return tuple(result)
+
+
+@app.callback(
+    Output('Elected-table-dropdown', 'data', allow_duplicate=True),
+    Output('BASC A-table-dropdown', 'data', allow_duplicate=True),
+    Output('K-Means-table-dropdown', 'data', allow_duplicate=True),
+    Output('Shmulevich-table-dropdown', 'data', allow_duplicate=True),
+    Output('Onestep-table-dropdown', 'data', allow_duplicate=True),
+    Output('gene-to-1', 'n_clicks'),
+    Output('gene-to-0', 'n_clicks'),
+    Input('gene-to-1', 'n_clicks'),
+    Input('gene-to-0', 'n_clicks'),
+    Input('imputate-option', 'value'),
+    Input('imputate-gene', 'value'),
+    Input('imputate-method', 'value'),
+    State('Elected-table', 'data'),
+    State('BASC A-table', 'data'),
+    State('K-Means-table', 'data'),
+    State('Shmulevich-table', 'data'),
+    State('Onestep-table', 'data'),
+    prevent_initial_call=True)
+def imputate_gene(n_clicks, n_clicks2, option, genes, method, elected, basc, kmeans, shmulevich, onestep):
+    
+    if n_clicks is None and n_clicks2 is None or option == None or genes == None or genes == []:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, None
+    
+    if method == "Elected":
+        indx = 0
+        data = elected
+    
+    elif method == "BASC A":
+        indx = 1
+        data = basc
+    
+    elif method == "K-Means":
+        indx = 2
+        data = kmeans
+
+    elif method == "Onestep":
+        indx = 4
+        data = onestep
+    
+    else:
+        indx = 3
+        data = shmulevich
+    
+    result = [dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, None]
+
+    if n_clicks != None and option == 1:
+
+        data = imputate_value_gene(data, 1, genes)
+
+        result[indx] = data
+      
+        return tuple(result)
+    
+    elif n_clicks2 != None and option == 1:
+
+        data = imputate_value_gene(data, 0, genes)
+
+        result[indx] = data
+
+        return tuple(result)
+
+
+
+def imputate_value_time(df, value, timeCourse):
+    df = pd.DataFrame(df)
+
+    for time in timeCourse:
+
+        df.iloc[time] = df.iloc[time].replace("?", value)
+
+    return df.to_dict('records')
+
+
+@app.callback(
+    Output('Elected-table-dropdown', 'data', allow_duplicate=True),
+    Output('BASC A-table-dropdown', 'data', allow_duplicate=True),
+    Output('K-Means-table-dropdown', 'data', allow_duplicate=True),
+    Output('Shmulevich-table-dropdown', 'data', allow_duplicate=True),
+    Output('Onestep-table-dropdown', 'data', allow_duplicate=True),
+    Output('time-to-1', 'n_clicks'),
+    Output('time-to-0', 'n_clicks'),
+    Input('time-to-1', 'n_clicks'),
+    Input('time-to-0', 'n_clicks'),
+    Input('imputate-option', 'value'),
+    Input('imputate-time', 'value'),
+    Input('imputate-method', 'value'),
+    State('Elected-table', 'data'),
+    State('BASC A-table', 'data'),
+    State('K-Means-table', 'data'),
+    State('Shmulevich-table', 'data'),
+    State('Onestep-table', 'data'),
+    prevent_initial_call=True)
+def imputate_gene(n_clicks, n_clicks2, option, timecourse, method, elected, basc, kmeans, shmulevich, onestep):
+    
+    if n_clicks is None and n_clicks2 is None or option == None or timecourse == None or timecourse == []:
+        return dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, None
+    
+    if method == "Elected":
+        indx = 0
+        data = elected
+    
+    elif method == "BASC A":
+        indx = 1
+        data = basc
+    
+    elif method == "K-Means":
+        indx = 2
+        data = kmeans
+
+    elif method == "Onestep":
+        indx = 4
+        data = onestep
+    
+    else:
+        indx = 3
+        data = shmulevich
+    
+    result = [dash.no_update, dash.no_update, dash.no_update, dash.no_update, dash.no_update, None, None]
+
+    if n_clicks != None and option == 2:
+
+        data = imputate_value_time(data, 1, timecourse)
+
+        result[indx] = data
+      
+        return tuple(result)
+    
+    elif n_clicks2 != None and option == 2:
+
+        data = imputate_value_time(data, 0, timecourse)
+
+        result[indx] = data
+
+        return tuple(result)
+
+
+# Run the server
+if __name__ == "__main__":
+    app.run_server(debug=True)

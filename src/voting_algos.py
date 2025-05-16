@@ -7,6 +7,8 @@
 
 import math
 import numpy as np
+from normalize import geneNorm
+import pandas as pd
 #threshold/displacement indexes are vectors with values in them
 #for different algorithms
 
@@ -58,7 +60,7 @@ def binarizationVoting(gene, threshold, displacement):
     alg = len(threshold)
     n = len(gene)
 
-    algos = np.zeros([alg, n])
+    algos = np.zeros([alg, n], dtype=int)
 
     #get results for every algorithm
     for i in range(alg): 
@@ -87,7 +89,7 @@ def binarizationVoting(gene, threshold, displacement):
     # undefined -> nan
 
     # start counting votes
-    majority = np.zeros(n)
+    majority = np.zeros(n, dtype=int)
        
     for i in range(n):
 
@@ -140,3 +142,159 @@ def binarizationVoting(gene, threshold, displacement):
 
      #return 2d array of votes + final votes
     return algo, majority
+
+def majority(N, U, E, thr):
+
+    tie = False
+
+    U_true = U.count(True)
+    N_true = N.count(True)
+    E_true = E.count(True)
+
+    U_false = U.count(False) 
+    N_false = N.count(False) 
+    E_false = E.count(False) 
+
+    if U_true == U_false:
+
+        tie = True
+
+    if N_true == N_false:
+
+        tie = True
+    
+    if E_true == E_false:
+
+        tie = True
+
+    if U_true >= U_false:
+
+        U = True
+    
+    else:
+
+        U = False
+
+    if N_true >= N_false:
+
+        N = True
+
+    else:
+
+        N = False
+
+    if E_true >= E_false:
+
+        E = True
+    
+    else:
+
+        E = False
+
+    return U, N, E, tie
+    
+
+def election_strings(G, thr, disp):
+
+    Z_e = []
+
+    collective = [[] for _ in range(len(thr))]
+
+    U = []
+    N = []
+    E = []
+
+    for j in range(len(G)):
+        for i in range(len(thr)):
+
+            uvar = ((G[j] + disp[i]) < thr[i]) and (abs(thr[i] - G[j]) > disp[i])
+
+            nvar = abs(thr[i] - G[j]) <= disp[i]
+        
+            evar = not(uvar or nvar)
+
+            U.append(uvar)
+            N.append(nvar)
+            E.append(evar)
+
+            if (evar != (not(uvar or nvar))) or nvar == True:
+                collective[i].append('?')
+            elif evar == True:
+                collective[i].append(1)
+            else:
+                collective[i].append(0)
+
+        U, N, E, tie = majority(N, U, E, thr)
+
+        
+        if (E != (not(U or N))) or N == True:
+            
+            Z_e.append("?")
+
+        elif E == True:
+
+            Z_e.append(1)
+
+        else:
+
+            Z_e.append(0)
+
+        U = []
+        N = []
+        E = []
+    
+    return collective, Z_e
+
+
+
+'''
+if __name__ == "__main__":
+
+    G = [{0:13618.98725, 1:12113.79308, 2:13882.42529, 3:12037.27047, 4:12924.9502, 5:11795.57956}]
+
+    G = pd.DataFrame(G)
+
+    G  = geneNorm(G).iloc[0].values
+
+    #print(G)
+
+    disp = [0.00490, 0.00366, 0.00292, 0.00188]
+
+    thr = [0.124, 0.126, 0.129, 0.127]
+
+    labels = ['Algo A', 'Algo B', 'Algo C', 'Algo D']
+    
+    #for i in range(len(thr)):
+
+        #print(labels[i], ":", election_strings(G, [thr[i]], [disp[i]]), "mine")
+
+        #print(labels[i], ":", binVoting(G, [thr[i]], [disp[i]]), "andrea")
+
+    #    print("\n")
+
+    
+    #print(election_strings(G, thr, disp), "mine")
+
+    #print(binVoting(G, thr, disp), "andrea")
+
+    #print(binarizationVoting(G, thr, disp))
+
+    G = [0. ,0.16966817, 0.19426017, 0.21037017, 0.20068433, 0.1847105,0.16538533,0.14316133, 0.11713267, 0.09497817] 
+    t = [0.0858161158554813, 0.14958133789442618, 0.11163803490458082, 0.018275213120431785] 
+    d = [0.0368999999999999, 0.0053999999999999, 0.0186, 0.1296]
+
+    #for i in range(len(thr)):
+
+        #print(labels[i], ":", election_strings(G, [thr[i]], [disp[i]]), "mine")
+
+        #rint(labels[i], ":", binVoting(G, [t[i]], [d[i]]), "andrea")
+
+        #print("\n")
+
+    #print(binVoting(G, t, d))
+
+    print(election_strings(G, t, d), "mine \n")
+
+    #print(binVoting(G, t, d), "andrea \n")
+
+    print(binarizationVoting(G, t, d))'''

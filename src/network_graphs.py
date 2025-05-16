@@ -14,6 +14,7 @@ from networks import create_boolean_network, create_boolean_network_votes
 import gravis as gv
 from dash import html
 from pyvis.network import Network
+import string
 
 # created a plot that is a directional network with the binarization states
 # here the graph of each network per algoritm is created 
@@ -48,42 +49,59 @@ def create_boolean_network_graph(data):
 
 
     # to save the numbers of self loops by each state
-    self_loop = {}
+    #self_loop = {}
 
-    for i in range(len(states)-1):
+    #for i in range(len(states)-1):
 
-            if states[i] == states[i+1]:
-                if states[i] in self_loop:
-                    self_loop[states[i]] += 1
-                else:
-                    self_loop[states[i]] = 1
+    #        if states[i] == states[i+1]:
+    #            if states[i] in self_loop:
+    #                self_loop[states[i]] += 1
+    #            else:
+    #                self_loop[states[i]] = 1
 
             #G.add_edge(states[i], states[i+1])
         
+    labels_network = {}
 
     # now go through the list of states and add an edge        
     for i in range(len(states)-1):
             
-            if states[i] == states[i+1]:
-                if states[i] in self_loop:
+            #if states[i] == states[i+1]:
+            #    if states[i] in self_loop:
                     #G.add_edge(states[i], states[i+1], label=self_loop[states[i]])
-                    
-                    # add curr state node to graph
-                    net.add_node(states[i], label=states[i], shape='circle')
-                    # add end state node to graph
-                    net.add_node(states[i+1], label=states[i+1], shape='circle')
-                    # add edge from curr to end state to graph
-                    net.add_edge(states[i], states[i+1], label=str(self_loop[states[i]]))
 
+            if states[i] not in labels_network:
+        
+                labels_network[states[i]] = {states[i+1]:[i+1]}
+            
             else:
+                
+                if states[i+1] in labels_network[states[i]]:
+                    labels_network[states[i]][states[i+1]].append(i+1)
+            
+                else:
+                    labels_network[states[i]][states[i+1]] = [i+1]
+                    
+            # add curr state node to graph
+            net.add_node(states[i], label=states[i], shape='circle')
+            # add end state node to graph
+            net.add_node(states[i+1], label=states[i+1], shape='circle')
+            # add edge from curr to end state to graph
+            #net.add_edge(states[i], states[i+1], label=str(labels_network[states[i]][states[i+1]]))
+            if {'from':states[i], 'to':states[i+1], 'arrows': 'to'} in net.edges:
+                continue
+            else:
+                net.add_edge(states[i], states[i+1])
+
+            #else:
                 #G.add_edge(states[i], states[i+1])
                 
                 # add curr state node to graph
-                net.add_node(states[i], label=states[i], shape='circle')
+            #    net.add_node(states[i], label=states[i], shape='circle')
                 # add end state node to graph
-                net.add_node(states[i+1], label=states[i+1], shape='circle')
+            #    net.add_node(states[i+1], label=states[i+1], shape='circle')
                 # add edge from curr to end state to graph
-                net.add_edge(states[i], states[i+1])
+            #    net.add_edge(states[i], states[i+1])
                         
 
     # plot the network
@@ -102,9 +120,42 @@ def create_boolean_network_graph(data):
 
 
     #plot = fig.to_html()
+
+    legend_edges = {}
+    letters1 = list(string.ascii_lowercase)
+    letters = list(string.ascii_lowercase)
+    index = 0
+    index_lett = 0
+
+    #print("index:", len(letters))
+
+    for edge in net.edges:
+        
+        f = edge['from']
+        t = edge['to']
+
+        if len(labels_network[f][t]) > 2:
+
+            if index == len(letters):
+                index = 0
+                
+                letters = [letters[i] + letters1[index_lett] for i in range(len(letters))]
+                index_lett += 1
+            
+            let = letters[index]
+
+            if let not in legend_edges:
+                edge['label'] = let
+                legend_edges[let] = str(labels_network[f][t])
+                index += 1
+
+        
+        else:
+        
+            edge['label'] = ", ".join(map(str, labels_network[f][t]))
        
 
-    return net, network
+    return net, network, legend_edges
 
 
 
@@ -133,42 +184,61 @@ def create_boolean_network_graph_votes(data):
         states.append(''.join(map(str, row)))
 
     # to save the numbers of self loops by each state
-    self_loop = {}
+    #self_loop = {}
 
-    for i in range(len(states)-1):
+    #for i in range(len(states)-1):
 
-            if states[i] == states[i+1]:
-                if states[i] in self_loop:
-                    self_loop[states[i]] += 1
-                else:
-                    self_loop[states[i]] = 1
+    #        if states[i] == states[i+1]:
+    #            if states[i] in self_loop:
+    #                self_loop[states[i]] += 1
+    #            else:
+    #                self_loop[states[i]] = 1
 
             #G.add_edge(states[i], states[i+1])
     
     dict_network = {}
+    labels_network = {}
     
     # go through each state
     for i in range(len(states)-1):
         
-        if states[i] == states[i+1]:
-            if states[i] in self_loop:
+        #if states[i] == states[i+1]:
+            #if states[i] in self_loop:
                 #G.add_edge(states[i], states[i+1], label=self_loop[states[i]])
-                
-                # add curr state node to graph
-                net.add_node(states[i], label=states[i], shape='circle')
-                # add end state node to graph
-                net.add_node(states[i+1], label=states[i+1], shape='circle')
-                # add edge from curr to end state to graph
-                net.add_edge(states[i], states[i+1], label=str(self_loop[states[i]]))
+
+        if states[i] not in labels_network:
+        
+            labels_network[states[i]] = {states[i+1]:[i+1]}
+        
         else:
+            
+            if states[i+1] in labels_network[states[i]]:
+                labels_network[states[i]][states[i+1]].append(i+1)
+           
+            else:
+                labels_network[states[i]][states[i+1]] = [i+1]
+                
+        # add curr state node to graph
+        net.add_node(states[i], label=states[i], shape='circle')
+        # add end state node to graph
+        net.add_node(states[i+1], label=states[i+1], shape='circle')
+        # add edge from curr to end state to graph
+        #net.add_edge(states[i], states[i+1], label=str(labels_network[states[i]][states[i+1]]))
+
+        if {'from':states[i], 'to':states[i+1], 'arrows': 'to'} in net.edges:
+            continue
+        else:
+            net.add_edge(states[i], states[i+1])
+
+        #else:
             #G.add_edge(states[i], states[i+1])
 
             # add curr state node to graph
-            net.add_node(states[i], label=states[i], shape='circle')
+        #    net.add_node(states[i], label=states[i], shape='circle')
             # add end state node to graph
-            net.add_node(states[i+1], label=states[i+1], shape='circle')
+        #    net.add_node(states[i+1], label=states[i+1], shape='circle')
             # add edge from curr to end state to graph
-            net.add_edge(states[i], states[i+1])
+        #    net.add_edge(states[i], states[i+1])
         
         dict_network[states[i]] = states[i+1]
 
@@ -184,180 +254,40 @@ def create_boolean_network_graph_votes(data):
     #                node_size_factor=2, node_label_size_factor = 2, edge_label_size_factor = 2)
     
     # return figure and final dataframe network
-    return  net, final
 
+    legend_edges = {}
+    letters1 = list(string.ascii_lowercase)
+    letters = list(string.ascii_lowercase)
+    index = 0
+    index_lett = 0
 
-def rules_graph(selected, method, data, rules, thr_b, thr_k, thr_s, thr_o, displacement):
-     
-    final = network_rules2(selected, method, data, rules, thr_b, thr_k, thr_s, thr_o, displacement)
+    #print("index:", len(letters))
 
-    # create directed graph
-    G = nx.DiGraph()
-    
-    # create plot
-    fig = plt.figure()
-    
-    states = []
-    
-    # go through each row of the dataframe
-    for index, row in final.iterrows():
-
-        # concat columns together and save to state array
-        states.append(''.join(map(str, row)))
-
-    # to save the numbers of self loops by each state
-    self_loop = {}
-
-    for i in range(len(states)-1):
-
-            if states[i] == states[i+1]:
-                if states[i] in self_loop:
-                    self_loop[states[i]] += 1
-                else:
-                    self_loop[states[i]] = 1
-
-            #G.add_edge(states[i], states[i+1])
-     
-    
-    # go through each state
-    for i in range(len(states)-1):
+    for edge in net.edges:
         
-        if states[i] == states[i+1]:
-            if states[i] in self_loop:
-                G.add_edge(states[i], states[i+1], label=self_loop[states[i]])
+        f = edge['from']
+        t = edge['to']
+
+        if len(labels_network[f][t]) > 2:
+
+            if index == len(letters):
+                index = 0
+                
+                letters = [letters[i] + letters1[index_lett] for i in range(len(letters))]
+                index_lett += 1
+            
+            let = letters[index]
+
+            if let not in legend_edges:
+                edge['label'] = let
+                legend_edges[let] = str(labels_network[f][t])
+                index += 1
+
+        
         else:
-            G.add_edge(states[i], states[i+1])
-
-    
-    pos = nx.spring_layout(G)
-  
-    # draw and styling
-    nx.draw(G, pos, with_labels=True,node_color="skyblue",font_weight="bold", arrows=True, node_size=115, font_size=10)
-    edge_labels = nx.get_edge_attributes(G, "label")
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)
-
-    fig = gv.d3(G, edge_curvature=0.8, edge_label_data_source='label', show_edge_label=True, 
-                    node_size_factor=2, node_label_size_factor = 2, edge_label_size_factor = 2)
-    
-    # return figure and final dataframe network
-    return  fig.to_html(), final
-
-    '''# create directed graph
-    G = nx.DiGraph()
-    
-    # create plot
-    fig = plt.figure()
-    
-    
-    size = len(final.columns)
-
-    for index, row in final.iterrows():
-        curr_state = ''.join(map(str, row[:size//2]))
-        next_state = ''.join(map(str, row[size//2:]))
-
-        G.add_edge(curr_state, next_state)
         
-        #print(curr_state, next_state)
-
-    
-    pos = nx.spring_layout(G)
-  
-    # draw and styling
-    nx.draw(G, pos, with_labels=True,node_color="skyblue",font_weight="bold", arrows=True, node_size=115, font_size=10)
-    edge_labels = nx.get_edge_attributes(G, "label")
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)
-
-    fig = gv.d3(G, graph_height=200, edge_curvature=0.8, edge_label_data_source='label', show_edge_label=True, 
-                    node_size_factor=2, node_label_size_factor = 2, edge_label_size_factor = 2)
-    
-    # return figure and final dataframe network
-    return  fig.to_html(), final'''
-
-
-def rules_graph_vote(selected, method, data, rules, thr_b, thr_k, thr_s, thr_o, displacement):
-     
-    final = network_rules_vote2(selected, method, data, rules, thr_b, thr_k, thr_s, thr_o, displacement)
-
-    # create directed graph
-    G = nx.DiGraph()
-    
-    # create plot
-    fig = plt.figure()
-    
-    states = []
-    
-    # go through each row of the dataframe
-    for index, row in final.iterrows():
-
-        # concat columns together and save to state array
-        states.append(''.join(map(str, row)))
-
-    # to save the numbers of self loops by each state
-    self_loop = {}
-
-    for i in range(len(states)-1):
-
-            if states[i] == states[i+1]:
-                if states[i] in self_loop:
-                    self_loop[states[i]] += 1
-                else:
-                    self_loop[states[i]] = 1
-
-            #G.add_edge(states[i], states[i+1])
-     
-    
-    # go through each state
-    for i in range(len(states)-1):
+            edge['label'] = ", ".join(map(str, labels_network[f][t]))
         
-        if states[i] == states[i+1]:
-            if states[i] in self_loop:
-                G.add_edge(states[i], states[i+1], label=self_loop[states[i]])
-        else:
-            G.add_edge(states[i], states[i+1])
+    #print(net.edges)
 
-    
-    pos = nx.spring_layout(G)
-  
-    # draw and styling
-    nx.draw(G, pos, with_labels=True,node_color="skyblue",font_weight="bold", arrows=True, node_size=115, font_size=10)
-    edge_labels = nx.get_edge_attributes(G, "label")
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)
-
-    fig = gv.d3(G, edge_curvature=0.8, edge_label_data_source='label', show_edge_label=True, 
-                    node_size_factor=2, node_label_size_factor = 2, edge_label_size_factor = 2)
-    
-    # return figure and final dataframe network
-    return  fig.to_html(), final
-
-    #print(final)
-    # create directed graph
-    '''G = nx.DiGraph()
-    
-    # create plot
-    fig = plt.figure()
-    
-    
-    size = len(final.columns)
-
-    for index, row in final.iterrows():
-        curr_state = ''.join(map(str, row[:size//2]))
-        next_state = ''.join(map(str, row[size//2:]))
-
-        G.add_edge(curr_state, next_state)
-        
-        #print(curr_state, next_state)
-
-    
-    pos = nx.spring_layout(G)
-  
-    # draw and styling
-    nx.draw(G, pos, with_labels=True,node_color="skyblue",font_weight="bold", arrows=True, node_size=115, font_size=10)
-    edge_labels = nx.get_edge_attributes(G, "label")
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)
-
-    fig = gv.d3(G, graph_height=200, edge_curvature=0.8, edge_label_data_source='label', show_edge_label=True, 
-                    node_size_factor=2, node_label_size_factor = 2, edge_label_size_factor = 2)
-    
-    # return figure and final dataframe network
-    return  fig.to_html(), final'''
-   
+    return  net, final, legend_edges

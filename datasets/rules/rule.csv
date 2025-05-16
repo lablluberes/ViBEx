@@ -1,4 +1,0 @@
-Gene,Rule
-A,B
-B,not A
-C,A and B

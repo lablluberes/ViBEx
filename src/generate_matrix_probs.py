@@ -9,7 +9,7 @@ import scipy
 ######################################
 
 
-from methods import K_Means, BASC_A, onestep, shmulevich
+from methods import K_Means, BASC_A, onestep, shmulevich, call_C_BASC, call_C_Stepminer
 
 #algos -> list of algorithms
 #n -> size of gene
@@ -29,11 +29,11 @@ def PDF(algos, rangeIndex):
             thresholds.append([])
             cols.append('k-means')
         if a == "Onestep":
-            methods.append(onestep)
+            methods.append(call_C_Stepminer)
             thresholds.append([])
             cols.append('onestep')
         if a == "BASC A":
-            methods.append(BASC_A)
+            methods.append(call_C_BASC)
             thresholds.append([])
             cols.append('BASC_A')
         if a == "Shmulevich":

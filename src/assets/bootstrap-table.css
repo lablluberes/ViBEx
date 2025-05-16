@@ -1,0 +1,8 @@
+
+.dash-table-container .dropdown {
+    position: static;
+  }
+  
+.dash-spreadsheet .Select-value-label {
+    padding-right: 20px;
+}
