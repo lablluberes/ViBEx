@@ -1,7 +1,7 @@
 Gene,Rule
 lexA,recA
 uvrD,not lexA
-recA,recA
+recA,
 uvrA,not lexA
 polB,not lexA
 umuD,not lexA

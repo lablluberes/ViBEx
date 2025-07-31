@@ -1,0 +1,13 @@
+,Method,Binarization,Dynamic Accuracy,Accuracy,Precision,Recall,F1-Score
+0,MIBNI,BASC A,0.521,0.4,0.38,0.94,0.54
+1,MIBNI,K-Means,0.573,0.38,0.38,1.0,0.55
+2,MIBNI,Onestep,0.701,0.49,0.42,1.0,0.6
+3,MIBNI,Elected,0.547,0.42,0.39,0.94,0.55
+4,LogicGep,BASC A,0.846,0.47,0.29,0.29,0.29
+5,LogicGep,K-Means,0.556,0.6,0.47,0.47,0.47
+6,LogicGep,Onestep,0.59,0.53,0.38,0.35,0.36
+7,LogicGep,Elected,0.607,0.64,0.55,0.35,0.43
+8,Bestfit,BASC A,0.846,0.58,0.42,0.29,0.34
+9,Bestfit,K-Means,0.598,0.58,0.44,0.47,0.46
+10,Bestfit,Onestep,0.624,0.47,0.37,0.59,0.45
+11,Bestfit,Elected,0.598,0.44,0.33,0.47,0.39
