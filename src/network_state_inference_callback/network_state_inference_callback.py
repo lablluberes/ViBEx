@@ -17,7 +17,6 @@ from networks.network_rule import createNetwork
 
 from inference_methods.logicgep import LogicGep
 from inference_methods.mibni.Mibni import Mibni
-from inference_methods.bestfit.BinInfer import run_code
 from inference_methods.bestfit_mod import run_bestfit
 
 from networks.hamming import hamming_state_by_state, hamming_chain, generate_init_final_comparison, extract_path
