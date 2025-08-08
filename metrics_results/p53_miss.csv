@@ -1,0 +1,73 @@
+,Method,Binarization,Dynamic Accuracy,Accuracy,Precision,Recall,F1-Score
+0,MIBNI,BASC A,0.583,0.6,0.67,0.86,0.75
+1,MIBNI,K-Means,0.625,0.8,0.78,1.0,0.88
+2,MIBNI,Onestep,0.583,0.6,0.71,0.71,0.71
+3,MIBNI,Elected,0.583,0.6,0.71,0.71,0.71
+4,LogicGep,BASC A,Cannot be calculated,0.5,0.67,0.57,0.62
+5,LogicGep,BASC A,0.833,0.4,0.57,0.57,0.57
+6,LogicGep,BASC A,0.833,0.4,0.6,0.43,0.5
+7,LogicGep,BASC A,0.833,0.4,0.6,0.43,0.5
+8,LogicGep,BASC A,0.833,0.5,0.67,0.57,0.62
+9,LogicGep,BASC A,0.833,0.4,0.57,0.57,0.57
+10,LogicGep,BASC A,0.833,0.7,0.75,0.86,0.8
+11,LogicGep,BASC A,0.833,0.5,0.67,0.57,0.62
+12,LogicGep,BASC A,0.833,0.5,0.62,0.71,0.67
+13,LogicGep,BASC A,0.833,0.6,0.8,0.57,0.67
+14,LogicGep,BASC A,0.833,0.4,0.57,0.57,0.57
+15,LogicGep,BASC A,0.833,0.5,0.67,0.57,0.62
+16,LogicGep,BASC A,0.833,0.5,0.67,0.57,0.62
+17,LogicGep,BASC A,0.833,0.7,0.75,0.86,0.8
+18,LogicGep,BASC A,0.833,0.5,0.75,0.43,0.55
+19,LogicGep,BASC A,Mean: 0.83 STD: 0.0 SE: 0.0,Mean: 0.5 STD: 0.1 SE: 0.026,Mean: 0.66 STD: 0.074 SE: 0.019,Mean: 0.59 STD: 0.131 SE: 0.034,Mean: 0.62 STD: 0.089 SE: 0.023
+20,LogicGep,K-Means,0.583,0.7,0.83,0.71,0.77
+21,LogicGep,K-Means,0.583,0.8,0.86,0.86,0.86
+22,LogicGep,K-Means,0.583,0.7,0.83,0.71,0.77
+23,LogicGep,K-Means,0.583,0.6,0.8,0.57,0.67
+24,LogicGep,K-Means,0.583,0.6,0.8,0.57,0.67
+25,LogicGep,K-Means,0.583,0.8,0.86,0.86,0.86
+26,LogicGep,K-Means,0.583,0.6,0.71,0.71,0.71
+27,LogicGep,K-Means,0.583,0.7,0.7,1.0,0.82
+28,LogicGep,K-Means,0.583,0.6,0.8,0.57,0.67
+29,LogicGep,K-Means,0.583,0.7,0.83,0.71,0.77
+30,LogicGep,K-Means,0.583,0.8,0.86,0.86,0.86
+31,LogicGep,K-Means,0.583,0.7,0.83,0.71,0.77
+32,LogicGep,K-Means,0.583,0.7,0.83,0.71,0.77
+33,LogicGep,K-Means,0.583,0.8,0.78,1.0,0.88
+34,LogicGep,K-Means,0.583,0.7,0.83,0.71,0.77
+35,LogicGep,K-Means,Mean: 0.58 STD: 0.0 SE: 0.0,Mean: 0.7 STD: 0.076 SE: 0.02,Mean: 0.81 STD: 0.049 SE: 0.013,Mean: 0.75 STD: 0.139 SE: 0.036,Mean: 0.77 STD: 0.072 SE: 0.019
+36,LogicGep,Onestep,0.708,0.6,0.71,0.71,0.71
+37,LogicGep,Onestep,0.583,0.5,0.67,0.57,0.62
+38,LogicGep,Onestep,Cannot be calculated,0.7,0.83,0.71,0.77
+39,LogicGep,Onestep,0.583,0.7,0.75,0.86,0.8
+40,LogicGep,Onestep,0.583,0.6,0.71,0.71,0.71
+41,LogicGep,Onestep,0.667,0.9,0.88,1.0,0.93
+42,LogicGep,Onestep,Cannot be calculated,0.5,0.67,0.57,0.62
+43,LogicGep,Onestep,0.708,0.7,0.83,0.71,0.77
+44,LogicGep,Onestep,0.708,0.9,0.88,1.0,0.93
+45,LogicGep,Onestep,0.708,0.9,0.88,1.0,0.93
+46,LogicGep,Onestep,0.583,0.5,0.62,0.71,0.67
+47,LogicGep,Onestep,Cannot be calculated,0.7,0.83,0.71,0.77
+48,LogicGep,Onestep,0.708,0.7,0.83,0.71,0.77
+49,LogicGep,Onestep,Cannot be calculated,0.6,0.8,0.57,0.67
+50,LogicGep,Onestep,0.708,0.8,0.86,0.86,0.86
+51,LogicGep,Onestep,Mean: 0.66 STD: 0.061 SE: 0.018,Mean: 0.69 STD: 0.141 SE: 0.036,Mean: 0.78 STD: 0.087 SE: 0.023,Mean: 0.76 STD: 0.151 SE: 0.039,Mean: 0.77 STD: 0.106 SE: 0.027
+52,LogicGep,Elected,0.708,0.5,0.67,0.57,0.62
+53,LogicGep,Elected,0.708,0.7,0.7,1.0,0.82
+54,LogicGep,Elected,Cannot be calculated,0.4,0.6,0.43,0.5
+55,LogicGep,Elected,0.583,0.6,0.71,0.71,0.71
+56,LogicGep,Elected,0.583,0.6,0.67,0.86,0.75
+57,LogicGep,Elected,0.583,0.7,0.75,0.86,0.8
+58,LogicGep,Elected,0.708,0.8,0.86,0.86,0.86
+59,LogicGep,Elected,0.583,0.5,0.62,0.71,0.67
+60,LogicGep,Elected,0.583,0.6,0.71,0.71,0.71
+61,LogicGep,Elected,0.583,0.8,0.78,1.0,0.88
+62,LogicGep,Elected,0.583,0.7,0.75,0.86,0.8
+63,LogicGep,Elected,0.583,0.6,0.71,0.71,0.71
+64,LogicGep,Elected,Cannot be calculated,0.6,0.8,0.57,0.67
+65,LogicGep,Elected,0.708,0.8,0.78,1.0,0.88
+66,LogicGep,Elected,0.708,0.8,0.86,0.86,0.86
+67,LogicGep,Elected,Mean: 0.63 STD: 0.063 SE: 0.018,Mean: 0.65 STD: 0.125 SE: 0.032,Mean: 0.73 STD: 0.077 SE: 0.02,Mean: 0.78 STD: 0.171 SE: 0.044,Mean: 0.75 STD: 0.109 SE: 0.028
+68,Bestfit,BASC A,Cannot be calculated,0.4,0.67,0.29,0.4
+69,Bestfit,K-Means,0.583,0.7,0.83,0.71,0.77
+70,Bestfit,Onestep,0.583,0.6,0.71,0.71,0.71
+71,Bestfit,Elected,0.583,0.6,0.71,0.71,0.71

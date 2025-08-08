@@ -1,0 +1,12 @@
+Gene	Rule
+CLN3	(not CLN3) and 1
+MBF	CLN3 and not CLB1
+SBF	CLN3 and not CLB1
+CLN1	not CLN1 and SBF
+CDH1	not CLN1 and not CLB5 and not CLB1 and CDC20
+SWI5	not CLB1 and CDC20 and MCM1 and not SWI5
+CDC20	not CDC20 and MCM1 and CLB1
+CLB5	MBF and not CDC20 and not SIC1
+SIC1	CDC20 and SWI5 and not CLB1 and not CLB5 and not CLN1
+CLB1	MCM1 and CLB5 and not SIC1 and not CDH1 and not CDC20
+MCM1	not MCM1 and CLB5 and CLB1

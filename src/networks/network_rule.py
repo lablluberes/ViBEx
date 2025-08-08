@@ -103,16 +103,35 @@ def createNetwork(rules_df):
         # use zfill to fill with zeros so that all states have a size of 5 
         curr_state = bin(s)[2:].zfill(size)
         
-    
+        #print(curr_state)
         #print("Starting here ", curr_state)
         
         #states_name.append(curr_state)
         
         # empty string where to save the next state
         end_state = ""
+        
+        for key in j:
+        
+           if rules_dict[key] == "True":         
+                list_curr_state = list(curr_state)
+                #print(list_curr_state) 
+                list_curr_state[genes[key]-1] = '1'
+                        
+                curr_state = ''.join(list_curr_state)
+                
+           elif rules_dict[key] == "False":
+                list_curr_state = list(curr_state)
+                #print(list_curr_state) 
+                list_curr_state[genes[key]-1] = '0'
+                        
+                curr_state = ''.join(list_curr_state)
+               
+                #print(curr_state)
             
         # loop through each key in j
         for key in j:
+            
 
                 # array to save the genes in a rule
                 g_in_rule = []
@@ -127,6 +146,7 @@ def createNetwork(rules_df):
                     if g in rules_dict[key]:
                         # append gene to list
                         g_in_rule.append(g)
+            
                 
                 # iterate the arrays of j
                 for ind in j[key]:
@@ -154,6 +174,9 @@ def createNetwork(rules_df):
         #net_states.append((int(curr_state, 2), int(end_state, 2)))
         
         # add curr state node to graph
+        if curr_state in dict_net:
+            continue
+        
         dict_net[curr_state] = end_state
 
         title_label1 = "\n".join(f"{gene}: {bin}" for gene, bin in zip(labels, list(curr_state)))
@@ -164,8 +187,11 @@ def createNetwork(rules_df):
         net.add_node(end_state, label=end_state, shape='circle', title=title_label2)
         # add edge from curr to end state to graph
         net.add_edge(curr_state, end_state)
+        
+        #print(curr_state, end_state)
 
     #print(dict_net)
+    #print(net.edges)
 
     Atts_syn, Att_num = attractors(dict_net)
 

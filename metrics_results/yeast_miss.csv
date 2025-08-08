@@ -1,0 +1,73 @@
+,Method,Binarization,Dynamic Accuracy,Accuracy,Precision,Recall,F1-Score
+0,MIBNI,BASC A,0.521,0.42,0.4,0.94,0.57
+1,MIBNI,K-Means,0.573,0.4,0.4,1.0,0.57
+2,MIBNI,Onestep,0.701,0.51,0.45,1.0,0.62
+3,MIBNI,Elected,0.547,0.44,0.41,0.94,0.58
+4,LogicGep,BASC A,Cannot be calculated,0.6,0.5,0.33,0.4
+5,LogicGep,BASC A,0.846,0.58,0.48,0.56,0.51
+6,LogicGep,BASC A,Cannot be calculated,0.42,0.28,0.28,0.28
+7,LogicGep,BASC A,0.846,0.47,0.36,0.44,0.4
+8,LogicGep,BASC A,Cannot be calculated,0.56,0.44,0.39,0.41
+9,LogicGep,BASC A,0.846,0.51,0.39,0.39,0.39
+10,LogicGep,BASC A,Cannot be calculated,0.51,0.39,0.39,0.39
+11,LogicGep,BASC A,0.846,0.53,0.42,0.44,0.43
+12,LogicGep,BASC A,Cannot be calculated,0.51,0.38,0.33,0.35
+13,LogicGep,BASC A,0.846,0.58,0.47,0.5,0.49
+14,LogicGep,BASC A,0.846,0.49,0.4,0.56,0.47
+15,LogicGep,BASC A,Cannot be calculated,0.47,0.33,0.33,0.33
+16,LogicGep,BASC A,Cannot be calculated,0.51,0.39,0.39,0.39
+17,LogicGep,BASC A,0.846,0.6,0.5,0.56,0.53
+18,LogicGep,BASC A,0.846,0.47,0.33,0.33,0.33
+19,LogicGep,BASC A,Mean: 0.85 STD: 0.0 SE: 0.0,Mean: 0.52 STD: 0.054 SE: 0.014,Mean: 0.4 STD: 0.065 SE: 0.017,Mean: 0.41 STD: 0.093 SE: 0.024,Mean: 0.41 STD: 0.07 SE: 0.018
+20,LogicGep,K-Means,0.675,0.58,0.47,0.44,0.46
+21,LogicGep,K-Means,0.556,0.62,0.54,0.39,0.45
+22,LogicGep,K-Means,Cannot be calculated,0.47,0.29,0.22,0.25
+23,LogicGep,K-Means,0.556,0.58,0.47,0.5,0.49
+24,LogicGep,K-Means,0.556,0.71,0.67,0.56,0.61
+25,LogicGep,K-Means,0.556,0.6,0.5,0.39,0.44
+26,LogicGep,K-Means,0.487,0.6,0.5,0.44,0.47
+27,LogicGep,K-Means,0.556,0.62,0.53,0.5,0.51
+28,LogicGep,K-Means,Cannot be calculated,0.62,0.55,0.33,0.41
+29,LogicGep,K-Means,0.487,0.67,0.57,0.67,0.62
+30,LogicGep,K-Means,Cannot be calculated,0.6,0.5,0.39,0.44
+31,LogicGep,K-Means,0.556,0.69,0.64,0.5,0.56
+32,LogicGep,K-Means,Cannot be calculated,0.51,0.33,0.22,0.27
+33,LogicGep,K-Means,0.556,0.58,0.47,0.44,0.46
+34,LogicGep,K-Means,0.556,0.51,0.38,0.33,0.35
+35,LogicGep,K-Means,Mean: 0.55 STD: 0.049 SE: 0.015,Mean: 0.6 STD: 0.066 SE: 0.017,Mean: 0.49 STD: 0.103 SE: 0.027,Mean: 0.42 STD: 0.12 SE: 0.031,Mean: 0.45 STD: 0.106 SE: 0.027
+36,LogicGep,Onestep,0.59,0.58,0.47,0.39,0.42
+37,LogicGep,Onestep,0.59,0.56,0.44,0.44,0.44
+38,LogicGep,Onestep,0.59,0.51,0.38,0.33,0.35
+39,LogicGep,Onestep,0.59,0.56,0.42,0.28,0.33
+40,LogicGep,Onestep,0.59,0.58,0.46,0.33,0.39
+41,LogicGep,Onestep,0.59,0.53,0.38,0.28,0.32
+42,LogicGep,Onestep,0.513,0.51,0.36,0.28,0.31
+43,LogicGep,Onestep,0.59,0.6,0.5,0.33,0.4
+44,LogicGep,Onestep,0.59,0.62,0.53,0.44,0.48
+45,LogicGep,Onestep,0.59,0.6,0.5,0.5,0.5
+46,LogicGep,Onestep,0.513,0.51,0.39,0.39,0.39
+47,LogicGep,Onestep,0.504,0.53,0.4,0.33,0.36
+48,LogicGep,Onestep,0.547,0.53,0.41,0.39,0.4
+49,LogicGep,Onestep,0.59,0.51,0.36,0.28,0.31
+50,LogicGep,Onestep,0.504,0.64,0.57,0.44,0.5
+51,LogicGep,Onestep,Mean: 0.57 STD: 0.037 SE: 0.01,Mean: 0.56 STD: 0.044 SE: 0.011,Mean: 0.44 STD: 0.065 SE: 0.017,Mean: 0.36 STD: 0.071 SE: 0.018,Mean: 0.39 STD: 0.065 SE: 0.017
+52,LogicGep,Elected,Cannot be calculated,0.58,0.46,0.33,0.39
+53,LogicGep,Elected,Cannot be calculated,0.51,0.3,0.17,0.21
+54,LogicGep,Elected,0.607,0.58,0.47,0.39,0.42
+55,LogicGep,Elected,0.521,0.49,0.33,0.28,0.3
+56,LogicGep,Elected,Cannot be calculated,0.58,0.44,0.22,0.3
+57,LogicGep,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+58,LogicGep,Elected,0.607,0.6,0.5,0.56,0.53
+59,LogicGep,Elected,0.607,0.49,0.35,0.33,0.34
+60,LogicGep,Elected,0.607,0.53,0.41,0.39,0.4
+61,LogicGep,Elected,0.607,0.67,0.6,0.5,0.55
+62,LogicGep,Elected,0.607,0.58,0.45,0.28,0.34
+63,LogicGep,Elected,Cannot be calculated,0.62,0.55,0.33,0.41
+64,LogicGep,Elected,0.607,0.58,0.47,0.39,0.42
+65,LogicGep,Elected,0.607,0.53,0.4,0.33,0.36
+66,LogicGep,Elected,Cannot be calculated,0.71,0.69,0.5,0.58
+67,LogicGep,Elected,Mean: 0.6 STD: 0.029 SE: 0.01,Mean: 0.57 STD: 0.067 SE: 0.017,Mean: 0.45 STD: 0.11 SE: 0.028,Mean: 0.35 STD: 0.111 SE: 0.029,Mean: 0.39 STD: 0.106 SE: 0.027
+68,Bestfit,BASC A,Cannot be calculated,0.56,0.42,0.28,0.33
+69,Bestfit,K-Means,Cannot be calculated,0.56,0.44,0.44,0.44
+70,Bestfit,Onestep,0.624,0.44,0.37,0.56,0.44
+71,Bestfit,Elected,Cannot be calculated,0.42,0.33,0.44,0.38

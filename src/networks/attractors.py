@@ -20,8 +20,7 @@ def attractors(S):
     Atts_syn = set() # set of attractors
     total_set = set() # set of unvisited states
     total_set.update(S.keys())
-    delta_0 = set() # empty set 
-
+    
     #print(total_set)
 
     # Main resolving part (continue until all states are visited)
@@ -33,24 +32,25 @@ def attractors(S):
         #print(delta_j)
 
         # delete visited attractor 
-        delta_j.difference_update(delta_0)
+        delta_j.difference_update(Atts_syn)
 
         # verifies if states are periodic attractors
-        if delta_j.union(delta_0) == total_set:
+        if delta_j.union(Atts_syn) == total_set:
+            
             Att_num += len(delta_j) / j # increase number of attractors
-            Atts_syn.update(delta_j) # add attractors
+            Atts_syn.update(total_set) # add attractors
             break # end loop
         
         # verifies if new attractor will be generated after one iteration
         if len(delta_j) != 0:
+
             Att_num += len(delta_j) / j # increase number of attractors
             Atts_syn.update(delta_j) # add new attractors
             total_set.difference_update(BR(delta_j, S)) # deletes states that reach attractor 
         
         #print(j)
 
-        # adds attractors 
-        delta_0.update(delta_j)
+        # increase J cycle size
         j += 1
 
     #print(Atts_syn)
@@ -149,115 +149,4 @@ def getElementsJCycle(total_set, S, j):
             # add attractor
             states.add(state)
 
-    return states
-
-
-'''if __name__ == "__main__":
-
-    BN = {
-        '000':'001',
-        '001':'000',
-        '010':'101',
-        '011':'000',
-        '100':'101',
-        '101':'010',
-        '110':'101',
-        '111':'011'
-    }
-
-    BN1 = {
-        '000':'000',
-        '001':'100',
-        '010':'001',
-        '011':'101',
-        '100':'001',
-        '101':'101',
-        '110':'000',
-        '111':'100'
-    }
-
-    BN2 = {
-        '000':'000',
-        '001':'100',
-        '010':'001',
-        '011':'101',
-        '100':'000',
-        '101':'100',
-        '110':'000',
-        '111':'100'
-    }
-
-    BN3 = {
-        '000':'000',
-        '001':'000',
-        '010':'100',
-        '011':'100',
-        '100':'011',
-        '101':'001',
-        '110':'110',
-        '111':'100'
-    }
-
-    BN4 = {
-        '000':'000',
-        '001':'100',
-        '010':'001',
-        '011':'101',
-        '100':'010',
-        '101':'100',
-        '110':'011',
-        '111':'101'
-    }
-
-    BN5 = {
-        '00101':'01100',
-        '00001':'01100',
-        '10101':'01100',
-        '11001':'11000',
-        '01100':'10100',
-        '11000':'10100',
-        '10100':'00000',
-        '00000':'00000',
-
-        '10001':'01000',
-        '01101':'11100',
-        '01001':'11100',
-        '11101':'11100',
-        '01000':'10000',
-        '11100':'10000',
-        '10000':'00100',
-        '00100':'00100',
-
-        '11011':'10011',
-        '10011':'10011',
-
-        '10111':'11111',
-        '11111':'11111',
-
-        '01011':'10110',
-        '00011':'10110',
-        '10110':'11010',
-        '01010':'11010',
-        '00010':'11010',
-        '11010':'11110',
-        '11110':'11010',
-        '10010':'11110',
-        '01111':'11110',
-        '01110':'11110',
-        '00111':'11110',
-        '00110':'11110'
-    }
-
-    BN6 = {
-        '00':'01',
-        '01':'10',
-        '10':'11',
-        '11':'00'
-    }
-
-    Atts_syn, Att_num = attractors(BN6)
-
-    print("Attractors:", Atts_syn)
-    print("Number of attractors:", Att_num)'''
-
-    
+    return states   

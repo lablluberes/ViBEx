@@ -73,8 +73,8 @@ def get_imputation_callbacks(app):
                             dcc.Dropdown(
                                 options=[
                                 {'label': 'MissForest Imputation', 'value':4},
-                                {'label': 'IterativeImputer (MICE with LogReg) Imputation', 'value':5},
-                                {'label': 'Framework Statistics Algorithm', 'value':3},
+                                #{'label': 'IterativeImputer (MICE with LogReg) Imputation', 'value':5},
+                                {'label': 'Probabilistic Imputation', 'value':3},
                                 {'label': 'Global Imputation (ex: changes all "?" to either 0 or 1)', 'value':0},
                                 {'label': 'Gene Imputation (ex: imputates a value for only one gene)', 'value':1},
                                 {'label': 'Time Impuation (ex: imputates values based on time course)', 'value':2},

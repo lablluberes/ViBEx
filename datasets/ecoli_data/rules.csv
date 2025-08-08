@@ -1,5 +1,5 @@
 Gene,Rule
-lexA,recA
+lexA,not recA
 uvrD,not lexA
 recA,
 uvrA,not lexA

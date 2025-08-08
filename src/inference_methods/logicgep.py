@@ -393,7 +393,7 @@ def mlp2(raw_dataIn,y,list1):
     y=y.ravel()
     X = np.array(raw_dataIn[list(set(list1))])
     # X = min_max_scaler.fit_transform(X) # if necessary
-    fit1 = MLPRegressor(hidden_layer_sizes=(50, 15), activation='relu', solver='adam', alpha=0.01, max_iter=15, random_state=42)
+    fit1 = MLPRegressor(hidden_layer_sizes=(50, 15), activation='relu', solver='adam', alpha=0.01, max_iter=200, random_state=42)
     fit1.fit(X, y)
     pred1_train = fit1.predict(X)
     mse_1 = mean_squared_error(pred1_train, y)

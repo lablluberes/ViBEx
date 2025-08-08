@@ -308,6 +308,9 @@ def extract_path(state, net_dict, n, labels, net):
         net: 
     """
 
+    if state not in net_dict.keys():
+        return [dict(zip(labels, ['' for i in range(len(state))]))], net
+
     data = []
 
     # extracts n length path

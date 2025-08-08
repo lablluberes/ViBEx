@@ -1203,10 +1203,14 @@ def get_network_inf_callbacks(app):
 
         end_time = time.time()
 
+        #print(df_infer_rules)
+
         print(f"{inference_method} time taken: {end_time-start_time}")
 
         # create network based on inferred rules
         net, dict_net = createNetwork(df_infer_rules)
+
+        #print(dict_net)
 
         # get first state of binarization
         state = df_binary.iloc[0].values
@@ -1218,9 +1222,14 @@ def get_network_inf_callbacks(app):
         
         grn_network = create_GRN_plot(df_infer_rules)
 
-        print(path, df_binary)
+        #print(path, df_binary)
 
         df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
+
+        if df_dyn_acc == None:
+            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
+        else:
+            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
 
         # if network has more than 1000 nodes then dont show BN graph
         if len(net.nodes) > 2500:
@@ -1615,7 +1624,90 @@ def get_network_inf_callbacks(app):
                 if m == "LogicGep":
                     print(m)
                     # infer rules using LogicGep
-                    df_infer_rules = LogicGep(df_binary, df_data)
+
+                    dyn_arr = []
+                    acc_arr = []
+                    pre_arr = []
+                    re_arr = []
+                    fscore_arr = []
+
+                    for i in range(15):
+                        df_infer_rules = LogicGep(df_binary, df_data)
+
+                        # create network based on inferred rules
+                        net, dict_net = createNetwork(df_infer_rules)
+
+                        # get first state of binarization
+                        state = df_binary.iloc[0].values
+                        state = ''.join(str(s) for s in state)
+
+                        # extract path from infered BN based on first state
+                        path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+
+                        print("get dyn and metrics")
+                        df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
+
+                        if df_dyn_acc == None:
+                            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
+                        
+                        else:
+                            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
+
+                        metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
+                        #metrics_dir = Metrics_directed(pd.DataFrame(rules_uploaded), df_infer_rules)
+
+                        metric_dict = {}
+
+                        metric_dict['Method'] = m
+
+                        metric_dict['Binarization'] = m_thr
+
+                        metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
+                            
+
+                        for metr in metrics:
+                            metric_dict[metr] = metrics[metr][0]
+
+                        #for metr in metrics_dir:
+                        #    metric_dict[metr+'(Directed Matrix)'] = metrics_dir[metr][0]
+
+                        if metric_dict['Dynamic Accuracy'] != 'Cannot be calculated':
+                      
+                            dyn_arr.append(metric_dict['Dynamic Accuracy'])
+
+                        acc_arr.append(metric_dict['Accuracy'])
+                        pre_arr.append(metric_dict['Precision'])
+                        re_arr.append(metric_dict['Recall'])
+                        fscore_arr.append(metric_dict['F1-Score'])
+
+                        metrics_data.append(metric_dict)
+                    
+                    mean_dyn = np.mean(dyn_arr)
+                    mean_acc = np.mean(acc_arr)
+                    mean_pre = np.mean(pre_arr)
+                    mean_re = np.mean(re_arr)
+                    mean_f= np.mean(fscore_arr)
+
+                    std_dyn = np.std(dyn_arr, ddof=1)
+                    std_acc = np.std(acc_arr, ddof=1)
+                    std_pre = np.std(pre_arr, ddof=1)
+                    std_re = np.std(re_arr, ddof=1)
+                    std_f= np.std(fscore_arr, ddof=1)
+
+                    se_dyn = std_dyn / np.sqrt(len(dyn_arr))
+                    se_acc = std_acc / np.sqrt(len(acc_arr))
+                    se_pre = std_pre / np.sqrt(len(pre_arr))
+                    se_re = std_re / np.sqrt(len(re_arr))
+                    se_f= std_f / np.sqrt(len(fscore_arr))
+
+                    mean_row = {'Method': m, 'Binarization':m_thr, 
+                                'Dynamic Accuracy': f"Mean: {round(mean_dyn, 2)} STD: {round(std_dyn, 3)} SE: {round(se_dyn, 3)}",
+                                'Accuracy': f"Mean: {round(mean_acc, 2)} STD: {round(std_acc, 3)} SE: {round(se_acc, 3)}",
+                                'Precision': f"Mean: {round(mean_pre, 2)} STD: {round(std_pre, 3)} SE: {round(se_pre, 3)}",
+                                'Recall': f"Mean: {round(mean_re, 2)} STD: {round(std_re, 3)} SE: {round(se_re, 3)}",
+                                'F1-Score': f"Mean: {round(mean_f, 2)} STD: {round(std_f, 3)} SE: {round(se_f, 3)}"} 
+                    metrics_data.append(mean_row)
+
 
                 elif m == 'MIBNI':
                     print(m)
@@ -1647,39 +1739,46 @@ def get_network_inf_callbacks(app):
                     
                     df_infer_rules = pd.DataFrame(data)
                 
-                # create network based on inferred rules
-                net, dict_net = createNetwork(df_infer_rules)
+                if m != "LogicGep":
+                    # create network based on inferred rules
+                    net, dict_net = createNetwork(df_infer_rules)
 
-                # get first state of binarization
-                state = df_binary.iloc[0].values
-                state = ''.join(str(s) for s in state)
+                    # get first state of binarization
+                    state = df_binary.iloc[0].values
+                    state = ''.join(str(s) for s in state)
 
-                # extract path from infered BN based on first state
-                path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+                    # extract path from infered BN based on first state
+                    path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
 
-                print("get dyn and metrics")
-                df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
+                    print("get dyn and metrics")
+                    df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
 
-                metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
-                #metrics_dir = Metrics_directed(pd.DataFrame(rules_uploaded), df_infer_rules)
-
-                metric_dict = {}
-
-                metric_dict['Method'] = m
-
-                metric_dict['Binarization'] = m_thr
-
-                metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
+                    if df_dyn_acc == None:
+                        df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
                     
+                    else:
+                        df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
 
-                for metr in metrics:
-                    metric_dict[metr] = metrics[metr][0]
+                    metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
+                    #metrics_dir = Metrics_directed(pd.DataFrame(rules_uploaded), df_infer_rules)
 
-                #for metr in metrics_dir:
-                #    metric_dict[metr+'(Directed Matrix)'] = metrics_dir[metr][0]
+                    metric_dict = {}
+
+                    metric_dict['Method'] = m
+
+                    metric_dict['Binarization'] = m_thr
+
+                    metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
+                        
+
+                    for metr in metrics:
+                        metric_dict[metr] = metrics[metr][0]
+
+                    #for metr in metrics_dir:
+                    #    metric_dict[metr+'(Directed Matrix)'] = metrics_dir[metr][0]
 
 
-                metrics_data.append(metric_dict)
+                    metrics_data.append(metric_dict)
         
         
         #return None

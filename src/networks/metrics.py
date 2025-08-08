@@ -83,7 +83,11 @@ def Metrics(ground_truth, inferred):
 def dynamic_accuracy(df, df1):
   columns_names = list(df.columns)
 
-  print(columns_names)
+  #print(columns_names)
+
+  if len(df) != len(df1):
+      return None
+
 
   C = []
   
@@ -106,7 +110,7 @@ def dynamic_accuracy(df, df1):
 
   dyn_acc = round(1 - (sum(C)/len(columns_names)), 3)
 
-  return pd.DataFrame({'Dynamic Accuracy': [dyn_acc]})
+  return dyn_acc
 
 
 def getAdjMatrix_directed(rule_net):

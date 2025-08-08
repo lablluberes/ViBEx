@@ -224,7 +224,7 @@ def hidden_buttons():
                             options=[{'label': 'Global Imputation (ex: changes all "?" to either 0 or 1)', 'value':0},
                              {'label': 'Gene Imputation (ex: imputates a value for only one gene)', 'value':1},
                              {'label': 'Time Impuation (ex: imputates values based on time course)', 'value':2},
-                             {'label': 'Framework Statistics Algorithm', 'value':3}],
+                             {'label': 'Probabilistic Imputation', 'value':3}],
                             placeholder="Select option",
                             id="imputate-option",
                             multi=False,
@@ -517,9 +517,12 @@ def network_nav():
                         ]),
                     className="mb-3"),
 
-                html.Button("Download metrics automatic", id='download-metrics'),
+                html.Button("Run Script to Download Metrics", id='download-metrics'),
                 html.Div(id='download-metrics-output'),
-                dcc.Download(id="download-metrics-excel"),
+                dcc.Loading(
+                    children=[dcc.Download(id="download-metrics-excel")],
+            type="circle"),
+                
 
                 html.Div(style={"height": "20px"}),
                 dbc.Card(
@@ -620,7 +623,7 @@ def tabs_nav():
                             html.Div(id='displacements-output')
                     ], type="circle")
                 ]),
-                dcc.Tab(label='Statistics', children=[
+                dcc.Tab(label='Probability', children=[
 
                     dcc.Loading(
                        children=[html.Div(id='statistics-output')],
