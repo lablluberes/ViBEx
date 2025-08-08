@@ -7,7 +7,7 @@
                       change the #define FILENAME line 
      *   Compile:     gcc-13 -fopenmp KMeans.c -o kmeans	  *
      *   Run:         ./kmeans
-     *   Author:      Michael H. Terrefortes Rosado							  *
+     *   Author:   						  *
      *   Course:      CCOM6189 HPC						  *
      *   Last update: December 11, 2023	
      *   
