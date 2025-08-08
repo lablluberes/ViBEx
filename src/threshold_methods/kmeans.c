@@ -7,7 +7,7 @@
                       change the #define FILENAME line 
      *   Compile:     gcc-13 -fopenmp KMeans.c -o kmeans	  *
      *   Run:         ./kmeans
-     *   Author:   						  *
+     *   Author:      Michael H. Terrefortes Rosado							  *
      *   Course:      CCOM6189 HPC						  *
      *   Last update: December 11, 2023	
      *   
@@ -30,8 +30,15 @@ double KMeans(double vect[], const int size) {
 
     //printf("%d, %d", rand(), rand());
 
+    double random_num1 = vect[rand()%size];
+    double random_num2;
+
+    do {
+        random_num2 = vect[rand()%size];
+    } while (random_num1 == random_num2);
+
     // Initialize the centroids
-    double centroidsUpdate[2] = {vect[0], vect[1]};
+    double centroidsUpdate[2] = {random_num1, random_num2};
 
     // Initialize the past centroids to zero
     double centroidsPrev[2] = {0,0};
@@ -171,6 +178,8 @@ double KMeans(double vect[], const int size) {
         centroidsUpdate[1] = 0;
         return centroidsUpdate[0];
     }
+
+    //printf("%d\n", itr);
 
     // return the mean (which is the threshold) by adding both centroids and dividing by two.
     return (centroidsUpdate[0]+centroidsUpdate[1])/2;
