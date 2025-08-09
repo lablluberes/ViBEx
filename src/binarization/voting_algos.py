@@ -1,7 +1,7 @@
 ################################
 ## Code to generate the voting table 
 ## Function - binVoting, voting mechanism based on Lluberes and Seguel paper. 
-## Function - binarizationVoting, voting mechanism
+## Function - binarizationVoting, voting mechanism created
 ## Function - election_strings, voting mechanism based on Lluberes thesis
 ###############################
 
@@ -49,7 +49,7 @@ def binVoting(gene, threshold, displacement):
        
     return z
 
-# algorithm (i made it myself based on the table!!!)
+#algorithm (i made it myself based on the table!!!)
 
 def binarizationVoting(gene, threshold, displacement):
 
@@ -271,3 +271,57 @@ def election_strings(G, thr, disp):
         E = []
     
     return collective, Z_e
+
+
+
+'''
+if __name__ == "__main__":
+
+    G = [{0:13618.98725, 1:12113.79308, 2:13882.42529, 3:12037.27047, 4:12924.9502, 5:11795.57956}]
+
+    G = pd.DataFrame(G)
+
+    G  = geneNorm(G).iloc[0].values
+
+    #print(G)
+
+    disp = [0.00490, 0.00366, 0.00292, 0.00188]
+
+    thr = [0.124, 0.126, 0.129, 0.127]
+
+    labels = ['Algo A', 'Algo B', 'Algo C', 'Algo D']
+    
+    #for i in range(len(thr)):
+
+        #print(labels[i], ":", election_strings(G, [thr[i]], [disp[i]]), "mine")
+
+        #print(labels[i], ":", binVoting(G, [thr[i]], [disp[i]]), "andrea")
+
+    #    print("\n")
+
+    
+    #print(election_strings(G, thr, disp), "mine")
+
+    #print(binVoting(G, thr, disp), "andrea")
+
+    #print(binarizationVoting(G, thr, disp))
+
+    G = [0. ,0.16966817, 0.19426017, 0.21037017, 0.20068433, 0.1847105,0.16538533,0.14316133, 0.11713267, 0.09497817] 
+    t = [0.0858161158554813, 0.14958133789442618, 0.11163803490458082, 0.018275213120431785] 
+    d = [0.0368999999999999, 0.0053999999999999, 0.0186, 0.1296]
+
+    #for i in range(len(thr)):
+
+        #print(labels[i], ":", election_strings(G, [thr[i]], [disp[i]]), "mine")
+
+        #rint(labels[i], ":", binVoting(G, [t[i]], [d[i]]), "andrea")
+
+        #print("\n")
+
+    #print(binVoting(G, t, d))
+
+    print(election_strings(G, t, d), "mine \n")
+
+    #print(binVoting(G, t, d), "andrea \n")
+
+    print(binarizationVoting(G, t, d))'''

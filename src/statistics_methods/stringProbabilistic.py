@@ -49,13 +49,23 @@ def call_C_statistics(gene, d, alg, binary):
 
     #print("aqui", binary, alg, d, gene)
 
-    my_lib.run(gene, d, sizeGene, alg.encode('utf-8'), binary.encode('utf-8'))
+    #print(gene, d, sizeGene, alg, binary)
+
+    gene2 = gene.copy()
+
+    my_lib.run(gene2, d, sizeGene, alg.encode('utf-8'), binary.encode('utf-8'))
 
     #print("despues de run")
 
     high_p = my_lib.get_high_p()
     high_string = my_lib.get_string()
     p = my_lib.get_p()
+
+    #print((high_p, high_string), p)
+
+    prob_dict = {'label':[alg],'string':[binary],'prob':[p],'mean':[],'sd':[],'res':[],'highest':[high_string.decode('utf-8')],'highestprob':[high_p]}
+
+    #print(prob_dict, d)
 
     return high_p, high_string.decode('utf-8'), p
 

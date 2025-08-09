@@ -14,6 +14,8 @@ void readFile(double *prob_alg, double *prob_val, int rangeIndex, int alg){
 
     snprintf(name, 100, "./statistics_methods/cdf_%d.csv", rangeIndex+1);
 
+    //printf("%d\n", rangeIndex+1);
+
     FILE *file = fopen(name, "r");
 
     char line[1024];
@@ -220,10 +222,16 @@ void probBin(double gene[], double d, int sizeGene, double probs_alg[], double p
 void run(double gene[], double d, int sizeGene, char alg[], char my_string[]){
 
     double min = gene[0], max = gene[0];
-        for (int i = 1; i < sizeGene; i++) {
+    for (int i = 1; i < sizeGene; i++) {
             if (gene[i] < min) min = gene[i];
             if (gene[i] > max) max = gene[i];
         }
+    
+    //for(int i = 0; i < sizeGene; i++){
+    //    printf("%f ", gene[i]);
+    //}
+
+    //printf("\nmax: %f, min: %f\n", max, min);
 
     int rangeIndex = ceil((max-min)*10) - 1;
 
