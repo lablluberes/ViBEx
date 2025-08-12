@@ -9,7 +9,7 @@ import pandas as pd
 import numpy as np
 import time
 import dash_bootstrap_components as dbc
-
+from bitarray import bitarray
 
 from networks.networks import create_boolean_network, create_boolean_network_votes
 from networks.network_graphs import create_boolean_network_graph, create_boolean_network_graph_votes, create_GRN_plot
@@ -17,7 +17,7 @@ from networks.network_rule import createNetwork
 
 from inference_methods.logicgep import LogicGep
 from inference_methods.mibni.Mibni import Mibni
-from inference_methods.bestfit_mod import run_bestfit
+from inference_methods.BooleanModeling2post.BinInfer import run
 
 from networks.hamming import hamming_state_by_state, hamming_chain, generate_init_final_comparison, extract_path
 from networks.metrics import Metrics, dynamic_accuracy, Metrics_directed
@@ -1177,28 +1177,38 @@ def get_network_inf_callbacks(app):
             
         else:
             # infer rules using Bestfit
-            result, expr = run_bestfit(df_binary.T, len(list(df_binary.columns)))
+            #result, expr = run_bestfit(df_binary.T, len(list(df_binary.columns)))
+            
+            data = {}
+            
+            for i in df_binary:
+                nums = list(df_binary[i].values)
+                
+                nums = [str(int(i)) for i in nums]
+                
+                array_nums = "".join(nums)
+                
+                data[i] = bitarray(array_nums)
+            
+            result = run(data, 100, 0.05)
             
             #print(len(list(df_binary.columns)))
             #print(df_binary)
             
             #print(result)
             
-            if len(result) != len(list(df_binary.columns)):
-                result = None
+            #print(result)
+            
+            #if len(result) != len(list(df_binary.columns)):
+            #    result = None
                 
             # if result is None means bestfit was not able to infer all rules. show message
             if result is None:
 
                 return html.P("Best fit was not able to infer all Boolean Functions. Try again, user other binarizations or imputate different values."), None
 
-            # save rules
-            data = {'Gene': [], 'Rule': []}
+            df_infer_rules = pd.DataFrame(result)
             
-            data['Rule'] = expr
-            data['Gene'] = list(df_binary.columns)
-            
-            df_infer_rules = pd.DataFrame(data)
 
         end_time = time.time()
 
@@ -1632,6 +1642,8 @@ def get_network_inf_callbacks(app):
 
                     for i in range(15):
                         df_infer_rules = LogicGep(df_binary, df_data)
+                        
+                        print("LOGICGEP", i)
 
                         # create network based on inferred rules
                         net, dict_net = createNetwork(df_infer_rules)
@@ -1728,17 +1740,107 @@ def get_network_inf_callbacks(app):
                 else:
                     print(m)
                     # infer rules using Bestfit
-                    result, expr = run_bestfit(df_binary.T, len(list(df_binary.columns)))
                     
-                    # save rules
-                    data = {'Gene': [], 'Rule': []}
+                    data = {}
+            
+                    for i in df_binary:
+                        nums = list(df_binary[i].values)
+                        
+                        nums = [str(int(i)) for i in nums]
+                        
+                        array_nums = "".join(nums)
+                        
+                        data[i] = bitarray(array_nums)
+
+                    dyn_arr = []
+                    acc_arr = []
+                    pre_arr = []
+                    re_arr = []
+                    fscore_arr = []
+
+                    for i in range(15):
+                        
+                        rules = run(data, 100, 0.05)
+                        
+                        df_infer_rules = pd.DataFrame(rules)
+                        
+                        print(i, rules, "BESTFIT")
+
+                        # create network based on inferred rules
+                        net, dict_net = createNetwork(df_infer_rules)
+
+                        # get first state of binarization
+                        state = df_binary.iloc[0].values
+                        state = ''.join(str(s) for s in state)
+
+                        # extract path from infered BN based on first state
+                        path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+
+                        print("get dyn and metrics")
+                        df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
+
+                        if df_dyn_acc == None:
+                            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
+                        
+                        else:
+                            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
+
+                        metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
+                        #metrics_dir = Metrics_directed(pd.DataFrame(rules_uploaded), df_infer_rules)
+
+                        metric_dict = {}
+
+                        metric_dict['Method'] = m
+
+                        metric_dict['Binarization'] = m_thr
+
+                        metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
+                            
+
+                        for metr in metrics:
+                            metric_dict[metr] = metrics[metr][0]
+
+                        #for metr in metrics_dir:
+                        #    metric_dict[metr+'(Directed Matrix)'] = metrics_dir[metr][0]
+
+                        if metric_dict['Dynamic Accuracy'] != 'Cannot be calculated':
+                      
+                            dyn_arr.append(metric_dict['Dynamic Accuracy'])
+
+                        acc_arr.append(metric_dict['Accuracy'])
+                        pre_arr.append(metric_dict['Precision'])
+                        re_arr.append(metric_dict['Recall'])
+                        fscore_arr.append(metric_dict['F1-Score'])
+
+                        metrics_data.append(metric_dict)
                     
-                    data['Rule'] = expr
-                    data['Gene'] = list(df_binary.columns)
-                    
-                    df_infer_rules = pd.DataFrame(data)
+                    mean_dyn = np.mean(dyn_arr)
+                    mean_acc = np.mean(acc_arr)
+                    mean_pre = np.mean(pre_arr)
+                    mean_re = np.mean(re_arr)
+                    mean_f= np.mean(fscore_arr)
+
+                    std_dyn = np.std(dyn_arr, ddof=1)
+                    std_acc = np.std(acc_arr, ddof=1)
+                    std_pre = np.std(pre_arr, ddof=1)
+                    std_re = np.std(re_arr, ddof=1)
+                    std_f= np.std(fscore_arr, ddof=1)
+
+                    se_dyn = std_dyn / np.sqrt(len(dyn_arr))
+                    se_acc = std_acc / np.sqrt(len(acc_arr))
+                    se_pre = std_pre / np.sqrt(len(pre_arr))
+                    se_re = std_re / np.sqrt(len(re_arr))
+                    se_f= std_f / np.sqrt(len(fscore_arr))
+
+                    mean_row = {'Method': m, 'Binarization':m_thr, 
+                                'Dynamic Accuracy': f"Mean: {round(mean_dyn, 2)} STD: {round(std_dyn, 3)} SE: {round(se_dyn, 3)}",
+                                'Accuracy': f"Mean: {round(mean_acc, 2)} STD: {round(std_acc, 3)} SE: {round(se_acc, 3)}",
+                                'Precision': f"Mean: {round(mean_pre, 2)} STD: {round(std_pre, 3)} SE: {round(se_pre, 3)}",
+                                'Recall': f"Mean: {round(mean_re, 2)} STD: {round(std_re, 3)} SE: {round(se_re, 3)}",
+                                'F1-Score': f"Mean: {round(mean_f, 2)} STD: {round(std_f, 3)} SE: {round(se_f, 3)}"} 
+                    metrics_data.append(mean_row)
                 
-                if m != "LogicGep":
+                if m == "MIBNI":
                     # create network based on inferred rules
                     net, dict_net = createNetwork(df_infer_rules)
 

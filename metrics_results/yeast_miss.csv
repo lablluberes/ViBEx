@@ -1,73 +1,133 @@
 ,Method,Binarization,Dynamic Accuracy,Accuracy,Precision,Recall,F1-Score
 0,MIBNI,BASC A,0.521,0.42,0.4,0.94,0.57
-1,MIBNI,K-Means,0.573,0.4,0.4,1.0,0.57
-2,MIBNI,Onestep,0.701,0.51,0.45,1.0,0.62
+1,MIBNI,K-Means,0.573,0.4,0.4,1,0.57
+2,MIBNI,Onestep,0.701,0.51,0.45,1,0.62
 3,MIBNI,Elected,0.547,0.44,0.41,0.94,0.58
-4,LogicGep,BASC A,0.846,0.62,0.53,0.56,0.54
-5,LogicGep,BASC A,0.846,0.44,0.33,0.39,0.36
-6,LogicGep,BASC A,0.846,0.51,0.39,0.39,0.39
-7,LogicGep,BASC A,0.846,0.56,0.44,0.44,0.44
-8,LogicGep,BASC A,0.846,0.58,0.47,0.5,0.49
-9,LogicGep,BASC A,0.846,0.49,0.4,0.56,0.47
-10,LogicGep,BASC A,0.846,0.64,0.57,0.44,0.5
-11,LogicGep,BASC A,0.846,0.38,0.27,0.33,0.3
-12,LogicGep,BASC A,0.846,0.47,0.33,0.33,0.33
-13,LogicGep,BASC A,Cannot be calculated,0.53,0.41,0.39,0.4
-14,LogicGep,BASC A,Cannot be calculated,0.58,0.47,0.44,0.46
-15,LogicGep,BASC A,0.846,0.64,0.56,0.5,0.53
-16,LogicGep,BASC A,Cannot be calculated,0.58,0.47,0.5,0.49
-17,LogicGep,BASC A,0.846,0.49,0.35,0.33,0.34
-18,LogicGep,BASC A,0.846,0.53,0.41,0.39,0.4
-19,LogicGep,BASC A,Mean: 0.85 STD: 0.0 SE: 0.0,Mean: 0.54 STD: 0.075 SE: 0.019,Mean: 0.43 STD: 0.087 SE: 0.023,Mean: 0.43 STD: 0.078 SE: 0.02,Mean: 0.43 STD: 0.076 SE: 0.02
-20,LogicGep,K-Means,Cannot be calculated,0.67,0.59,0.56,0.57
-21,LogicGep,K-Means,0.487,0.6,0.5,0.44,0.47
-22,LogicGep,K-Means,0.556,0.62,0.54,0.39,0.45
-23,LogicGep,K-Means,0.556,0.73,0.67,0.67,0.67
-24,LogicGep,K-Means,0.556,0.64,0.55,0.61,0.58
-25,LogicGep,K-Means,0.556,0.69,0.61,0.61,0.61
-26,LogicGep,K-Means,0.556,0.67,0.59,0.56,0.57
-27,LogicGep,K-Means,Cannot be calculated,0.64,0.56,0.5,0.53
-28,LogicGep,K-Means,0.556,0.53,0.42,0.44,0.43
-29,LogicGep,K-Means,0.556,0.62,0.53,0.56,0.54
-30,LogicGep,K-Means,0.718,0.58,0.47,0.44,0.46
-31,LogicGep,K-Means,0.444,0.58,0.47,0.5,0.49
-32,LogicGep,K-Means,0.556,0.53,0.4,0.33,0.36
-33,LogicGep,K-Means,0.556,0.67,0.57,0.72,0.63
-34,LogicGep,K-Means,0.547,0.42,0.28,0.28,0.28
-35,LogicGep,K-Means,Mean: 0.55 STD: 0.06 SE: 0.017,Mean: 0.61 STD: 0.078 SE: 0.02,Mean: 0.52 STD: 0.098 SE: 0.025,Mean: 0.51 STD: 0.123 SE: 0.032,Mean: 0.51 STD: 0.105 SE: 0.027
-36,LogicGep,Onestep,0.59,0.6,0.5,0.44,0.47
-37,LogicGep,Onestep,0.59,0.51,0.38,0.33,0.35
-38,LogicGep,Onestep,0.59,0.6,0.5,0.39,0.44
-39,LogicGep,Onestep,0.59,0.51,0.36,0.28,0.31
-40,LogicGep,Onestep,0.513,0.44,0.32,0.33,0.32
-41,LogicGep,Onestep,0.513,0.53,0.4,0.33,0.36
-42,LogicGep,Onestep,0.59,0.58,0.47,0.44,0.46
-43,LogicGep,Onestep,0.513,0.58,0.47,0.44,0.46
-44,LogicGep,Onestep,0.513,0.6,0.5,0.61,0.55
-45,LogicGep,Onestep,0.513,0.64,0.57,0.44,0.5
-46,LogicGep,Onestep,0.59,0.62,0.53,0.5,0.51
-47,LogicGep,Onestep,0.59,0.56,0.44,0.44,0.44
-48,LogicGep,Onestep,0.59,0.51,0.33,0.22,0.27
-49,LogicGep,Onestep,0.556,0.51,0.4,0.44,0.42
-50,LogicGep,Onestep,0.59,0.53,0.4,0.33,0.36
-51,LogicGep,Onestep,Mean: 0.56 STD: 0.037 SE: 0.01,Mean: 0.55 STD: 0.054 SE: 0.014,Mean: 0.44 STD: 0.075 SE: 0.019,Mean: 0.4 STD: 0.096 SE: 0.025,Mean: 0.41 STD: 0.082 SE: 0.021
-52,LogicGep,Elected,0.607,0.6,0.5,0.39,0.44
-53,LogicGep,Elected,0.607,0.64,0.58,0.39,0.47
-54,LogicGep,Elected,0.607,0.56,0.44,0.39,0.41
-55,LogicGep,Elected,0.607,0.67,0.62,0.44,0.52
-56,LogicGep,Elected,0.521,0.56,0.44,0.44,0.44
-57,LogicGep,Elected,Cannot be calculated,0.62,0.54,0.39,0.45
-58,LogicGep,Elected,0.607,0.6,0.5,0.33,0.4
-59,LogicGep,Elected,0.598,0.6,0.5,0.44,0.47
-60,LogicGep,Elected,0.607,0.62,0.53,0.44,0.48
-61,LogicGep,Elected,0.521,0.62,0.53,0.44,0.48
+4,LogicGep,BASC A,0.846,0.56,0.44,0.39,0.41
+5,LogicGep,BASC A,Cannot be calculated,0.49,0.33,0.28,0.3
+6,LogicGep,BASC A,Cannot be calculated,0.62,0.54,0.39,0.45
+7,LogicGep,BASC A,Cannot be calculated,0.64,0.58,0.39,0.47
+8,LogicGep,BASC A,Cannot be calculated,0.58,0.48,0.56,0.51
+9,LogicGep,BASC A,0.846,0.44,0.32,0.33,0.32
+10,LogicGep,BASC A,0.846,0.51,0.39,0.39,0.39
+11,LogicGep,BASC A,0.803,0.44,0.32,0.33,0.32
+12,LogicGep,BASC A,0.846,0.64,0.56,0.5,0.53
+13,LogicGep,BASC A,0.846,0.58,0.47,0.5,0.49
+14,LogicGep,BASC A,0.846,0.53,0.43,0.56,0.49
+15,LogicGep,BASC A,0.846,0.58,0.47,0.39,0.42
+16,LogicGep,BASC A,0.846,0.56,0.45,0.5,0.47
+17,LogicGep,BASC A,Cannot be calculated,0.58,0.46,0.33,0.39
+18,LogicGep,BASC A,Cannot be calculated,0.53,0.43,0.5,0.46
+19,LogicGep,BASC A,Mean: 0.84 STD: 0.014 SE: 0.005,Mean: 0.55 STD: 0.063 SE: 0.016,Mean: 0.44 STD: 0.081 SE: 0.021,Mean: 0.42 STD: 0.09 SE: 0.023,Mean: 0.43 STD: 0.072 SE: 0.019
+20,LogicGep,K-Means,0.556,0.71,0.69,0.5,0.58
+21,LogicGep,K-Means,0.556,0.69,0.64,0.5,0.56
+22,LogicGep,K-Means,0.556,0.56,0.45,0.5,0.47
+23,LogicGep,K-Means,Cannot be calculated,0.67,0.64,0.39,0.48
+24,LogicGep,K-Means,0.556,0.76,0.73,0.61,0.67
+25,LogicGep,K-Means,Cannot be calculated,0.49,0.33,0.28,0.3
+26,LogicGep,K-Means,Cannot be calculated,0.62,0.54,0.39,0.45
+27,LogicGep,K-Means,Cannot be calculated,0.6,0.5,0.33,0.4
+28,LogicGep,K-Means,0.556,0.51,0.39,0.39,0.39
+29,LogicGep,K-Means,0.556,0.69,0.62,0.56,0.59
+30,LogicGep,K-Means,0.556,0.67,0.59,0.56,0.57
+31,LogicGep,K-Means,0.684,0.56,0.44,0.39,0.41
+32,LogicGep,K-Means,0.556,0.71,0.78,0.39,0.52
+33,LogicGep,K-Means,0.556,0.64,0.58,0.39,0.47
+34,LogicGep,K-Means,0.556,0.67,0.59,0.56,0.57
+35,LogicGep,K-Means,Mean: 0.57 STD: 0.039 SE: 0.012,Mean: 0.64 STD: 0.078 SE: 0.02,Mean: 0.57 STD: 0.127 SE: 0.033,Mean: 0.45 STD: 0.098 SE: 0.025,Mean: 0.5 STD: 0.097 SE: 0.025
+36,LogicGep,Onestep,0.504,0.53,0.42,0.44,0.43
+37,LogicGep,Onestep,0.59,0.53,0.4,0.33,0.36
+38,LogicGep,Onestep,0.513,0.56,0.42,0.28,0.33
+39,LogicGep,Onestep,0.59,0.67,0.62,0.44,0.52
+40,LogicGep,Onestep,0.59,0.58,0.47,0.39,0.42
+41,LogicGep,Onestep,0.59,0.51,0.4,0.44,0.42
+42,LogicGep,Onestep,0.513,0.58,0.47,0.44,0.46
+43,LogicGep,Onestep,0.59,0.56,0.44,0.39,0.41
+44,LogicGep,Onestep,0.59,0.49,0.37,0.39,0.38
+45,LogicGep,Onestep,0.581,0.6,0.5,0.39,0.44
+46,LogicGep,Onestep,0.59,0.6,0.5,0.44,0.47
+47,LogicGep,Onestep,0.59,0.51,0.36,0.28,0.31
+48,LogicGep,Onestep,0.581,0.69,0.6,0.67,0.63
+49,LogicGep,Onestep,0.513,0.58,0.46,0.33,0.39
+50,LogicGep,Onestep,0.59,0.58,0.47,0.44,0.46
+51,LogicGep,Onestep,Mean: 0.57 STD: 0.036 SE: 0.009,Mean: 0.57 STD: 0.056 SE: 0.014,Mean: 0.46 STD: 0.074 SE: 0.019,Mean: 0.41 STD: 0.093 SE: 0.024,Mean: 0.43 STD: 0.078 SE: 0.02
+52,LogicGep,Elected,0.607,0.56,0.44,0.39,0.41
+53,LogicGep,Elected,Cannot be calculated,0.62,0.55,0.33,0.41
+54,LogicGep,Elected,0.607,0.51,0.39,0.39,0.39
+55,LogicGep,Elected,0.598,0.49,0.35,0.33,0.34
+56,LogicGep,Elected,0.598,0.49,0.35,0.33,0.34
+57,LogicGep,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+58,LogicGep,Elected,0.624,0.49,0.37,0.39,0.38
+59,LogicGep,Elected,0.607,0.6,0.5,0.39,0.44
+60,LogicGep,Elected,0.632,0.64,0.57,0.44,0.5
+61,LogicGep,Elected,0.598,0.53,0.41,0.39,0.4
 62,LogicGep,Elected,0.607,0.62,0.53,0.44,0.48
-63,LogicGep,Elected,0.598,0.53,0.38,0.28,0.32
-64,LogicGep,Elected,0.607,0.6,0.5,0.33,0.4
-65,LogicGep,Elected,0.598,0.6,0.5,0.44,0.47
-66,LogicGep,Elected,0.607,0.58,0.47,0.39,0.42
-67,LogicGep,Elected,Mean: 0.59 STD: 0.031 SE: 0.008,Mean: 0.6 STD: 0.034 SE: 0.009,Mean: 0.5 STD: 0.058 SE: 0.015,Mean: 0.4 STD: 0.051 SE: 0.013,Mean: 0.44 STD: 0.048 SE: 0.012
-68,Bestfit,BASC A,Cannot be calculated,0.56,0.42,0.28,0.33
-69,Bestfit,K-Means,Cannot be calculated,0.56,0.44,0.44,0.44
-70,Bestfit,Onestep,0.624,0.44,0.37,0.56,0.44
-71,Bestfit,Elected,Cannot be calculated,0.42,0.33,0.44,0.38
+63,LogicGep,Elected,0.615,0.62,0.54,0.39,0.45
+64,LogicGep,Elected,0.607,0.56,0.44,0.39,0.41
+65,LogicGep,Elected,0.521,0.62,0.53,0.56,0.54
+66,LogicGep,Elected,0.615,0.62,0.53,0.44,0.48
+67,LogicGep,Elected,Mean: 0.6 STD: 0.027 SE: 0.007,Mean: 0.57 STD: 0.057 SE: 0.015,Mean: 0.46 STD: 0.082 SE: 0.021,Mean: 0.39 STD: 0.065 SE: 0.017,Mean: 0.42 STD: 0.064 SE: 0.017
+68,Bestfit,BASC A,Cannot be calculated,0.51,0.33,0.22,0.27
+69,Bestfit,BASC A,Cannot be calculated,0.58,0.45,0.28,0.34
+70,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+71,Bestfit,BASC A,Cannot be calculated,0.58,0.45,0.28,0.34
+72,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+73,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+74,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+75,Bestfit,BASC A,Cannot be calculated,0.56,0.42,0.28,0.33
+76,Bestfit,BASC A,Cannot be calculated,0.51,0.33,0.22,0.27
+77,Bestfit,BASC A,Cannot be calculated,0.58,0.45,0.28,0.34
+78,Bestfit,BASC A,Cannot be calculated,0.62,0.55,0.33,0.41
+79,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+80,Bestfit,BASC A,Cannot be calculated,0.6,0.5,0.33,0.4
+81,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+82,Bestfit,BASC A,Cannot be calculated,0.53,0.36,0.22,0.28
+83,Bestfit,BASC A,Mean: nan STD: nan SE: nan,Mean: 0.55 STD: 0.034 SE: 0.009,Mean: 0.4 STD: 0.066 SE: 0.017,Mean: 0.25 STD: 0.042 SE: 0.011,Mean: 0.31 STD: 0.047 SE: 0.012
+84,Bestfit,K-Means,Cannot be calculated,0.56,0.44,0.44,0.44
+85,Bestfit,K-Means,Cannot be calculated,0.6,0.5,0.5,0.5
+86,Bestfit,K-Means,Cannot be calculated,0.56,0.44,0.44,0.44
+87,Bestfit,K-Means,Cannot be calculated,0.53,0.41,0.39,0.4
+88,Bestfit,K-Means,Cannot be calculated,0.51,0.39,0.39,0.39
+89,Bestfit,K-Means,Cannot be calculated,0.53,0.42,0.44,0.43
+90,Bestfit,K-Means,Cannot be calculated,0.53,0.41,0.39,0.4
+91,Bestfit,K-Means,Cannot be calculated,0.58,0.47,0.5,0.49
+92,Bestfit,K-Means,Cannot be calculated,0.53,0.42,0.44,0.43
+93,Bestfit,K-Means,Cannot be calculated,0.51,0.39,0.39,0.39
+94,Bestfit,K-Means,Cannot be calculated,0.51,0.39,0.39,0.39
+95,Bestfit,K-Means,Cannot be calculated,0.53,0.42,0.44,0.43
+96,Bestfit,K-Means,Cannot be calculated,0.51,0.39,0.39,0.39
+97,Bestfit,K-Means,Cannot be calculated,0.51,0.39,0.39,0.39
+98,Bestfit,K-Means,Cannot be calculated,0.53,0.41,0.39,0.4
+99,Bestfit,K-Means,Mean: nan STD: nan SE: nan,Mean: 0.54 STD: 0.028 SE: 0.007,Mean: 0.42 STD: 0.032 SE: 0.008,Mean: 0.42 STD: 0.04 SE: 0.01,Mean: 0.42 STD: 0.036 SE: 0.009
+100,Bestfit,Onestep,0.915,0.44,0.32,0.33,0.32
+101,Bestfit,Onestep,0.752,0.49,0.37,0.39,0.38
+102,Bestfit,Onestep,0.761,0.53,0.42,0.44,0.43
+103,Bestfit,Onestep,0.581,0.53,0.42,0.44,0.43
+104,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+105,Bestfit,Onestep,0.769,0.49,0.37,0.39,0.38
+106,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+107,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+108,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+109,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+110,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+111,Bestfit,Onestep,0.786,0.49,0.37,0.39,0.38
+112,Bestfit,Onestep,0.803,0.49,0.37,0.39,0.38
+113,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+114,Bestfit,Onestep,0.803,0.44,0.32,0.33,0.32
+115,Bestfit,Onestep,Mean: 0.79 STD: 0.067 SE: 0.017,Mean: 0.47 STD: 0.034 SE: 0.009,Mean: 0.35 STD: 0.037 SE: 0.01,Mean: 0.36 STD: 0.042 SE: 0.011,Mean: 0.35 STD: 0.042 SE: 0.011
+116,Bestfit,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+117,Bestfit,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+118,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+119,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+120,Bestfit,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+121,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+122,Bestfit,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+123,Bestfit,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+124,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+125,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+126,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+127,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+128,Bestfit,Elected,Cannot be calculated,0.51,0.36,0.28,0.31
+129,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+130,Bestfit,Elected,Cannot be calculated,0.47,0.29,0.22,0.25
+131,Bestfit,Elected,Mean: nan STD: nan SE: nan,Mean: 0.49 STD: 0.02 SE: 0.005,Mean: 0.32 STD: 0.035 SE: 0.009,Mean: 0.24 STD: 0.03 SE: 0.008,Mean: 0.27 STD: 0.03 SE: 0.008

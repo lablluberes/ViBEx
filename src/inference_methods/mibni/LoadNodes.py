@@ -1,3 +1,21 @@
+##############################################
+# This code was converted from Java to Python based on Pusnik paper Java code: Pušnik, Ž., Mraz, M., Zimic, N., & Moškon, M. (2022). Review and assessment of Boolean approaches for inference of gene regulatory networks. Heliyon, 8(8).
+#
+# Barman and Kwon, the creaters of MIBNI, provided the Java code to Pusnik
+# This is the paper of Barman about MIBNI: Barman, S., & Kwon, Y. K. (2017). A novel mutual information-based Boolean network inference method from time-series gene expression data. PloS one, 12(2), e0171097.
+#
+#
+##############################################
+
+# Following comment was in the Java code that we obtained from Pusnik
+'''/**
+ * @author Shohag Barman
+ * Combined Master's and PhD student
+ * Complex Systems Computing Lab, Ulsan university, South Korea.
+ *
+ */'''
+
+
 import pandas as pd
 
 class LoadNodes():

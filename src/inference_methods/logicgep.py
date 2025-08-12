@@ -1,3 +1,13 @@
+##########################################
+#
+# Code was taken from https://github.com/DZ-Z/LogicGep
+# This is the code of the method created by Dezhen Zhang in following paper
+#
+# Zhang, D., Gao, S., Liu, Z. P., & Gao, R. (2024). LogicGep: Boolean networks inference using symbolic regression from time-series transcriptomic profiling data. Briefings in Bioinformatics, 25(4), bbae286.
+#
+# DOI: https://doi.org/10.1093/bib/bbae286
+##########################################
+
 import deap
 import random
 def _validate_basic_toolbox(tb):

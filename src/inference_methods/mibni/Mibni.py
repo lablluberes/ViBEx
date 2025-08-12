@@ -1,8 +1,18 @@
+##############################################
+# This code was converted from Java to Python based on Pusnik paper Java code: Pušnik, Ž., Mraz, M., Zimic, N., & Moškon, M. (2022). Review and assessment of Boolean approaches for inference of gene regulatory networks. Heliyon, 8(8).
+#
+# Barman and Kwon, the creaters of MIBNI, provided the Java code to Pusnik
+# This is the paper of Barman about MIBNI: Barman, S., & Kwon, Y. K. (2017). A novel mutual information-based Boolean network inference method from time-series gene expression data. PloS one, 12(2), e0171097.
+#
+#
+##############################################
+
 import pandas as pd
 
 from .LoadNodes import LoadNodes
 from .MutualInformationCalculation import MutualInformationCalculation
 from .MIBNIUpateRules import MIBNIUpateRules
+#from ...networks.metrics import Metrics
 
 class Mibni():
 
@@ -199,7 +209,7 @@ class Mibni():
 
 
 
-'''if __name__ == "__main__":
+"""if __name__ == "__main__":
 
     data = {'lexA': [0, 1, 0, 1], 
                 'uvrD': [0, 0, 1, 1], 
@@ -215,14 +225,76 @@ class Mibni():
             'polB': [0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], 
             'umuD': [0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]}
 
+    data = {
+
+                'Gene1':[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                'Gene2':[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene3":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                "Gene4":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1],
+                "Gene5":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene6":[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene7":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene8":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene9":[1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,1],
+                "Gene10":[0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene11":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+                "Gene12":[1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                "Gene13":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                "Gene14":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                "Gene15":[1,1,0,0,1,1,1,1,1,0,1,1,0,0,1,0,1,0,0,1,1,0,1,0,0,0,0,1,1,1,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,1],
+                "Gene16":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+
+
+    }
 
     df = pd.DataFrame(data)
 
     
 
     a = Mibni(10, df, "dynamics.tsv")
-    rules = a.run()
+    result = a.run()
 
-    print(rules)'''
+    rules_infered = {'Gene':[],
+                    'Rule':[]}
+    for r in result:
+
+        rul = r.split(" = ")
+        rules_infered['Gene'].append(rul[0])
+        rules_infered['Rule'].append(rul[1])
+
+
+    df_infer_rules = pd.DataFrame(rules_infered)
+
+    real_rules = {
+
+        "Gene": [
+            "Gene1", "Gene2", "Gene3", "Gene4", "Gene5", "Gene6", "Gene7", "Gene8",
+            "Gene9", "Gene10", "Gene11", "Gene12", "Gene13", "Gene14", "Gene15", "Gene16"
+        ],
+        "Rule": [
+            "(Gene12) | (Gene5) | (!Gene2) | (Gene10) | (Gene11) | (!Gene3) | (!Gene14) | (!Gene13) | (Gene6) | (Gene7)",
+            "(!Gene1) & (!Gene12) & (Gene2) & (Gene10) & (Gene11) & (Gene3) & (Gene14) & (Gene13) & (Gene4) & (Gene7)",
+            "(Gene14) | (Gene13) | (Gene4) | (Gene3) | (!Gene10) | (!Gene11) | (Gene7) | (Gene6) | (Gene5) | (!Gene16)",
+            "(Gene13) | (Gene14) | (Gene4) | (Gene3) | (!Gene10) | (!Gene11) | (Gene7) | (Gene6) | (Gene5) | (!Gene16)",
+            "(Gene7) & (Gene1) & (!Gene2) & (Gene3) & (Gene14) & (Gene13) & (Gene4) & (!Gene16) & (Gene5) & (Gene9)",
+            "(Gene6) & (Gene11) & (Gene7) & (Gene3) & (Gene14) & (Gene13) & (Gene4) & (!Gene16) & (Gene5) & (Gene1)",
+            "(Gene5) | (Gene7) | (Gene6) | (Gene10) | (!Gene3) | (!Gene14) | (!Gene13) | (Gene11) | (Gene16) | (Gene8)",
+            "(Gene11) & (Gene10) & (!Gene3) & (!Gene9) & (!Gene12) & (!Gene6) & (Gene7) & (!Gene16) & (Gene5) & (Gene8)",
+            "(Gene1) & (Gene7) & (Gene11) & (!Gene2) & (Gene3) & (Gene14) & (Gene13) & (Gene4) & (!Gene16) & (Gene5)",
+            "(!Gene6) & (Gene10) & (!Gene3) & (!Gene14) & (!Gene13) & (!Gene4) & (!Gene7) & (Gene16) & (!Gene5) & (Gene11)",
+            "(Gene10) | (Gene6) | (!Gene3) | (!Gene14) | (!Gene13) | (Gene11) | (!Gene4) | (Gene16) | (Gene5) | (Gene8)",
+            "(Gene1) | (Gene12) | (!Gene2) | (!Gene10) | (!Gene11) | (!Gene3) | (!Gene14) | (!Gene13) | (!Gene4) | (!Gene7)",
+            "(Gene14) | (Gene13) | (Gene4) | (Gene3) | (!Gene10) | (!Gene11) | (Gene7) | (Gene6) | (Gene5) | (!Gene16)",
+            "(Gene13) | (Gene14) | (Gene4) | (Gene3) | (!Gene10) | (!Gene11) | (Gene7) | (Gene6) | (Gene5) | (!Gene16)",
+            "(Gene1) & (!Gene6) & (Gene14) & (Gene3) & (!Gene10) & (!Gene9) & (Gene7) & (!Gene16) & (!Gene5) & (!Gene8)",
+            "(!Gene14) & (!Gene13) & (!Gene4) & (!Gene3) & (Gene10) & (Gene11) & (!Gene7) & (Gene16) & (!Gene5) & (!Gene6)"
+        ]
+    }
+
+
+    metrics = Metrics(pd.DataFrame(real_rules), df_infer_rules)
+
+    print(df_infer_rules)"""
 
 

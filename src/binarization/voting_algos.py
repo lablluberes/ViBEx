@@ -1,7 +1,7 @@
 ################################
 ## Code to generate the voting table 
 ## Function - binVoting, voting mechanism based on Lluberes and Seguel paper. 
-## Function - binarizationVoting, voting mechanism created
+## Function - binarizationVoting, voting mechanism
 ## Function - election_strings, voting mechanism based on Lluberes thesis
 ###############################
 
