@@ -1,7 +1,7 @@
 ################################
 ## Code to generate the voting table 
 ## Function - binVoting, voting mechanism based on Lluberes and Seguel paper. 
-## Function - binarizationVoting, voting mechanism
+## Function - binarizationVoting, voting mechanism created
 ## Function - election_strings, voting mechanism based on Lluberes thesis
 ###############################
 
@@ -49,7 +49,7 @@ def binVoting(gene, threshold, displacement):
        
     return z
 
-#algorithm (i made it myself based on the table!!!)
+# algorithm (i made it myself based on the table!!!)
 
 def binarizationVoting(gene, threshold, displacement):
 

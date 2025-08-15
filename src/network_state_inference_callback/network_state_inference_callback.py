@@ -18,6 +18,7 @@ from networks.network_rule import createNetwork
 from inference_methods.logicgep import LogicGep
 from inference_methods.mibni.Mibni import Mibni
 from inference_methods.BooleanModeling2post.BinInfer import run
+from inference_methods.bestfit_mod import run_bestfit
 
 from networks.hamming import hamming_state_by_state, hamming_chain, generate_init_final_comparison, extract_path
 from networks.metrics import Metrics, dynamic_accuracy, Metrics_directed
@@ -1712,11 +1713,11 @@ def get_network_inf_callbacks(app):
                     se_f= std_f / np.sqrt(len(fscore_arr))
 
                     mean_row = {'Method': m, 'Binarization':m_thr, 
-                                'Dynamic Accuracy': f"Mean: {round(mean_dyn, 2)} STD: {round(std_dyn, 3)} SE: {round(se_dyn, 3)}",
-                                'Accuracy': f"Mean: {round(mean_acc, 2)} STD: {round(std_acc, 3)} SE: {round(se_acc, 3)}",
-                                'Precision': f"Mean: {round(mean_pre, 2)} STD: {round(std_pre, 3)} SE: {round(se_pre, 3)}",
-                                'Recall': f"Mean: {round(mean_re, 2)} STD: {round(std_re, 3)} SE: {round(se_re, 3)}",
-                                'F1-Score': f"Mean: {round(mean_f, 2)} STD: {round(std_f, 3)} SE: {round(se_f, 3)}"} 
+                                'Dynamic Accuracy': f"Mean: {mean_dyn} STD: {std_dyn} SE: {se_dyn}",
+                                'Accuracy': f"Mean: {mean_acc} STD: {std_acc} SE: {se_acc}",
+                                'Precision': f"Mean: {mean_pre} STD: {std_pre} SE: {se_pre}",
+                                'Recall': f"Mean: {mean_re} STD: {std_re} SE: {se_re}",
+                                'F1-Score': f"Mean: {mean_f} STD: {std_f} SE: {se_f}"} 
                     metrics_data.append(mean_row)
 
 
@@ -1833,11 +1834,11 @@ def get_network_inf_callbacks(app):
                     se_f= std_f / np.sqrt(len(fscore_arr))
 
                     mean_row = {'Method': m, 'Binarization':m_thr, 
-                                'Dynamic Accuracy': f"Mean: {round(mean_dyn, 2)} STD: {round(std_dyn, 3)} SE: {round(se_dyn, 3)}",
-                                'Accuracy': f"Mean: {round(mean_acc, 2)} STD: {round(std_acc, 3)} SE: {round(se_acc, 3)}",
-                                'Precision': f"Mean: {round(mean_pre, 2)} STD: {round(std_pre, 3)} SE: {round(se_pre, 3)}",
-                                'Recall': f"Mean: {round(mean_re, 2)} STD: {round(std_re, 3)} SE: {round(se_re, 3)}",
-                                'F1-Score': f"Mean: {round(mean_f, 2)} STD: {round(std_f, 3)} SE: {round(se_f, 3)}"} 
+                                'Dynamic Accuracy': f"Mean: {mean_dyn} STD: {std_dyn} SE: {se_dyn}",
+                                'Accuracy': f"Mean: {mean_acc} STD: {std_acc} SE: {se_acc}",
+                                'Precision': f"Mean: {mean_pre} STD: {std_pre} SE: {se_pre}",
+                                'Recall': f"Mean: {mean_re} STD: {std_re} SE: {se_re}",
+                                'F1-Score': f"Mean: {mean_f} STD: {std_f} SE: {se_f}"} 
                     metrics_data.append(mean_row)
                 
                 if m == "MIBNI":

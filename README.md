@@ -1,16 +1,25 @@
-# ViBEx
 
-This tool works as a visualizer for different binarizations of
-time-series gene expressions. Time-series data must be in .csv
-format to properly upload to the application.
 
-## TO RUN ONLINE:
+This tool works as a visualizer, and probabilistic analysis for different binarizations of time-series gene expressions. In addition, it includes Gene Regulatory Network and Boolean Network analysis. Boolean functions can be inferred based on selected binarizations. Different value imputations are available for undecided states of each binarization (based on probabilistic framework). Boolan functions can be uploaded to draw Boolean function or perform metrics based on inferred boolean functions. Time-series data must be in .csv format to properly upload to the application.
 
-go to https://vibex.onrender.com
+## Experiments
+
+- We performed various experiments using datasets for E coli. sos repair, Yeast cell, and p53-MDM2 network. 
+- Go to folder "datasets" where each gene expression is available for each system. Each system boolean functions are available. 
+- Experiments were run for each dataset with binarizations BASC A, K-Means, and Onestep (Elected binarization is created based on selected binarizations, this is from the probabilistic framework). 
+- Two value imputations strategies were done as a case study comparing performance. These are:
+  - (1) probabilistic imputation and MissForest imputation
+  - (2) only MissForest imputation
+- After value imputation we went to tab "Network", and subtab "Inference Boolean Network" and pressed button "Run Script to Download Metrics"
+- As a result a csv file will download once metrics evaluation is finished. Here the dynamic accuracy, accuracy, precision, recall, and F1-score for each inference method and binarization are downloaded. 
+- E coli sos dataset was only imputated using (2) only MissForest  because probabilistic imputation takes a lot of time to imputate. 
+
+- To run experiments follow the previous explination of the experiments to obtain results. 
+- We added a script called script.py to allow the performance evaluation be done without the tool. We recommend that if experiments are to be run, use the tool instead of the script. The following are how to use the tool. 
 
 ## TO RUN LOCALLY:
 
-- Have Python3 installed
+- Have Python3.10 or higher installed
 - Go to:
 ```
 cd src
@@ -31,10 +40,9 @@ python app.py
 	browser of choice
 - Use CTRL + C to shut down the local server once finished
 
-
 ## HOW TO USE
 
-1. Click on **UPLOAD GENE EXPRESSION FILE** and upload a time series dataset in CSV format first column should be gene names. 
+1. Click on **UPLOAD GENE EXPRESSION FILE** and upload a time series dataset in CSV format first column should be gene names (each row is a gene expression).
 2. Select individual genes by clicking on the checkboxes. Deselect by clicking the checkbox again
   - Select all genes by clicking **SELECT ALL**
   - Deselect all selections by clicking **DESELECT ALL**
@@ -47,16 +55,16 @@ python app.py
 ### BINARIZATION TAB
 
  - Displays binarization of a gene from each algorithm's thresholds
- - Click on *Select gene to visulize and binarize* dropdown to select another gene
+ - Click on *Select gene to visuliaze and binarize* dropdown to select another gene
 
 ### DISPLACEMENT TAB
-
+ 
 
 1. Thresholds Tab
- - Displays a rough line graph of the gene with each threshold displayed
- - Shows the interpolation line of gene
- - Graph can be zoomed in or out
- - Graph view can be moved with click and drag
+  - Displays a rough line graph of the gene with each threshold displayed
+  - Shows the interpolation line of gene
+  - Graph can be zoomed in or out
+  - Graph view can be moved with click and drag
  - Hover over a point to see its value
  - Hover over a line to see the threshold value
  
@@ -80,7 +88,7 @@ python app.py
 - Drawing a plot of the binarization path
 3. Inference Boolean Network
 - The "Run Script to Download Metrics" button allows the ability to download a CSV with performance metrics. This is based on the current uploaded dataset, boolean functions, and selected threshold methods. Make sure the data has no undecided states. 
-- Infers boolean Functions based on binarization
+- Infers Boolean Functions based on binarization
 - Select inference method
 - Select binarization to use
 - Shows Boolean Function and Gene Regulatory Network Inferred
@@ -95,9 +103,3 @@ python app.py
 5. Analysis
 - Based on uploaded functions it extracts a path based on binarizations
 - Does Hamming distance analysis comparing each chain 
-
-# PROBABILISTIC ANALYSIS
-
-#### Credits
-
-- loading.py -> https://github.com/Lguanghui/TermLoading

@@ -71,10 +71,10 @@ def Metrics(ground_truth, inferred):
     #print(y_true, y_pred)
     
     # gets metrics 
-    accuracy = round(accuracy_score(y_true, y_pred), 2)
-    precision = round(precision_score(y_true, y_pred), 2)
-    recall = round(recall_score(y_true, y_pred), 2)
-    f1 = round(f1_score(y_true, y_pred), 2)
+    accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    f1 = f1_score(y_true, y_pred)
     
     metrics_dict = {'Accuracy': [accuracy], 'Precision':[precision], 'Recall':[recall], 'F1-Score':[f1]}
     
@@ -108,7 +108,7 @@ def dynamic_accuracy(df, df1):
 
   #print(C)
 
-  dyn_acc = round(1 - (sum(C)/len(columns_names)), 3)
+  dyn_acc = 1 - (sum(C)/len(columns_names))
 
   return dyn_acc
 
