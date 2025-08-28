@@ -112,7 +112,7 @@ double Find_median(double array[] , int n)
 double BASCA (double vect[], const int size) {
 
     omp_set_num_threads(omp_get_max_threads());
-
+    //omp_set_num_threads(threads);
     //double time = omp_get_wtime();
 
     // sort one of the vectors
@@ -183,23 +183,12 @@ double BASCA (double vect[], const int size) {
     //double time = omp_get_wtime();
 
     // parallelize the first step
-    #pragma omp parallel private(threadid)
-    {
-        nt = omp_get_num_threads();
-                //printf("Number threads: %d\n", nt);
-        threadid = omp_get_thread_num();
-                //printf("Thread: %d\n", threadid);
-        chunks = size/nt;
-                //printf("Chunks: %d\n", chunks);
-
-        // parallelize the cost of the first column of the cost matrix
-        #pragma omp for schedule(static, chunks)
-
-            for (int i = 0; i < size; i++){
+    #pragma omp parallel for private(threadid)
+    for (int i = 0; i < size; i++){
                              //printf("Thread %d put value %f in Array space [%d][%d]\n", threadid, C_a_b(vect, i, size), i, 0);
                 cost_matrix[i][0] = C_a_b(vect, i, size);
             }
-    }
+
 
     int i, d;
     double var;
@@ -208,19 +197,9 @@ double BASCA (double vect[], const int size) {
     // Algorithm 1: Calculate optimal step functions
 
     // Palrallelize the calculation optimal step functions algorithm
-    #pragma omp parallel private(threadid, min_value, min_index, curr_value, i, d)
-    {
-        nt = omp_get_num_threads();
-                //printf("Number threads: %d\n", nt);
-        threadid = omp_get_thread_num();
-                //printf("Thread: %d\n", threadid);
-        chunks = (size-2)/nt;
-                //printf("Chunks: %d\n", chunks);
-
-            // go through each column
-            for(int j = 0; j < size-2; j++){
+    for(int j = 0; j < size-2; j++){
             // in each column parallelize so that each thread can calculate a chunk of the cost
-            #pragma omp for schedule(static, chunks)
+                #pragma omp parallel for private(threadid, min_value, min_index, curr_value, i, d)
                 for(int i = 0; i < size-j-1; i++){
 
                     // find the min_value and index of the minimum cost of
@@ -248,7 +227,6 @@ double BASCA (double vect[], const int size) {
                 }
             }
 
-    }
 
                     /*for(int i = 0; i < size; i++){
                         for(int j = 0; j < size-1; j++){
@@ -270,18 +248,9 @@ double BASCA (double vect[], const int size) {
     int z;
 
     // Parallelize the second algorithm which is the P matrix calculation
-    #pragma omp parallel private(threadid, z, i)
-    {
-        nt = omp_get_num_threads();
-        //printf("Number threads: %d\n", nt);
-        threadid = omp_get_thread_num();
-        //printf("Thread: %d\n", threadid);
-        chunks = (size-2)/nt;
-        //printf("Chunks: %d\n", chunks);
-
-        // each thread gets a chunk of columns in order to calculate the value and finish P matrix calculation
-        #pragma omp for schedule(static, chunks)
-            for(int j = 0; j < size-2; j++){
+    #pragma omp parallel for private(threadid, z, i)
+    
+    for(int j = 0; j < size-2; j++){
                 z = j;
                             //printf("Thread %d saved %d in [%d][%d]\n", threadid, index_matrix[0][z], i, j);
                 // initialize first column
@@ -299,7 +268,6 @@ double BASCA (double vect[], const int size) {
                     }
                 }
             }
-    }
 
                         /*printf("\n");
                         for(int i = 0; i < size-2; i++){
@@ -324,18 +292,8 @@ double BASCA (double vect[], const int size) {
     int k;
 
     // paralleize the algorithm to search for the strongest discontinuity
-    #pragma omp parallel private(threadid, h, z_, e, q_score, max_value, max_index, i, k)
-    {
-        nt = omp_get_num_threads();
-        //printf("Number threads: %d\n", nt);
-        threadid = omp_get_thread_num();
-        //printf("Thread: %d\n", threadid);
-        chunks = (size-2)/nt;
-        //printf("Chunks: %d\n", chunks);
-
-        // Divide the work in chunk so each thread calculates a chunk of vector v
-        #pragma omp for schedule(static, chunks)
-            for(int j = 0; j < size-2; j++){
+    #pragma omp parallel for private(threadid, h, z_, e, q_score, max_value, max_index, i, k)
+    for(int j = 0; j < size-2; j++){
                 max_value = -INFINITY;
                 max_index = -1;
 
@@ -384,7 +342,6 @@ double BASCA (double vect[], const int size) {
                 v[j] = P[max_index][j];
 
             }
-    }
 
                         /*for(int i = 0; i < size-2; i++){
                             printf("%d ", v[i]);

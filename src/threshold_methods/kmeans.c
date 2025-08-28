@@ -8,8 +8,8 @@
      *   Compile:     gcc-13 -fopenmp KMeans.c -o kmeans	  *
      *   Run:         ./kmeans
      *   Author:   						  *
-     *   Course:      CCOM6189 HPC						  *
-     *   Last update: December 11, 2023	
+     *   Course:						  *
+     *   Last update: 
      *   
      ******************************************************************************/
     
@@ -24,236 +24,105 @@
 
 // K-Means function where the method is implemented
 // The function takes a vector as an argument
-double KMeans(double vect[], const int size) {
+double KMeans(double G[], const int size){
 
-    omp_set_num_threads(1);
+    srand(42);
 
-    //printf("%d, %d", rand(), rand());
+    printf("\nk-means\n");
 
-    // Initialize the centroids
-    double centroidsUpdate[2] = {vect[0], vect[1]};
+    double cn_j[2], co_j[2];
 
-    //printf("fixed kmeans\n");
+    int index1 = rand()%size;
+    //int index2 = rand()%size;
 
-    // Initialize the past centroids to zero
-    double centroidsPrev[2] = {-1,-1};
+    //printf("%d, %d ", index1, index2);
 
-    //printf("Initial centroids: %f, %f\n", centroidsUpdate[0], centroidsUpdate[1]);
-    //int maxIteration = 0;
+    cn_j[0] = G[index1];
 
-    // eucledian distance of both centroids
-    double distanceOne;
-    double distanceTwo;
-
-    // sum for the new mean of the centroids
-    double sumCenOne;
-    double sumCenTwo;
-    int countOne;
-    int countTwo;
-
-    // binary array to flag each gene expression to cluster 1 or 2. 
-    int binary[size];
-    int nt, threadid;
-    int chunks;
-
-    int itr = 0;
-
-                //double time = omp_get_wtime();
-
-                //printf("calculating row\n");
-
-    // while loop to keep assigning the genes until the centroid do not change or the maximum iteration is reached
-    while(((centroidsUpdate[0] != centroidsPrev[0]) || (centroidsUpdate[1] != centroidsPrev[1])) && itr < 1000){
-
-        // increase iteration
-        itr++;
-
-        // update the past centroids
-        centroidsPrev[0] = centroidsUpdate[0];
-        centroidsPrev[1] = centroidsUpdate[1];
-
-                //printf("The centroids are %f, %f\n", centroidsUpdate[0], centroidsUpdate[1]);
-
-        // start the first loop parallelization. the private variables are distanceOne, distanceTwo and threadid.
-        #pragma omp parallel private(threadid, distanceOne, distanceTwo)
-        {
-            // get number of threads
-            nt = omp_get_num_threads();
-                     //printf("Number threads: %d\n", nt);
-
-            // get the threadid
-            threadid = omp_get_thread_num();
-            //printf("Thread: %d \n", threadid);
-
-            // get the chunk size so that the array is divided by the threads.
-            chunks = size/nt;
-            //printf("Thread: %d Chunks: %d\n itr: %d", threadid, chunks, itr);
-
-            // parallelize for loop with schedule based on the chunks
-            #pragma omp for schedule(static, chunks) 
-
-                //printf("Chunks: %d thread: %d\n", chunks, threadid);
-
-                for(int i = 0; i < size; i++){
-                    // get the distance of the current gene to each centroid
-                    distanceOne = centroidsUpdate[0] - vect[i];
-                    distanceTwo = centroidsUpdate[1] - vect[i];
-
-                    // if the distance is negative then multiply by one
-                    // this is absolute value
-                    if(distanceOne < 0){
-                        distanceOne *= -1;
-                    }
-                    if(distanceTwo < 0){
-                        distanceTwo *= -1;
-                    }
-
-                    // if the centroid one distance is less than the second then assign the gene
-                    // to centroid 1
-                    if(distanceOne < distanceTwo){
-                        binary[i] = 1;
-                    }
-
-                    // assign the gene to centroid 2. 
-                    else{
-                        binary[i] = 2;
-                    }
-
-                }
-        }
-
-        // initialize variables
-        sumCenOne = 0;
-        sumCenTwo = 0;
-        countOne = 0;
-        countTwo = 0;
-
-        // parallelize for loop using reduction. The operation is sum (+) and the variables are
-        // sumcenone, sumcentwo, countone, countwo. 
-        #pragma omp parallel for reduction(+: sumCenOne, sumCenTwo, countOne, countTwo) shared(binary)
-        
-        for(int j = 0; j < size; j++){
-
-            // if the flag assigment of the gene is cluster one then 
-            // sum that gene to the sumCenOne variable
-            if(binary[j] == 1){
-                sumCenOne += vect[j];
-                countOne += 1;
-            }
-
-             // if the flag assigment of the gene is cluster two then 
-            // sum that gene to the sumCenTwo variable
-            else{
-                sumCenTwo += vect[j];
-                countTwo += 1;
-            }
-        }
-
-        
-        // update the centroids by getting a new mean
-        centroidsUpdate[0] = sumCenOne / countOne;
-        centroidsUpdate[1] = sumCenTwo / countTwo;
-
-                        //printf("Updated centroids: %f, %f\n", centroidsUpdate[0], centroidsUpdate[1]);
-
-                        //printf("iter %d\n", itr);
-
-    }
-
-                    //printf("returning threshold\n");
-
-    // if the first centroid is nan then return the second centroid
-    if(isnan(centroidsUpdate[0])){
-        centroidsUpdate[0] = 0;
-        return centroidsUpdate[1];
-    }
-
-    // if the second centroid is nan then return the first centroid
-    if(isnan(centroidsUpdate[1])){
-        centroidsUpdate[1] = 0;
-        return centroidsUpdate[0];
-    }
-
-    //printf("%d\n", itr);
-
-    // return the mean (which is the threshold) by adding both centroids and dividing by two.
-    return (centroidsUpdate[0]+centroidsUpdate[1])/2;
-
-
-
-}
-
-/*
-// Main function
-int main() {
-
-    //double data[9] = { 0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0};
-
-    // thr es 2584.558333
-
-    //double data[5] = {2080.5, 2404.2, 2526.5, 2798.4, 2865.7};
-
-    double data[50] = {0,
- 68.645,
- 71.67,
- 88.53666667,
- 89.63666667,
- 89.80833333,
- 91.635,
- 94.6,
- 101.6083333,
- 102.4816667,
- 103.38,
- 112.975,
- 117.5366667,
- 121.2633333,
- 123.6283333,
- 125.5916667,
- 131.76,
- 133.7833333,
- 141.8766667,
- 159.155,
- 163.6133333,
- 164.42,
- 164.885,
- 165.0283333,
- 169.57,
- 169.635,
- 182.38,
- 182.615,
- 183.9533333,
- 188.3966667,
- 210.1783333,
- 216.045,
- 227.6633333,
- 238.9266667,
- 257.7633333,
- 287.015,
- 292.9166667,
- 337.565,
- 368.7466667,
- 382.2266667,
- 439.2416667,
- 494.62,
- 655.355,
- 738.5883333,
- 849.2483333,
- 1190.89,
- 1619.07,
- 1726.663333,
- 1921.125,
- 2161.133333};
-
-    int N = sizeof(data) / sizeof(data[0]);
-
-    printf("Size of array before call: %d\n", N);
+    int index2;
+    do{
+        index2 = rand()%size;
+        cn_j[1] = G[index2];
+    }while (cn_j[0] == cn_j[1]);
     
-    double thr = KMeans(data, N);
+    //printf("%d, %d ", index1, index2);
+    
+    co_j[0] = -1;
+    co_j[1] = -1;
 
-    printf("Thr: %f\n", thr);
+    int S[size];
+    int iter = 0;
 
-    return 0;
- 
+    while((cn_j[0] != co_j[0] || cn_j[1] != co_j[1]) && iter < 1000){
+        
+        co_j[0] = cn_j[0];
+        co_j[1] = cn_j[1];
 
+        iter += 1;
+
+        for(int i = 0; i < size; i++){
+            double dis_1 = fabs(G[i] - co_j[0]) * fabs(G[i] - co_j[0]);
+            double dis_2 = fabs(G[i] - co_j[1]) * fabs(G[i] - co_j[1]);
+
+            if(dis_1 <= dis_2){
+                S[i] = 1;
+            }
+            else{
+                S[i] = 2;
+            }
+        }
+
+        double sum1 = 0;
+        double sum2 = 0;
+        int count1 = 0;
+        int count2 = 0;
+
+        for(int i = 0; i < size; i++){
+            if(S[i] == 1){
+                sum1 += G[i];
+                count1 += 1;
+            }
+            else if(S[i] == 2){
+                sum2 += G[i];
+                count2 += 1;
+            }
+        }
+        if(count1 > 0){
+      
+            cn_j[0] = sum1 / count1;
+        }
+
+        if(count2 > 0){
+        
+            cn_j[1] = sum2 / count2;
+        }
+
+    
+    }
+
+    //printf("centroids: %f, %f ", cn_j[0], cn_j[1]);
+
+    return (cn_j[0]+cn_j[1]) / 2;
 }
-*/
+
+/*int main(){
+
+    double gene[5] = {1772.47, 2108.5, 3205.1, 1133.63, 185.885};
+
+    double data[97] = {0.7566794133, 0.7455017481385997, 0.7355852386575561, 0.7268633690762257, 0.7192696236139648, 0.71273748649013, 0.7072004419240775, 0.7025919741351639, 0.6988455673427455, 0.6958947057661788, 0.6936728736248203, 0.6921135551380263, 0.6911502345251533, 0.6907163960055579, 0.6907455237985961, 0.6911711021236248, 0.6919266152, 0.6929455472470784, 0.6941613824842163, 0.6955076051307701, 0.6969176994060966, 0.6983251495295517, 0.699663439720492, 0.7008660541982743, 0.7018664771822544, 0.7025981928917893, 0.702994685546235, 0.7029894393649482, 0.7025159385672852, 0.7015076673726024, 0.6998981100002564, 0.6976207506696035, 0.6946090736, 0.6908286995316317, 0.6863737952880005, 0.6813706642134375, 0.675945609652274, 0.670224934948841, 0.6643349434474697, 0.6584019384924912, 0.6525522234282367, 0.6469121015990372, 0.6416078763492241, 0.6367658510231282, 0.6325123289650809, 0.6289736135194134, 0.6262760080304565, 0.6245458158425417, 0.6239093403, 0.6244522305796908, 0.6260975191885864, 0.6287275844661876, 0.6322248047519949, 0.6364715583855092, 0.6413502237062308, 0.6467431790536606, 0.6525328027672991, 0.6586014731866471, 0.6648315686512051, 0.6711054675004736, 0.6773055480739536, 0.6833141887111458, 0.6890137677515503, 0.6942866635346683, 0.6990152544, 0.7031079984245564, 0.7065776726353881, 0.7094631337970562, 0.7118032386741211, 0.7136368440311439, 0.7150028066326851, 0.715939983243306, 0.7164872306275669, 0.716683405550029, 0.7165673647752528, 0.7161779650677993, 0.7155540631922294, 0.7147345159131037, 0.7137581799949829, 0.7126639122024281, 0.7114905693, 0.7102770080522594, 0.7090620852237671, 0.7078846575790839, 0.7067835818827707, 0.7057977148993881, 0.7049659133934971, 0.7043270341296585, 0.703919933872433, 0.7037834693863816, 0.7039564974360648, 0.7044778747860435, 0.7053864582008789, 0.7067211044451314, 0.7085206702833619, 0.7108240124801312, 0.7136699878};
+
+    double data2[5] = {1772.47, 1772.47, 1772.47, 1772.47, 0};
+
+    double thr;
+
+    // se supone que sea kmeans {0: 0.6737218344374016}
+    for(int i = 0; i < 10; i++){
+
+        thr = KMeans(gene, 5);
+
+        printf("thr: %.20lf run: %d\n", thr, i);
+
+    }
+
+
+}*/
