@@ -42,7 +42,7 @@ python app.py
 
 ## HOW TO USE
 
-1. Click on **UPLOAD GENE EXPRESSION FILE** and upload a time series dataset in CSV format first column should be gene names (each row is a gene expression).
+1. Click on **UPLOAD GENE EXPRESSION FILE** and upload a time series dataset in CSV format first column should be gene names (each row is a gene expression). It should have no column names only the matrix with gene names as first column and expressions.
 2. Select individual genes by clicking on the checkboxes. Deselect by clicking the checkbox again
   - Select all genes by clicking **SELECT ALL**
   - Deselect all selections by clicking **DESELECT ALL**
@@ -51,6 +51,7 @@ python app.py
   - Click on **SELECT ALL** to select all available algorithms
   - Click on **DOWNLOAD CSV** to obtain a CSV file of the threshold for each gene calculated by
 	each selected algorithm
+4. Click on **UPLOAD RULES** to upload Boolean functions CSV file in "Network" > "Upload Boolean Functions" tab. Boolean functions should be coded in python style boolean expression. For example: A or B. This means using *and*, *or*, and *not*. First column should be named *Gene* and should have the genes names. The second column should be called *Rule* and each value is the boolean function expression of the corresponding gene. 
 
 ### BINARIZATION TAB
 
