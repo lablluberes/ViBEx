@@ -5,11 +5,12 @@ import pandas as pd
 import io
 import base64
 import dash_bootstrap_components as dbc
+import dash_daq as daq
 
 # import gene normalization, interpolation, and thr methods functions
 from binarization.normalize import geneNorm 
 from binarization.interpolation import interpolation
-from threshold_methods.methods import call_C_BASC, BASC_A, call_C_Stepminer, onestep, K_Means, shmulevich, call_C_shmulevich, call_C_kmeans, call_C_Onestep
+from threshold_methods.methods import call_C_BASC, BASC_A, call_C_Stepminer, K_Means, shmulevich, call_C_shmulevich, call_C_kmeans, run_C_parallelized_dataset
 
 ######### Import each tab callbacks and components (importing each tab component) ########
 # imports every component and callbacks about value imputation (Network tab)
@@ -32,6 +33,8 @@ standard_dev = pd.read_csv("./statistics_methods/standard_dev.csv")
 # Create dash app object
 app = dash.Dash(
     __name__,
+    requests_pathname_prefix='/vibex/',
+    routes_pathname_prefix='/vibex/',
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
     external_stylesheets=[
         dbc.themes.BOOTSTRAP
@@ -132,6 +135,7 @@ def generate_control_card():
             dcc.Store(id='Onestep-table', data={}),
             dcc.Store(id='rule_network_dict', data={}),
             dcc.Store(id='stored-rules', data={}),
+            dcc.Store(id='inferred-rules-table', data={}),
             dcc.Store(id='inferred_net_rules', data={}),
 
             dcc.Store(id='Elected-data', data={}),
@@ -304,9 +308,9 @@ def download_csv(n_clicks, data, selected_rows):
     # get threshold of selected rows and save to dataframe
     for i in range(len(selected_rows)):
             k_means = K_Means(genes[i])
-            basc_a = BASC_A(genes[i])
-            one_step = onestep(genes[i])
-            shmulevich_ = shmulevich(genes[i])
+            basc_a = call_C_BASC(genes[i])
+            one_step = call_C_Stepminer(genes[i])
+            shmulevich_ = call_C_shmulevich(genes[i])
 
             label = labels[i]
             
@@ -430,7 +434,7 @@ def network_nav():
     # return tabs
     return dcc.Tabs([
 
-        dcc.Tab(label='Binarization State Table', children=[
+        dcc.Tab(label='Binarization Table', children=[
 
             dash_table.DataTable(
                     id='Elected-table-dropdown',
@@ -544,7 +548,7 @@ def network_nav():
 
 
                 dcc.Loading(
-                    children=[html.Div(id='inference_plots')],
+                    children=[html.Div(id='inference_plots'), html.Div(id='inference-graphs')],
                 type="circle"),
 
             ])
@@ -579,7 +583,7 @@ def network_nav():
                 type="circle"),
 
                 dcc.Loading(
-                    children=[html.Div(id='generate-network-rules')],
+                    children=[html.Div(id='generate-network-rules'), html.Div(id='generate-network-graph'),],
                 type="circle"),
                                
             ])
@@ -589,7 +593,16 @@ def network_nav():
                     
 
             dcc.Loading(
-                       children=[html.Div(id='analysis-output')],
+                       children=[
+                            dbc.Card(
+                                dbc.CardBody([
+                                    html.P("Following switch allows to make analysis based on uploaded Boolean functions instead of inferred functions which is the default."),
+                                    daq.BooleanSwitch(id='rules-switch', on=False),
+                                ]),
+                                className="mb-3",
+                            ),
+
+                            html.Div(id='analysis-output')],
             type="circle"),
 
         ]),
@@ -631,6 +644,7 @@ def tabs_nav():
                 
                 ]),
                 dcc.Tab(label='Networks', children=[
+                    html.Div(style={'height': '30px'}), 
                     network_nav()
                 ]),
             ])
@@ -686,10 +700,10 @@ def content_tabs(data):
         # create image carousel
         carousel = dbc.Carousel(
             items=[
-                {"key": "1", "src": "/assets/table.png"},
-                {"key": "2", "src": "/assets/thr.png"},
-                {"key": "3", "src": "/assets/bn.png"},
-                {"key": "4", "src": "/assets/inference.png"},
+                {"key": "1", "src": "/vibex/assets/table.png"},
+                {"key": "2", "src": "/vibex/assets/thr.png"},
+                {"key": "3", "src": "/vibex/assets/bn.png"},
+                {"key": "4", "src": "/vibex/assets/inference.png"},
             ],
             controls=False,
             indicators=False,
@@ -751,6 +765,16 @@ def parse_contents(contents, filename, date):
         return html.Div([
             'There was an error processing this file.'
         ])
+    
+    result = all(pd.api.types.is_numeric_dtype(df_labels.loc[ : , df_labels.columns!=0][col]) for col in df_labels.loc[ : , df_labels.columns!=0].columns)
+ 
+    if result == False:
+        return "Dataset needs to be valid. Numerical values as gene expression matrix. First column gene names and each row corresponding gene expression."
+    
+    result = pd.api.types.is_string_dtype(df_labels[0])
+
+    if result == False:
+        return "Dataset needs to be valid. Numerical values as gene expression matrix. First column gene names and each row corresponding gene expression."
 
     # normalize each row of the dataframe 
     df_t = geneNorm(df_labels.loc[ : , df_labels.columns!=0].copy())
@@ -840,6 +864,9 @@ def parse_contents_rules(contents, filename, date):
 
         # read data of rules
         df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=0)
+
+        if 'Gene' not in df.columns or 'Rule' not in df.columns:
+            return html.Div([html.P("Wrong file format. The Boolean functions need to be a CSV with column 'Gene', and 'Rule'."), dcc.Store(id='rule_network_dict', data={}), dcc.Store(id='stored-rules', data={})])
 
         for index, row in df.iterrows():
             if pd.isna(row['Rule']):
@@ -1011,7 +1038,20 @@ def process_thr(selected_rows, data, selected_method):
 
     # iterate selected methods
     for method in selected_method:
-
+        
+        if method == "BASC A":
+            thr_b = run_C_parallelized_dataset(splineDict, selected_rows, "basc")
+        elif method == "Onestep":
+            thr_o = run_C_parallelized_dataset(splineDict, selected_rows, "onestep")
+        #elif method == "K-Means":
+        #    thr_k == thrs
+        #else:
+        #    thr_s = thrs
+    
+    #print("basc a dataset parallelized: ", thr_b)
+    
+    # iterate selected methods
+    for method in selected_method:
         # iterate each selected gene
         for row in selected_rows:
 
@@ -1019,22 +1059,22 @@ def process_thr(selected_rows, data, selected_method):
             splineGene = splineDict[row]
 
             # get basc threshold 
-            if(method == 'BASC A'):
+            #if(method == 'BASC A'):
 
-                thr = call_C_BASC(splineGene.copy())
+            #    thr = call_C_BASC(splineGene.copy())
 
                 # save thr in dict
-                thr_b[row] = thr
+            #    thr_b[row] = thr
 
             # get onestep threshold 
-            elif(method == 'Onestep'):
-                thr = call_C_Stepminer(splineGene)
+            #elif(method == 'Onestep'):
+            #    thr = call_C_Stepminer(splineGene)
 
                 # save thr in dict
-                thr_o[row] = thr
+            #    thr_o[row] = thr
 
             # get shmulevich threshold 
-            elif(method == 'Shmulevich'):
+            if(method == 'Shmulevich'):
                 #thr = shmulevich(splineGene)
                 thr = call_C_shmulevich(splineGene)
 
@@ -1044,10 +1084,12 @@ def process_thr(selected_rows, data, selected_method):
             # get kmeans threshold 
             elif(method == 'K-Means'):
                 #thr = K_Means(splineGene)
-                thr = call_C_kmeans(splineGene)
+                thr = K_Means(splineGene)
 
                 # save thr in dict
                 thr_k[row] = thr
+    
+    #print("basc a parallelized:",thr_b)
 
     #end_time = time.time()
 
@@ -1094,4 +1136,4 @@ get_network_inf_callbacks(app)
 
 # Run the server
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server(port=8051,debug=True)

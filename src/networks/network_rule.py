@@ -12,10 +12,156 @@ import igraph as ig
 from IPython.core.display import HTML
 from pyvis.network import Network
 from networks.attractors import attractors
+import ast
+from itertools import product
+from networks.booleanParser import runBooleanParser
 
 # function that reads the rules of the csv and creates a boolean network of all posible states
 # the parameters is the csv file as a dataframe
 def createNetwork(rules_df):
+    """
+        createNetwork - generates BN of all possible states based on rules
+
+        rules_df: Boolean functions
+    
+    """
+
+    # lexicography of each BN states
+    lexi = [True, False]
+    
+    # gene names
+    names = list(rules_df['Gene'].values)
+
+    # generate all 2^N states 
+    states = product(lexi, repeat=len(names))
+    
+    # to sabe rules and genes that are fixed values
+    rules_dict = {}
+    fixed_rules = {}
+    
+    # read each row of the dataframe 
+    for index, row in rules_df.iterrows():
+ 
+        # save rule of that gene to rules_dict. example: rules_dict = {'x1': 'x1 or x2'}
+        # if rule is empty make the state stay the same 
+        if row['Rule'] == '':
+            # gene has no rule then keep state as the same 
+            rules_dict[row['Gene']] = row['Gene']
+        
+        else:
+            rules_dict[row['Gene']] = row['Rule']
+        
+        # verifies if boolean function is a fixed value "True" or "False"
+        try:
+            # verift rule is just a True or False (no variables)
+            boolValue = ast.literal_eval(row['Rule'])
+            # save the gene that is fixed value 
+            fixed_rules[row['Gene']] = boolValue
+        except Exception as e:
+            pass
+    
+    # save BN state transitions
+    dict_net = {}
+    
+    #print(rules_dict)
+    
+    #print(fixed_rules)
+    
+    # to exit current loop iteration when a state has a value that contradicts fixed value 
+    condition = False
+    
+    # BN plot 
+    net = Network(width="450px", height="450px", directed=True)
+    
+    # iterate all 2^N states 
+    for s in states:
+
+        # convert current state and names of genes to a dictionary. For example: (False, True), ['A', 'B'] -> {'A': False, 'B': True}
+        curr_state_dict = dict(zip(names,s))
+        
+        # convert current state to a string 
+        curr_state_string = [str(int(e)) for e in s]
+        curr_state_string = ''.join(curr_state_string)
+        
+        # to save the next state after applying rules
+        next_state_string = ''
+        
+        # verify that state exists when some genes are fixed values
+        for r in fixed_rules:
+            # if a gene if fixed based on rules and the current state is not that fixed 
+            # value then skip applying rule to state and skip iteration
+            if curr_state_dict[r] != fixed_rules[r]:
+                condition = True
+                continue
+        
+        # skip iteration
+        if condition:
+            condition = False
+            continue
+        
+        # iterate across Boolean functions to apply to each bin state
+        for r in rules_dict:
+            # calls the parser to apply dictionary of gene values to boolean function
+            result = runBooleanParser(curr_state_dict, rules_dict[r])
+            # append the rule result to the next state string
+            next_state_string += str(int(result))
+           
+        # if the current state already exist in the BN dictionary skip iteration 
+        if curr_state_string in dict_net:
+            continue
+        
+        # label for toolip of plot. For both current state and next state 
+        title_label1 = "\n".join(f"{gene}: {bin}" for gene, bin in zip(names, list(curr_state_string)))
+        title_label2 = "\n".join(f"{gene}: {bin}" for gene, bin in zip(names, list(next_state_string)))
+
+        # adds current state as node with toolip
+        net.add_node(curr_state_string, label=curr_state_string, shape='circle', title=title_label1)
+        
+        
+        # verifies if next state does not exist as key in BN dictionary
+        if next_state_string not in dict_net.keys():
+            # add next state as a node with toolip
+            net.add_node(next_state_string, label=next_state_string, shape='circle', title=title_label2)
+        
+        # adds an edge from current state to next state node
+        net.add_edge(curr_state_string, next_state_string)
+        
+        # add transition to dictionary
+        dict_net[curr_state_string] = next_state_string
+        
+        #print(curr_state_dict)
+    
+    # find attractors of BN 
+    Atts_syn, Att_num = attractors(dict_net)
+    
+    # iterate nodes and color attractors 
+    for nodes in net.nodes:
+        # if node is an attractor color as lightgray
+        if nodes['id'] in Atts_syn:
+            nodes['color'] = 'lightgray'
+
+    
+    #net.save_graph("plot.html")
+    
+    return net, dict_net
+
+"""
+if __name__ == "__main__":
+    
+    rules = {'Gene':['ATM', 'p53', 'WIP1', 'MDM2'],  
+             'Rule':['(not WIP1) and (ATM or True)', '(not MDM2) and (ATM or WIP1)', 'p53', '(not ATM) and (p53 or WIP1)']}
+    
+    rules2 = {'Gene':['lexA', 'uvrD', 'recA', 'uvrA', 'polB', 'umuD'],
+             'Rule':['not recA', 'not lexA', 'True', 'not lexA', 'not lexA', 'not lexA']}
+    df = pd.DataFrame(rules)
+    
+    createNetwork(df)"""
+    
+    
+########## OLD FUNCTION WITHOUT PARSING. USES ONLY EVAL
+# function that reads the rules of the csv and creates a boolean network of all posible states
+# the parameters is the csv file as a dataframe
+def createNetwork2(rules_df):
     """
         createNetwork - generates BN of all possible states based on rules
 
@@ -41,6 +187,7 @@ def createNetwork(rules_df):
         genes[row['Gene']] = gene_id
         
         # save rule of that gene to rules_dict. example: rules_dict = {'x1': 'x1 or x2'}
+        # if rule is empty make the state stay the same 
         if row['Rule'] == '':
 
             rules_dict[row['Gene']] = row['Gene']

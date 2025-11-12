@@ -1,4 +1,4 @@
-
+# ViBEx
 
 This tool works as a visualizer, and probabilistic analysis for different binarizations of time-series gene expressions. In addition, it includes Gene Regulatory Network and Boolean Network analysis. Boolean functions can be inferred based on selected binarizations. Different value imputations are available for undecided states of each binarization (based on probabilistic framework). Boolan functions can be uploaded to draw Boolean function or perform metrics based on inferred boolean functions. Time-series data must be in .csv format to properly upload to the application.
 
@@ -15,7 +15,9 @@ This tool works as a visualizer, and probabilistic analysis for different binari
 - E coli sos dataset was only imputated using (2) only MissForest  because probabilistic imputation takes a lot of time to imputate. 
 
 - To run experiments follow the previous explination of the experiments to obtain results. 
-- We added a script called script.py to allow the performance evaluation be done without the tool. We recommend that if experiments are to be run, use the tool instead of the script. The following are how to use the tool. 
+- We added a script called framework.py to allow the performance evaluation be done without the tool. We recommend that if experiments are to be run, use the tool instead of the script. The following are how to use the tool. 
+
+- Command to run framework.py: python framework.py data=P53-MDM2/data.csv,yeast_cell/yeast_data_elu.csv,ecoli_data/Exp4.csv rules=P53-MDM2/rules.csv,yeast_cell/rules.csv,ecoli_data/rules.csv inf=MIBNI,LogicGep,Bestfit bin=BASCA,K-Means,Onestep impu=1,1,1
 
 ## TO RUN LOCALLY:
 

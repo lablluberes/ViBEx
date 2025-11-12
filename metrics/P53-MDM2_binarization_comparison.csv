@@ -12,7 +12,7 @@
 10,,"kmeans_miss, kmeans_probs"
 11,,"kmeans_miss, onestep_probs"
 12,,"kmeans_miss, elected_probs"
-13,,"onestep_miss, elected_miss"
+13,"onestep_miss, elected_miss",
 14,,"onestep_miss, basc_probs"
 15,,"onestep_miss, kmeans_probs"
 16,,"onestep_miss, onestep_probs"
@@ -22,8 +22,8 @@
 20,,"elected_miss, onestep_probs"
 21,,"elected_miss, elected_probs"
 22,,"basc_probs, kmeans_probs"
-23,,"basc_probs, onestep_probs"
-24,,"basc_probs, elected_probs"
+23,"basc_probs, onestep_probs",
+24,"basc_probs, elected_probs",
 25,,"kmeans_probs, onestep_probs"
 26,,"kmeans_probs, elected_probs"
-27,,"onestep_probs, elected_probs"
+27,"onestep_probs, elected_probs",

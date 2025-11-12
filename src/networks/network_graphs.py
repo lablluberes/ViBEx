@@ -6,7 +6,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import pandas as pd
-from threshold_methods.methods import K_Means, shmulevich, BASC_A, call_C_BASC, call_C_Stepminer, onestep
+from threshold_methods.methods import K_Means, shmulevich, BASC_A, call_C_BASC, call_C_Stepminer
 from networks.networks import create_boolean_network, create_boolean_network_votes
 import gravis as gv
 from dash import html

@@ -21,14 +21,15 @@
 #include <omp.h>
 #include <string.h>
 
-
 // K-Means function where the method is implemented
 // The function takes a vector as an argument
 double KMeans(double G[], const int size){
 
     srand(42);
 
-    printf("\nk-means\n");
+    omp_set_num_threads(omp_get_max_threads());
+
+    //printf("\nk-means\n");
 
     double cn_j[2], co_j[2];
 
@@ -53,40 +54,62 @@ double KMeans(double G[], const int size){
     int S[size];
     int iter = 0;
 
+    double sum1;
+    double sum2;
+    int count1;
+    int count2;
+
+    double dis_1, dis_2;
+
+    //printf("centroids init %f, %f\n", cn_j[0], cn_j[1]);
+
     while((cn_j[0] != co_j[0] || cn_j[1] != co_j[1]) && iter < 1000){
         
         co_j[0] = cn_j[0];
         co_j[1] = cn_j[1];
 
+        //printf("prev centroids: %f, %f\n", co_j[0], co_j[1]);
+
         iter += 1;
 
-        for(int i = 0; i < size; i++){
-            double dis_1 = fabs(G[i] - co_j[0]) * fabs(G[i] - co_j[0]);
-            double dis_2 = fabs(G[i] - co_j[1]) * fabs(G[i] - co_j[1]);
+        sum1 = 0;
+        sum2 = 0;
+        count1 = 0;
+        count2 = 0;
 
-            if(dis_1 <= dis_2){
+        #pragma omp parallel for shared(S, sum1, count1, count2, sum2, co_j) private(dis_1, dis_2)
+        for(int i = 0; i < size; i++){
+            //printf("index %d\n", i);
+            dis_1 = fabs(G[i] - co_j[0]) * fabs(G[i] - co_j[0]);
+            dis_2 = fabs(G[i] - co_j[1]) * fabs(G[i] - co_j[1]);
+            
+            //#pragma omp critial
+            if(dis_1 < dis_2){
                 S[i] = 1;
+                //sum1 += G[i];
+                //count1 += 1;
             }
             else{
                 S[i] = 2;
+                //sum2 += G[i];
+                //count2 += 1;
             }
         }
 
-        double sum1 = 0;
-        double sum2 = 0;
-        int count1 = 0;
-        int count2 = 0;
-
+        //#pragma omp parallel for reduction(+:sum1, sum2, count1, count2)
         for(int i = 0; i < size; i++){
+
             if(S[i] == 1){
                 sum1 += G[i];
                 count1 += 1;
             }
-            else if(S[i] == 2){
+            else{
                 sum2 += G[i];
                 count2 += 1;
             }
         }
+
+        //printf("ya\n");
         if(count1 > 0){
       
             cn_j[0] = sum1 / count1;
@@ -97,15 +120,25 @@ double KMeans(double G[], const int size){
             cn_j[1] = sum2 / count2;
         }
 
+        //for(int i = 0; i < size; i++){
+        //    printf("%d ", S[i]);
+        //}
+        //printf("\n");
+
+        //printf("new centroids: %f, %f\n", cn_j[0], cn_j[1]);
+
     
     }
 
-    //printf("centroids: %f, %f ", cn_j[0], cn_j[1]);
+    //printf("iters: %d\n", iter);
+
+    //printf("last centroids: %f, %f\n", cn_j[0], cn_j[1]);
 
     return (cn_j[0]+cn_j[1]) / 2;
 }
 
-/*int main(){
+/*
+int main(){
 
     double gene[5] = {1772.47, 2108.5, 3205.1, 1133.63, 185.885};
 
@@ -115,12 +148,27 @@ double KMeans(double G[], const int size){
 
     double thr;
 
+    double thr2 = KMeans(data, 97, 1);
+
     // se supone que sea kmeans {0: 0.6737218344374016}
     for(int i = 0; i < 10; i++){
 
-        thr = KMeans(gene, 5);
+        for(int j = 0; j < 100; j++){
 
-        printf("thr: %.20lf run: %d\n", thr, i);
+            thr = KMeans(data, 97, i+1);
+
+            printf(" thr: %.20lf threads numbers: %d iter: %d\n\n", thr, i+1, j+1);
+
+
+            if(thr != thr2){
+                printf("NOT SAME\n");
+                break;
+            }
+        }
+        if(thr != thr2){
+                printf("NOT SAME\n");
+                break;
+            }
 
     }
 

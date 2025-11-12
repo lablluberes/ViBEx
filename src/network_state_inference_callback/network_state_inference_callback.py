@@ -29,14 +29,14 @@ displacements = pd.read_csv("./displacements/Displacements.csv")
 # function to return components 
 def get_network_inf_callbacks(app):
 
-    #### Callback - generates network based on rules (Upload Boolean Functions tab)
-    @app.callback(Output('generate-network-rules', 'children'),
-              Input('rule_network_dict', 'data'),
-              Input('inferred_net_rules', 'data'),
+    #### Callback - generates network graph based on rules (Upload Boolean Functions tab)
+    @app.callback(Output('generate-network-graph', 'children'),
+              Input('stored-rules', 'data'),
+              Input('inferred-rules-table', 'data'),
               prevent_initial_call=True)
-    def generate_net_rules(rules, inferred_rules):
+    def generate_net_graph(rules, inferred_rules):
         """
-            generate_net_rules - generates network based on rules (Upload Boolean Functions tab)
+            generate_net_graph - generates network based on rules (Upload Boolean Functions tab)
 
             rules: uploaded rules
             inferred_rules: rules inferred 
@@ -58,61 +58,11 @@ def get_network_inf_callbacks(app):
 
         #print(dict_net)
 
-        # if Boolean Network has more than 1,000 nodes dont display network
-        if len(net.nodes) > 2500:
-            return html.Div([
-
-                            html.Div(style={"height": "20px"}),
-                            # rules displayed
-                            dbc.Card(
-                                dbc.CardBody([
-                                        html.B("Table of Uploaded Boolean Functions"),
-                                        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], id="stored-rules"),
-                                        html.Br(),
-                                    ]),
-                            className="mb-3"),
-
-                            html.P("Cannot display Boolean Network because it has too many nodes"),
-
-                            # metrics for performance of infer rules and uploaded rules
-                            output_metrics(rules, inferred_rules),
-                           
-                            
-                            html.Div([
-
-                                    dbc.Card(
-                                        dbc.CardBody([
-                                                html.Div([
-                                                html.B("Uploaded Boolean Functions Gene Regulatory Network"),
-                                            
-                                                html.Iframe(
-                                                                srcDoc=grn_network_uploaded.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                                                width="500px",
-                                                                height="500px"
-                                                ),
-                                            
-                                            ], style={'display': 'flex', 'flexDirection': 'column'}),
-                                            ]),
-                                    className="mb-3"),
-                                    
-                              
-
-                        ], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
-                    
-                        ], style={'display': 'flex', 'flexDirection': 'column'})
-
         # return network tab components this includes network plots and metrics 
         return  html.Div([
 
                             html.Div(style={"height": "20px"}),
-                            # rules displayed
-                            dbc.Card(
-                                dbc.CardBody([
-                                        html.B("Table of Uploaded Boolean Functions"),
-                                        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], id="stored-rules"),
-                                        html.Br(),
-                                    ]),
-                            className="mb-3"),
+                            
                             
                             # perform metrics for inferred rules and uploaded rules
                             output_metrics(rules, inferred_rules),
@@ -165,6 +115,64 @@ def get_network_inf_callbacks(app):
 
                             # perform metrics for inferred rules and uploaded rules
                             #output_metrics(inferred_rules, rules),
+                       
+                    
+                        ], style={'display': 'flex', 'flexDirection': 'column'})
+
+    #### Callback - generates network table on rules (Upload Boolean Functions tab)
+    @app.callback(Output('generate-network-rules', 'children'),
+              Input('rule_network_dict', 'data'),
+              Input('inferred-rules-table', 'data'),
+              prevent_initial_call=True)
+    def generate_net_rules(rules, inferred_rules):
+        """
+            generate_net_rules - generates network table on rules (Upload Boolean Functions tab)
+
+            rules: uploaded rules
+            inferred_rules: rules inferred 
+        """
+
+        # return nothing if rules are not uploaded
+        if rules == {} or rules is None:
+            return None
+        
+        # read uploaded rules
+        df = pd.DataFrame(rules)
+
+        # create network plot of uploaded rules 
+        #net, dict_net = createNetwork(df)
+        
+        #grn_network_uploaded = create_GRN_plot(df)
+        
+        #print(inferred_rules)
+
+        #print(dict_net)
+
+        # return network tab components this includes network plots and metrics 
+        return  html.Div([
+
+                            html.Div(style={"height": "20px"}),
+                            # rules displayed
+                            dbc.Card(
+                                dbc.CardBody([
+                                        html.B("Table of Uploaded Boolean Functions"),
+                                        dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i, 'presentation': 'dropdown'} for i in df.columns], id="stored-rules",
+                                                            editable=True,
+                                                            dropdown_conditional=[{
+                                                                    'if': {
+                                                                        'column_id': 'Rule',
+                                                                        'filter_query': '{Rule} = "True" || {Rule} = "False" || {Rule} = ""'
+                                                                    },
+                                                                    'options': [
+                                                                        {'label': 'True', 'value': 'True'},
+                                                                        {'label': 'False', 'value': 'False'},
+                                                                        {'label': 'Blank', 'value': ''}
+                                                                        
+                                                                    ]
+                                                            }]),
+                                        html.Br(),
+                                    ]),
+                            className="mb-3"),
                        
                     
                         ], style={'display': 'flex', 'flexDirection': 'column'})
@@ -873,10 +881,12 @@ def get_network_inf_callbacks(app):
         Input('K-Means-table', 'data'),
         Input('Onestep-table', 'data'),
         Input('Shmulevich-table', 'data'),
-        Input('rule_network_dict', 'data'),
+        Input('stored-rules', 'data'),
+        Input('inferred-rules-table', 'data'),
         Input('Elected-table', 'data'),
+        Input('rules-switch', 'on'),
         prevent_initial_call=True)   
-    def generate_analysis(methods, basc, kmeans, onestep, shmulevich, rule_network, elected_network):
+    def generate_analysis(methods, basc, kmeans, onestep, shmulevich, upload_network, inferred_network, elected_network, switch):
         """
             generate_analysis - generates hamming analysis tab based on uploaded functions and binarizations 
             
@@ -894,9 +904,22 @@ def get_network_inf_callbacks(app):
         #print(rule_network)
 
         # send message that functions need to be uploaded to be able to analyze them
-        if methods is None or methods == [] or rule_network == {} or rule_network is None:
-            return "Upload transition rules to see network analysis or selected genes or methods"
+        if methods is None or methods == []:
+            return "Selected genes or methods."
         
+        if (upload_network is None or upload_network == {}) and (inferred_network is None or inferred_network == {}):
+            return "Infer or upload transition rules to see network analysis."
+        
+        if switch == False:
+            if  inferred_network == {} or inferred_network is None:
+                return "Infer transition rules to see network analysis."
+            rule_network = inferred_network
+            label = "Analysis of Inferred Boolean Functions Path with each selected Binarization."
+        elif switch == True and upload_network != {} or upload_network is not None:
+            label = "Analysis of Uploaded Boolean Functions Path with each selected Binarization."
+            rule_network = upload_network
+        elif upload_network == {} or upload_network is None:
+            return "Upload transition rules to see network analysis."
         
         # if uploaded functions dont have the same number of genes as the binarizations (selected genes) then send message
         if len(elected_network[0]) != len(rule_network):
@@ -1001,6 +1024,14 @@ def get_network_inf_callbacks(app):
 
             dbc.Card(
                 dbc.CardBody([
+                    html.B(label),
+                    
+                ]),
+                className="mb-3",
+            ),
+
+            dbc.Card(
+                dbc.CardBody([
                     html.P("The following table analyzes the state by state transition based on the Boolen Functions chain."),
                     html.B("State by State Analysis"),
                     dash_table.DataTable(df.to_dict('records'), [{"name": i, "id": i} for i in df.columns], style_table={'overflowY': 'auto'}),
@@ -1046,6 +1077,151 @@ def get_network_inf_callbacks(app):
                 node['color']= 'yellow'
 
         return net
+    
+
+    @app.callback(
+        Output('inference-graphs', 'children'),
+        Input('Elected-table', 'data'),
+        Input('K-Means-table', 'data'),
+        Input('Shmulevich-table', 'data'),
+        Input('BASC A-table', 'data'),
+        Input('Onestep-table', 'data'),
+        Input('dropdown-method', 'value'),
+        Input('dropdown-state-table-select', 'value'),
+        Input('inferred-rules-table', 'data'),
+        Input('inference-method', 'value'),
+        prevent_initial_call=True
+    )
+    def graph_inference(elected_binarizations, kmeans_binarizations, 
+                shmulevich_binarizations, basca_binarizations, onestep_binarizations, 
+                methods, bin_method, rules, inferredMethod):
+        
+        if rules is None or rules == {}:
+            return None
+        
+        if inferredMethod is None:
+            return None
+        
+        if methods is None or methods == []:
+            return None
+        
+        # if no binarization selected show message
+        if bin_method is None or bin_method == []:
+            return None
+        
+        df_infer_rules = pd.DataFrame(rules)
+        # get a dataframe based on the selected binarization used to inference 
+        if bin_method == "Elected":
+            bin_dict = elected_binarizations
+            df_binary = pd.DataFrame(elected_binarizations)
+
+        elif bin_method == "BASC A":
+            bin_dict = basca_binarizations
+            df_binary = pd.DataFrame(basca_binarizations)
+
+        elif bin_method == "Onestep":
+            bin_dict = onestep_binarizations
+            df_binary = pd.DataFrame(onestep_binarizations)
+
+        elif bin_method == "K-Means":
+            bin_dict = kmeans_binarizations
+            df_binary = pd.DataFrame(kmeans_binarizations)
+
+        else:
+            bin_dict = shmulevich_binarizations
+            df_binary = pd.DataFrame(shmulevich_binarizations)
+
+        # create network based on inferred rules
+        net, dict_net = createNetwork(df_infer_rules)
+
+        #print(dict_net)
+
+        # get first state of binarization
+        state = df_binary.iloc[0].values
+        state = ''.join(str(s) for s in state)
+
+        # extract path from infered BN based on first state
+        path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+        
+        
+        grn_network = create_GRN_plot(df_infer_rules)
+
+        #print(path, df_binary)
+
+        df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
+
+        if df_dyn_acc == None:
+            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
+        else:
+            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
+
+        return html.Div([ html.Div([
+
+                            dbc.Card(
+                                dbc.CardBody([
+                                        html.Div([
+                                        html.B("Inferred Gene Regulatory Network"),
+                                    
+                                        html.Iframe(
+                                                        srcDoc=grn_network.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                                        width="500px",
+                                                        height="500px"
+                                        ),
+                                    
+                                    ], style={'display': 'flex', 'flexDirection': 'column'}),
+                                    ]), style={'justify-content': 'center'},
+                            className="mb-3"),
+
+                #], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
+
+                #html.Div([
+
+                            dbc.Card(
+                                dbc.CardBody([
+                                        html.Div([
+                                        html.B("Network Based on Inferred Boolean Functions"),
+                                        html.P("Grey nodes are attractors, and green nodes are"),
+                                        html.P("the extracted path based on first state of the selected method"),
+                                    
+                                        html.Iframe(
+                                                        srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
+                                                        width="500px",
+                                                        height="500px"
+                                        ),
+                                    
+                                    ], style={'display': 'flex', 'flexDirection': 'column'}),
+                                    ]),
+                            className="mb-3"),
+
+                ], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
+
+                dbc.Card(
+                        dbc.CardBody([
+                            html.P("The next section shows the dynamic accuracy table comparing the performance of the original binarization and the extracted path based on the inferred rules."),
+                            html.P("The next tables show both paths taken and which are used for calculating dynamic accuracy."),
+                            dash_table.DataTable(df_dyn_acc.to_dict('records'), [{"name": str(i), "id": str(i)} for i in df_dyn_acc.columns], style_cell={'textAlign': 'left'})
+                    ]),className="mb-3",  style={"maxWidth": "400px"}),
+
+                dbc.Card(
+                    dbc.CardBody([
+                        html.P("The first table is the extracted binary path based on first state of second table."),
+                        html.P("The second table is the binarization path by the selected threshold method."),
+                        html.Div([
+                            
+                            html.Div([ 
+                                html.B("Binary Path State Table based on First State of "+bin_method),
+                                state_transition_table2(pd.DataFrame(path))
+                            ], style={'display':'flex', 'flexDirection': 'column', 'marginRight':'20px'}),
+
+                            html.Div([ 
+                                html.B("Binarization Using " +bin_method),
+                                state_transition_table2(df_binary)
+                            ], style={'display':'flex', 'flexDirection': 'column'})
+
+                            ], style={'display':'flex', 'flexDirection': 'row'})
+                    ]),
+                    className="mb-3"),])
+        
 
     #### Callback - generates BN inference, and outputs plots 
     @app.callback(
@@ -1216,94 +1392,6 @@ def get_network_inf_callbacks(app):
         #print(df_infer_rules)
 
         print(f"{inference_method} time taken: {end_time-start_time}")
-
-        # create network based on inferred rules
-        net, dict_net = createNetwork(df_infer_rules)
-
-        #print(dict_net)
-
-        # get first state of binarization
-        state = df_binary.iloc[0].values
-        state = ''.join(str(s) for s in state)
-
-        # extract path from infered BN based on first state
-        path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
-        
-        
-        grn_network = create_GRN_plot(df_infer_rules)
-
-        #print(path, df_binary)
-
-        df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
-
-        if df_dyn_acc == None:
-            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
-        else:
-            df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
-
-        # if network has more than 1000 nodes then dont show BN graph
-        if len(net.nodes) > 2500:
-
-            return html.Div([
-                # save inferred rules 
-                dcc.Store(id='inferred_net_rules', data=df_infer_rules.to_dict('records')), 
-                dbc.Card(
-                        dbc.CardBody([
-                                html.B("Table of Inferred Boolean Functions"),
-                                dash_table.DataTable(df_infer_rules.to_dict('records'), [{"name": i, "id": i} for i in df_infer_rules.columns]),
-                                html.Br(),
-                            ]),
-                className="mb-3"),
-                
-                html.Div([
-
-                            dbc.Card(
-                                dbc.CardBody([
-                                        html.Div([
-                                        html.B("Inferred Gene Regulatory Network"),
-                                    
-                                        html.Iframe(
-                                                        srcDoc=grn_network.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                                        width="500px",
-                                                        height="500px"
-                                        ),
-                                    
-                                    ], style={'display': 'flex', 'flexDirection': 'column'}),
-                                    ]),
-                            className="mb-3"),
-
-                ], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
-
-                html.P("Cannot display Boolean Network because it has too many nodes"),
-
-                dbc.Card(
-                        dbc.CardBody([
-                            html.P("The next section shows the dynamic accuracy table comparing the performance of the original binarization and the extracted path based on the inferred rules."),
-                            html.P("The next tables show both paths taken and which are used for calculating dynamic accuracy."),
-                            dash_table.DataTable(df_dyn_acc.to_dict('records'), [{"name": str(i), "id": str(i)} for i in df_dyn_acc.columns], style_cell={'textAlign': 'left'})
-                    ]),className="mb-3",  style={"maxWidth": "400px"}),
-
-                dbc.Card(
-                    dbc.CardBody([
-                        html.P("The first table is the extracted binary path based on first state of second table."),
-                        html.P("The second table is the binarization path by the selected threshold method."),
-                        html.Div([
-                            
-                            html.Div([ 
-                                html.B("Binary Path State Table based on First State of "+bin_method),
-                                state_transition_table2(pd.DataFrame(path))
-                            ], style={'display':'flex', 'flexDirection': 'column', 'marginRight':'20px'}),
-
-                            html.Div([ 
-                                html.B("Binarization Using " +bin_method),
-                                state_transition_table2(df_binary)
-                            ], style={'display':'flex', 'flexDirection': 'column'})
-
-                            ], style={'display':'flex', 'flexDirection': 'row'})
-                    ]),
-                    className="mb-3"),
-        
-        ], style={'display': 'flex', 'flexDirection': 'column'}), None
         
         # returns the components of the inference tab
         return  html.Div([
@@ -1313,77 +1401,25 @@ def get_network_inf_callbacks(app):
                 dbc.Card(
                         dbc.CardBody([
                                 html.B("Table of Inferred Boolean Functions"),
-                                dash_table.DataTable(df_infer_rules.to_dict('records'), [{"name": i, "id": i} for i in df_infer_rules.columns]),
+                                dash_table.DataTable(df_infer_rules.to_dict('records'), [{"name": i, "id": i, 'presentation': 'dropdown'} for i in df_infer_rules.columns], id='inferred-rules-table',
+                                                    editable=True,
+                                                    dropdown_conditional=[{
+                                                                    'if': {
+                                                                        'column_id': 'Rule',
+                                                                        'filter_query': '{Rule} = "True" || {Rule} = "False" || {Rule} = ""'
+                                                                    },
+                                                                    'options': [
+                                                                        {'label': 'True', 'value': 'True'},
+                                                                        {'label': 'False', 'value': 'False'},
+                                                                        {'label': 'Blank', 'value': ''}
+                                                                        
+                                                                    ]
+                                                    }]),
                                 html.Br(),
                             ]),
                 className="mb-3"),
                 
-                html.Div([
-
-                            dbc.Card(
-                                dbc.CardBody([
-                                        html.Div([
-                                        html.B("Inferred Gene Regulatory Network"),
-                                    
-                                        html.Iframe(
-                                                        srcDoc=grn_network.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                                        width="500px",
-                                                        height="500px"
-                                        ),
-                                    
-                                    ], style={'display': 'flex', 'flexDirection': 'column'}),
-                                    ]), style={'justify-content': 'center'},
-                            className="mb-3"),
-
-                #], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
-
-                #html.Div([
-
-                            dbc.Card(
-                                dbc.CardBody([
-                                        html.Div([
-                                        html.B("Network Based on Inferred Boolean Functions"),
-                                        html.P("Grey nodes are attractors, and green nodes are"),
-                                        html.P("the extracted path based on first state of the selected method"),
-                                    
-                                        html.Iframe(
-                                                        srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
-                                                        width="500px",
-                                                        height="500px"
-                                        ),
-                                    
-                                    ], style={'display': 'flex', 'flexDirection': 'column'}),
-                                    ]),
-                            className="mb-3"),
-
-                ], style={'display': 'flex', 'flexDirection': 'row', 'overflowY': 'auto'}),
-
-                dbc.Card(
-                        dbc.CardBody([
-                            html.P("The next section shows the dynamic accuracy table comparing the performance of the original binarization and the extracted path based on the inferred rules."),
-                            html.P("The next tables show both paths taken and which are used for calculating dynamic accuracy."),
-                            dash_table.DataTable(df_dyn_acc.to_dict('records'), [{"name": str(i), "id": str(i)} for i in df_dyn_acc.columns], style_cell={'textAlign': 'left'})
-                    ]),className="mb-3",  style={"maxWidth": "400px"}),
-
-                dbc.Card(
-                    dbc.CardBody([
-                        html.P("The first table is the extracted binary path based on first state of second table."),
-                        html.P("The second table is the binarization path by the selected threshold method."),
-                        html.Div([
-                            
-                            html.Div([ 
-                                html.B("Binary Path State Table based on First State of "+bin_method),
-                                state_transition_table2(pd.DataFrame(path))
-                            ], style={'display':'flex', 'flexDirection': 'column', 'marginRight':'20px'}),
-
-                            html.Div([ 
-                                html.B("Binarization Using " +bin_method),
-                                state_transition_table2(df_binary)
-                            ], style={'display':'flex', 'flexDirection': 'column'})
-
-                            ], style={'display':'flex', 'flexDirection': 'row'})
-                    ]),
-                    className="mb-3"),
+                
         
         ], style={'display': 'flex', 'flexDirection': 'column'}), None
 
@@ -1524,7 +1560,7 @@ def get_network_inf_callbacks(app):
         Input('Shmulevich-table', 'data'),
         Input('BASC A-table', 'data'),
         Input('Onestep-table', 'data'),
-        Input('rule_network_dict', 'data'),
+        Input('stored-rules', 'data'),
         prevent_initial_call=True,
     )
     def download_metrics(n_clicks, data, selected_rows, thr_methods, elected, kmeans, shmulevich, basc, onestep, rules_uploaded):
@@ -1635,90 +1671,43 @@ def get_network_inf_callbacks(app):
                     print(m)
                     # infer rules using LogicGep
 
-                    dyn_arr = []
-                    acc_arr = []
-                    pre_arr = []
-                    re_arr = []
-                    fscore_arr = []
+                    df_infer_rules = LogicGep(df_binary, df_data)
 
-                    for i in range(15):
-                        df_infer_rules = LogicGep(df_binary, df_data)
-                        
-                        print("LOGICGEP", i)
+                    # create network based on inferred rules
+                    net, dict_net = createNetwork(df_infer_rules)
 
-                        # create network based on inferred rules
-                        net, dict_net = createNetwork(df_infer_rules)
+                    # get first state of binarization
+                    state = df_binary.iloc[0].values
+                    state = ''.join(str(s) for s in state)
 
-                        # get first state of binarization
-                        state = df_binary.iloc[0].values
-                        state = ''.join(str(s) for s in state)
+                    # extract path from infered BN based on first state
+                    path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
 
-                        # extract path from infered BN based on first state
-                        path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+                    print("get dyn and metrics")
+                    df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
 
-                        print("get dyn and metrics")
-                        df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
-
-                        if df_dyn_acc == None:
+                    if df_dyn_acc == None:
                             df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
                         
-                        else:
+                    else:
                             df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
 
-                        metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
+                    metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
                         #metrics_dir = Metrics_directed(pd.DataFrame(rules_uploaded), df_infer_rules)
 
-                        metric_dict = {}
+                    metric_dict = {}
 
-                        metric_dict['Method'] = m
+                    metric_dict['Method'] = m
 
-                        metric_dict['Binarization'] = m_thr
+                    metric_dict['Binarization'] = m_thr
 
-                        metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
+                    metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
                             
 
-                        for metr in metrics:
+                    for metr in metrics:
                             metric_dict[metr] = metrics[metr][0]
 
-                        #for metr in metrics_dir:
-                        #    metric_dict[metr+'(Directed Matrix)'] = metrics_dir[metr][0]
-
-                        if metric_dict['Dynamic Accuracy'] != 'Cannot be calculated':
-                      
-                            dyn_arr.append(metric_dict['Dynamic Accuracy'])
-
-                        acc_arr.append(metric_dict['Accuracy'])
-                        pre_arr.append(metric_dict['Precision'])
-                        re_arr.append(metric_dict['Recall'])
-                        fscore_arr.append(metric_dict['F1-Score'])
-
-                        metrics_data.append(metric_dict)
-                    
-                    mean_dyn = np.mean(dyn_arr)
-                    mean_acc = np.mean(acc_arr)
-                    mean_pre = np.mean(pre_arr)
-                    mean_re = np.mean(re_arr)
-                    mean_f= np.mean(fscore_arr)
-
-                    std_dyn = np.std(dyn_arr, ddof=1)
-                    std_acc = np.std(acc_arr, ddof=1)
-                    std_pre = np.std(pre_arr, ddof=1)
-                    std_re = np.std(re_arr, ddof=1)
-                    std_f= np.std(fscore_arr, ddof=1)
-
-                    se_dyn = std_dyn / np.sqrt(len(dyn_arr))
-                    se_acc = std_acc / np.sqrt(len(acc_arr))
-                    se_pre = std_pre / np.sqrt(len(pre_arr))
-                    se_re = std_re / np.sqrt(len(re_arr))
-                    se_f= std_f / np.sqrt(len(fscore_arr))
-
-                    mean_row = {'Method': m, 'Binarization':m_thr, 
-                                'Dynamic Accuracy': f"Mean: {mean_dyn} STD: {std_dyn} SE: {se_dyn}",
-                                'Accuracy': f"Mean: {mean_acc} STD: {std_acc} SE: {se_acc}",
-                                'Precision': f"Mean: {mean_pre} STD: {std_pre} SE: {se_pre}",
-                                'Recall': f"Mean: {mean_re} STD: {std_re} SE: {se_re}",
-                                'F1-Score': f"Mean: {mean_f} STD: {std_f} SE: {se_f}"} 
-                    metrics_data.append(mean_row)
+                    metrics_data.append(metric_dict)
 
 
                 elif m == 'MIBNI':
@@ -1753,93 +1742,50 @@ def get_network_inf_callbacks(app):
                         
                         data[i] = bitarray(array_nums)
 
-                    dyn_arr = []
-                    acc_arr = []
-                    pre_arr = []
-                    re_arr = []
-                    fscore_arr = []
-
-                    for i in range(15):
                         
-                        rules = run(data, 100, 0.05)
+                    rules = run(data, 100, 0.05)
                         
-                        df_infer_rules = pd.DataFrame(rules)
+                    df_infer_rules = pd.DataFrame(rules)
                         
-                        print(i, rules, "BESTFIT")
 
-                        # create network based on inferred rules
-                        net, dict_net = createNetwork(df_infer_rules)
+                    # create network based on inferred rules
+                    net, dict_net = createNetwork(df_infer_rules)
 
-                        # get first state of binarization
-                        state = df_binary.iloc[0].values
-                        state = ''.join(str(s) for s in state)
+                    # get first state of binarization
+                    state = df_binary.iloc[0].values
+                    state = ''.join(str(s) for s in state)
 
-                        # extract path from infered BN based on first state
-                        path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
+                    # extract path from infered BN based on first state
+                    path, net = extract_path(state, dict_net, len(df_binary), list(df_binary.columns), net)
 
-                        print("get dyn and metrics")
-                        df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
+                    print("get dyn and metrics")
+                    df_dyn_acc = dynamic_accuracy(pd.DataFrame(path), df_binary)
 
-                        if df_dyn_acc == None:
+                    if df_dyn_acc == None:
                             df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': ['Cannot be calculated']})
                         
-                        else:
+                    else:
                             df_dyn_acc = pd.DataFrame({'Dynamic Accuracy': [df_dyn_acc]})
 
-                        metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
+                    metrics = Metrics(pd.DataFrame(rules_uploaded), df_infer_rules)
                         #metrics_dir = Metrics_directed(pd.DataFrame(rules_uploaded), df_infer_rules)
 
-                        metric_dict = {}
+                    metric_dict = {}
 
-                        metric_dict['Method'] = m
+                    metric_dict['Method'] = m
 
-                        metric_dict['Binarization'] = m_thr
+                    metric_dict['Binarization'] = m_thr
 
-                        metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
+                    metric_dict['Dynamic Accuracy'] = list(df_dyn_acc['Dynamic Accuracy'].values)[0]
                             
 
-                        for metr in metrics:
+                    for metr in metrics:
                             metric_dict[metr] = metrics[metr][0]
 
                         #for metr in metrics_dir:
                         #    metric_dict[metr+'(Directed Matrix)'] = metrics_dir[metr][0]
 
-                        if metric_dict['Dynamic Accuracy'] != 'Cannot be calculated':
-                      
-                            dyn_arr.append(metric_dict['Dynamic Accuracy'])
-
-                        acc_arr.append(metric_dict['Accuracy'])
-                        pre_arr.append(metric_dict['Precision'])
-                        re_arr.append(metric_dict['Recall'])
-                        fscore_arr.append(metric_dict['F1-Score'])
-
-                        metrics_data.append(metric_dict)
-                    
-                    mean_dyn = np.mean(dyn_arr)
-                    mean_acc = np.mean(acc_arr)
-                    mean_pre = np.mean(pre_arr)
-                    mean_re = np.mean(re_arr)
-                    mean_f= np.mean(fscore_arr)
-
-                    std_dyn = np.std(dyn_arr, ddof=1)
-                    std_acc = np.std(acc_arr, ddof=1)
-                    std_pre = np.std(pre_arr, ddof=1)
-                    std_re = np.std(re_arr, ddof=1)
-                    std_f= np.std(fscore_arr, ddof=1)
-
-                    se_dyn = std_dyn / np.sqrt(len(dyn_arr))
-                    se_acc = std_acc / np.sqrt(len(acc_arr))
-                    se_pre = std_pre / np.sqrt(len(pre_arr))
-                    se_re = std_re / np.sqrt(len(re_arr))
-                    se_f= std_f / np.sqrt(len(fscore_arr))
-
-                    mean_row = {'Method': m, 'Binarization':m_thr, 
-                                'Dynamic Accuracy': f"Mean: {mean_dyn} STD: {std_dyn} SE: {se_dyn}",
-                                'Accuracy': f"Mean: {mean_acc} STD: {std_acc} SE: {se_acc}",
-                                'Precision': f"Mean: {mean_pre} STD: {std_pre} SE: {se_pre}",
-                                'Recall': f"Mean: {mean_re} STD: {std_re} SE: {se_re}",
-                                'F1-Score': f"Mean: {mean_f} STD: {std_f} SE: {se_f}"} 
-                    metrics_data.append(mean_row)
+                    metrics_data.append(metric_dict)
                 
                 if m == "MIBNI":
                     # create network based on inferred rules

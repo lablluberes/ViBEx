@@ -1,13 +1,13 @@
 ################################
 ## Code to generate the voting table 
 ## Function - binVoting, voting mechanism based on Lluberes and Seguel paper. 
-## Function - binarizationVoting, voting mechanism created
-## Function - election_strings, voting mechanism based on Lluberes thesis
+## Function - binarizationVoting, voting mechanism created by  
+## Function - election_strings, voting mechanism based on Lluberes thesis (made by )
 ###############################
 
 import math
 import numpy as np
-from binarization.normalize import geneNorm
+#from binarization.normalize import geneNorm
 import pandas as pd
 #threshold/displacement indexes are vectors with values in them
 #for different algorithms
@@ -49,7 +49,7 @@ def binVoting(gene, threshold, displacement):
        
     return z
 
-# algorithm (i made it myself based on the table!!!)
+#'s algorithm (i made it myself based on the table!!!)
 
 def binarizationVoting(gene, threshold, displacement):
 
@@ -272,7 +272,57 @@ def election_strings(G, thr, disp):
     
     return collective, Z_e
 
-
+"""
+if __name__ == "__main__":
+    
+    areg = [0.177247, 0.21085, 0.32051, 0.113363, 0.0185885]
+    kifia = [0.19709, 0.325998, 0.155108, 0.0736089, 0.073398]
+    hlx = [0.130286, 0.0785806, 0.65799, 0.693175, 0.308899]
+    
+    genes = [areg, kifia, hlx]
+    
+    thrs = [[0.113363, 0.1453050000, 0.1510890417, 0.15108904166666667], [0.155108, 0.114358, 0.225400, 0.225400], [0.3088990000, 0.4834345000, 0.4240805167, 0.4240805167]]
+    
+    #print((np.ceil((max(areg)-min(areg))*10) / 10))
+    #print((np.ceil((max(kifia)-min(kifia))*10) / 10))
+    #print((np.ceil((max(hlx)-min(hlx))*10) / 10))
+    
+    #print(np.ceil((max(areg)*10))/10)
+    #print(np.ceil((max(kifia)*10))/10)
+    #print(np.ceil((max(hlx)*10))/10)
+    
+    disp = [[0.0845, 0.0785, 0.0480, 0.0307], [0.0699, 0.0580, 0.0508, 0.0252], [0.1435, 0.1107, 0.0796, 0.0502]]
+    
+    #disp2 = [[0.0845, 0.0785, 0.0480, 0.0307], [0.0845, 0.0785, 0.0480, 0.0307], [0.1435, 0.1107, 0.0796, 0.0502]]
+    
+    for i in range(3):
+        
+        elected = election_strings(genes[i], thrs[i], disp[i])
+        
+        print(binVoting(genes[i], [thrs[i][0]], [disp[i][0]]))
+        print('shulevich', elected[0][0])
+        
+        print('\n')
+        
+        print(binVoting(genes[i], [thrs[i][1]], [disp[i][1]]))
+        print('basc', elected[0][1])
+        
+        print('\n')
+        
+        print(binVoting(genes[i], [thrs[i][2]], [disp[i][2]]))
+        print('onestep', elected[0][2])
+        
+        print('\n')
+        
+        print(binVoting(genes[i], [thrs[i][3]], [disp[i][3]]))
+        print('kmeans', elected[0][3])
+        
+        print('\n')
+        
+        print(binVoting(genes[i], thrs[i], disp[i]))
+        print('elected', elected[1])
+        print('\n')
+"""
 
 '''
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import networkx as nx
 from binarization.interpolation import interpolation
 import pandas as pd
 from binarization.voting_algos import  election_strings
-from threshold_methods.methods import K_Means, shmulevich, BASC_A, call_C_BASC, call_C_Stepminer, onestep
+from threshold_methods.methods import K_Means, shmulevich, BASC_A, call_C_BASC, call_C_Stepminer
 import math
 
 # function to create dataframe with the binarization of each gene done by algorithm 

@@ -367,6 +367,7 @@ class Binarization(object):
 				
 				highestScore = findMostFrequent[e[-1]]
 				allHighest = []
+				random.seed(42)
 				for indx in range(len(e)):
 					if findMostFrequent[e[indx]] == highestScore:
 						allHighest.append(e[indx])
@@ -885,6 +886,7 @@ class BestFit(object):
 						C01[idx][dn+kk] += val
 				# Find the Best-Fit function for all the nodes: [OptErr,OptF] = min(cat(3,C01(:,1:kk),C01(:,kk+1:end)),[],3);
 
+			random.seed(42)
 			for idx in range(len(C01)):
 				optErr.append([])
 				optF.append([])

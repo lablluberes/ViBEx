@@ -10,6 +10,8 @@
 
 import deap
 import random
+import pandas as pd
+
 def _validate_basic_toolbox(tb):
 	"""
 	Validate the operators in the toolbox *tb* according to our conventions.
@@ -329,7 +331,8 @@ from sklearn.preprocessing import LabelEncoder
 import numpy as np
 def data_pre (target,a):
     data_y = a.loc[ : ,target]
-    data_x=a.drop([target],axis=1)
+    #data_x=a.drop([target],axis=1)
+    data_x=a.copy()
     data_1=data_x.drop(data_x.tail(1).index)
     data_2=data_y.drop(data_y.head(1).index,)
     list1=[]
@@ -340,32 +343,73 @@ def data_pre (target,a):
     zz=pd.concat([data_1,data_2],axis=1)
     return zz
 
-def RF_XG_regulators(x,y,zz):
+def RF_XG_regulators(x,y,zz, target):
+    
+    random.seed(42)
+    np.random.seed(42)
+    
     col = zz.columns
     rfc = RandomForestClassifier(n_estimators=1000, min_samples_leaf=1, n_jobs=-1, random_state=42)
-    rfc.fit(x,y)
+    #print("error rf")
+    
+    rfc.fit(x, y[target])
     importance_rfc = rfc.feature_importances_
     re_rfc = pd.DataFrame({'feature':np.array(col)[:-1],'IMP':importance_rfc}).sort_values(by = 'IMP',axis = 0,ascending = False)
     re_rfc=re_rfc.head(10)
     RF_features=re_rfc["feature"].tolist()
     le = LabelEncoder()
-    y_train = le.fit_transform(y)
-    model = xgb.XGBClassifier(max_depth=5, learning_rate=0.1, n_estimators=160, silent=True, objective='binary:logistic',
+    
+    #print("warning fittransform")
+    y_train = le.fit_transform(y[target])
+    model = xgb.XGBClassifier(max_depth=5, learning_rate=0.1, n_estimators=160, objective='binary:logistic',
                               n_jobs=-1, random_state=42)
+    
+    #print(len(np.unique(y_train)))
+    
     model.fit(x, y_train)
     importance_xgb = model.feature_importances_
     re_xgb = pd.DataFrame({'feature':np.array(col)[:-1],'IMP':importance_xgb}).sort_values(by = 'IMP',axis = 0,ascending = False)
     re_xgb=re_xgb.head(10)
     XG_features=re_xgb["feature"].tolist()
+    
+    #print(target)
+    #print("randomforest", re_rfc)
+    #print("xgboost", re_xgb)
+    
     return RF_features, XG_features
 
 def Regulators(target,a):
     ab=a
     regu=[]
+    #print("before pre")
     zz=data_pre(target,ab)
-    x,y = np.split(zz, (len(zz.columns)-1,), axis = 1)
-    RF_features,XG_features=RF_XG_regulators(x,y,zz)
-    RG_sets =list(set(RF_features).union(set(XG_features)))
+    #print("after pre")
+    #x,y = np.split(zz, (len(zz.columns)-1,), axis = 1)
+    
+    x = zz.iloc[:, :len(zz.columns)-1]
+    y = zz.iloc[:, len(zz.columns)-1:]
+    
+    #print("\n", x.equals(x_), y.equals(y_), "\n")
+    #print("before ml")
+    RF_features,XG_features=RF_XG_regulators(x,y,zz, target)
+    
+    # ['p53', 'ATM', 'MDM2', 'WIP1'] ['ATM', 'p53', 'WIP1', 'MDM2']
+    #RG_sets =list(set(RF_features).union(set(XG_features)))
+    
+    #if target == "ATM":
+    #    print(RF_features, XG_features, RG_sets)
+    
+    RG_sets = RF_features
+    
+    for x in XG_features:
+        if x not in RG_sets:
+            RG_sets.append(x)
+        
+    
+    #RG_sets =list(set(RF_features).union(set(XG_features)))
+    
+    #if target == "ATM":
+    #    print(RG_sets, RF_features, XG_features)
 
     return RG_sets
 
@@ -411,10 +455,15 @@ def mlp2(raw_dataIn,y,list1):
 
 
 def mainn(target,Regulators_sets,data_Out,Input_data,binary_data,raw_dataIn,raw_dataOut,ss,rules,pre_RG=True):
+    
+    random.seed(42)
+    np.random.seed(42)
 
     if pre_RG:
         Regulators_sets=Regulators(target,binary_data)
         Input_data = Input_data[Regulators_sets].values.tolist()
+        #if target == "ATM":
+        #    print(Regulators_sets)
     else:
         Input_data = Input_data[Regulators_sets].values.tolist()
 
@@ -498,6 +547,10 @@ def mainn(target,Regulators_sets,data_Out,Input_data,binary_data,raw_dataIn,raw_
     n_gen = 200
     elites=10
     pop = toolbox.population(n=n_pop)
+    
+    #if target == "ATM":
+    #    print(pop)
+    
     hof = HallOfFame(5)   # only record the best individual ever found in all generations
     # start evolution
     pop2, log = gep_simple(pop, toolbox,
@@ -537,7 +590,7 @@ def LogicGep(binary_data, raw_data):
     manager = multiprocessing.Manager()
     rules = manager.dict()
 
-    list1=[(x1,Regulators_sets,data_Out,data_In,binary_data,raw_dataIn,raw_dataOut,ss,False)for x1 in list(binary_data.columns)]
+    list1=[(x1,Regulators_sets,data_Out,data_In,binary_data,raw_dataIn,raw_dataOut,ss,True)for x1 in list(binary_data.columns)]
     processes = [ multiprocessing.Process(target= mainn, args=[name, count, data_Out, Input_data, binary_data,raw_dataIn,raw_dataOut, ss, rules, pre_RG])
     for name, count,data_Out,Input_data, binary_data,raw_dataIn,raw_dataOut,ss,pre_RG in list1]
 
@@ -579,3 +632,41 @@ def LogicGep(binary_data, raw_data):
 
 #    LogicGep(binary_data, raw_data)
 
+
+"""
+if __name__ == "__main__":
+    
+    binary = {'ATM': [1, 1, 1, 0, 1, 1, 1], 'p53': [0, 1, 1, 1, 0, 0, 0], 'WIP1': [0, 0, 0, 0, 0, 0, 0], 'MDM2':[0, 1, 1, 1, 1, 1, 1]}
+    binary_df = pd.DataFrame(binary)
+    
+    data_raw = {'ATM':[7.566794133,6.919266152,6.946090736,6.239093403,6.990152544,7.114905693,7.136699878],
+               'p53':[6.495043069,6.954698878,7.189797494,7.007641718,6.728389309,6.448082276,6.246030288],
+               'WIP1':[6.407645941,7.8061397,7.733830573,7.822113611,7.747800782,7.192744808,7.412382975],
+               'MDM2':[5.484177372,6.068058137,6.542947218,6.653667869,6.057462484,6.056829114,6.07915675]}
+    
+    data_df = pd.DataFrame(data_raw)
+    
+    rule = []
+    
+    
+    for i in range(10):
+        print(f"iter {i}")
+        rule.append(LogicGep(binary_df, data_df))
+        
+    #print(rule)
+    
+    # ['p53', 'ATM', 'MDM2', 'WIP1'] ['ATM', 'p53', 'WIP1', 'MDM2'] ['p53', 'WIP1', 'ATM', 'MDM2']
+    # ['p53', 'ATM', 'MDM2', 'WIP1'] ['ATM', 'p53', 'WIP1', 'MDM2'] ['WIP1', 'p53', 'ATM', 'MDM2']
+    
+    first_df = rule[0]
+    equal = 1
+    for i in range(1, len(rule)):
+        if not first_df.equals(rule[i]):
+            print( "dataframees not equal")
+            equal = 0
+            
+    if equal:
+        print("dataframes equal")
+        
+    print(rule)
+"""

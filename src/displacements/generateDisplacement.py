@@ -6,7 +6,7 @@
 import numpy as np
 import pandas as pd
 from binarization.interpolation import interpolation
-from threshold_methods.methods import call_C_BASC, BASC_A, call_C_Stepminer, onestep, K_Means, shmulevich, call_C_kmeans, call_C_shmulevich
+from threshold_methods.methods import call_C_BASC, BASC_A, call_C_Stepminer, K_Means, shmulevich, call_C_kmeans, call_C_shmulevich
 
 def generateDisplacement(methods, genes):
     """
@@ -73,7 +73,7 @@ def generateDisplacement(methods, genes):
                     for m in methods:
                         
                         if m == 'K-Means':
-                            kmeans_thr.append(call_C_kmeans(g_spline))
+                            kmeans_thr.append(K_Means(g_spline))
                         elif m == 'BASC A':
                             basc_thr.append(call_C_BASC(g_spline))
                         elif m == 'Onestep':

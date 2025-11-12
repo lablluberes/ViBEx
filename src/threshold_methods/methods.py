@@ -11,44 +11,62 @@ import ctypes
 from binarization.normalize import geneNorm
 from scipy.stats import f
 
+
+
+def run_C_parallelized_dataset(dataset, genes, method):
+    #np.random.seed(42)
+        
+    #print(matrix)
+    
+    run_lib = ctypes.CDLL('./threshold_methods/methods_parallelized_genes.so')
+
+    # Define the argument and return types for the functions
+    run_lib.run.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64, flags='C_CONTIGUOUS'), ctypes.c_int, ctypes.c_int, ctypes.c_char_p]
+    run_lib.run.restype = ctypes.POINTER(ctypes.c_double)
+    
+    run_lib.modifyN.argtypes = [ctypes.c_int]
+    run_lib.modifyN.restype = None
+    
+    run_lib.modifyM.argtypes = [ctypes.c_int]
+    run_lib.modifyM.restype = None
+    
+    
+    #NList = [10, 12, 14]
+    #MList = [200, 400, 600]
+    
+    matrix = np.array([dataset[i] for i in genes])
+    
+    N, M = np.shape(matrix)
+    
+    matrix = np.sort(matrix, axis=1)
+    
+    run_lib.modifyN(N)
+    run_lib.modifyM(M)
+        
+ 
+    thrs = run_lib.run(matrix.copy(), N, M, method.encode('utf-8'))
+        
+    thrs = [thrs[i] for i in range(N)]
+    
+    thr_d = {g:v for g, v in zip(genes, thrs)}
+    
+    return thr_d
+        
+    
+
 ################################
 ## K-MEANS
 
 ###############################
 
 
-## Kmeans main function
-def K_Means(genes):
-    """
-        K_Means - uses Kmeans to compute thr
+def K_Means(gene):
 
-        genes: gene expression
-    """
+  gene = np.array(gene).reshape(-1, 1)
 
-    # reshape data
-    data = np.array(genes).reshape(-1, 1)
+  kmeans = KMeans(n_clusters=2, random_state=42, n_init="auto").fit(gene)
 
-    # kmeans object two clusters
-    kmeans = KMeans(n_clusters=2, n_init=10)
-    # fit data
-    kmeans.fit(data)
-    # extract assigment
-    c=kmeans.labels_
-    # turn gene to array
-    genes = np.array(genes)
-    # get expression from first cluster
-    groupOne = genes[c==1]
-    # get expression from second cluster
-    groupZero = genes[c==0]
-    
-    # get mean
-    thr1 = np.mean(groupOne)
-    thr2 = np.mean(groupZero)
-    
-    # get mean of two clusters 
-    thr = (thr1 + thr2) / 2
-
-    return thr
+  return sum(kmeans.cluster_centers_)[0]/2
 
 
 def call_C_kmeans(data):
@@ -244,127 +262,6 @@ def call_C_BASC(data):
 ## Stepminer code (only onestep) in Python and C
 #############
 
-# Main function for Stepminer (onestep) based on Sahoo: https://sites.google.com/view/debashis-sahoo/softwares
-
-def mse(data, start, end):
-    """
-        mse - calculates mean square error
-
-        data: gene expression
-        start: start index
-        end: end index
-    """
-
-    result = 0
-
-    # get mean
-    m = np.mean(data[start:end+1])
-
-    # calculate mean square error
-    for i in range(start, end+1):
-        result += (data[i] - m) * (data[i] - m)
-
-    return result
-    
-
-def find_mean(data, start, end):
-    """
-        find_mean - finds mean
-
-        data: gene expr
-        start: start index
-        end: end index
-    """
-
-    # return 0 if start index is greater
-    if (start > end):
-        return 0
-
-    # return 0 if indexes are the same
-    if start == end: 
-        return 0
-
-    # return mean
-    return np.mean(data[start:end+1])
-
-def onestep(data):
-    """
-        onestep - onestep threshold computation 
-
-        data: gene expression
-    """
-
-    # size of gene
-    n = len(data)
-
-    # initialize sse array to 0
-    sseArray = np.zeros(n)
-
-    # sum of datapoints
-    suma = sum(data)
-
-    # mean of expression
-    mean = np.mean(data)
-
-    # calculate sstot
-    sstot = mse(data, 0, len(data)-1)
-    
-    # more variables
-    sum1 = 0
-    count1 = 0
-    m1 = 0
-    sum2 = suma
-    count2 = n
-    m2 = (suma/n)
-    sum1sq = 0
-    sum2sq = sstot
-    sse = sum1sq + sum2sq
-
-    # iterate gene expression
-    for i in range(len(data)):
-        entry = data[i]
-
-        count1 += 1
-        count2 -= 1
-
-        if count2 == 0:
-            sseArray[i] = sstot
-            continue
-        tmp = (mean - (entry + sum1)/count1)
-        sum1sq = sum1sq + (entry - mean) * (entry - mean) - tmp * tmp * count1 + (count1 - 1) * (mean - m1) * (mean - m1)
-        tmp = (mean - (sum2 - entry)/count2)
-        sum2sq = sum2sq - (entry - mean) * (entry - mean) - tmp * tmp * count2 + (count2 + 1) * (mean - m2) * (mean - m2)
-        sum1 += entry
-        sum2 -= entry
-        m1 = sum1/count1
-        m2 = sum2/count2
-        sse = sum1sq + sum2sq
-        sseArray[i] = sse
-
-    
-    # to find the best sse (minimum)
-    bestSse = sseArray[0]
-    bestIndex = 0
-
-    # find sse that is smaller 
-    for i in range(len(data)):
-        index = i
-
-        if sseArray[i] < bestSse:
-            bestSse = sseArray[i]
-            bestIndex = index
-
-    
-    # get means based on sse minimum index
-    m1 = find_mean(data, 0, bestIndex)
-    m2 = find_mean(data, bestIndex + 1, len(data))
-
-    # compute thr 
-    thr = (m1+m2)/2
-
-    return thr
-
-
 
 # This code makes python call the OpenMP code of Stepminer in C
 def call_C_Stepminer(data):
@@ -398,39 +295,6 @@ def call_C_Stepminer(data):
     return stepminer_lib.stepminer(gene, len(gene))
 
 
-# This code makes python call the Onestep in C
-def call_C_Onestep(data):
-    """
-        call_C_Onestep - calls C code of onestep
-
-        data: gene expression
-    """
-    
-    # Load the shared library
-    Onestep_lib = ctypes.CDLL('./threshold_methods/onestep.so')  # Update with the correct path to the compiled library
-
-    # Define argument and return types for the functions
-    Onestep_lib.mse.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), ctypes.c_int, ctypes.c_double]
-    Onestep_lib.mse.restype = ctypes.c_double
-
-    Onestep_lib.find_mean.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), ctypes.c_int, ctypes.c_int]
-    Onestep_lib.find_mean.restype = ctypes.c_double
-    
-    Onestep_lib.sum.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), ctypes.c_int]
-    Onestep_lib.sum.restype = ctypes.c_double
-
-    Onestep_lib.stepminer.argtypes = [np.ctypeslib.ndpointer(dtype=np.float64), ctypes.c_int]
-    Onestep_lib.stepminer.restype = ctypes.c_double
-
-    # Define your data
-    data = np.asarray(data, dtype=np.float64)
-
-    gene = data.copy()
-
-    # sort gene
-    gene.sort()
-    
-    return Onestep_lib.stepminer(gene, len(gene))
 
 #################
 ## Shumelich Code
@@ -496,8 +360,12 @@ def call_C_shmulevich(data):
 
     #print(gene)
 
+    #print("problema")
+
     # call c code
     t = shmulevich_lib.shmulevich(gene, len(data))
+
+    #print(t)
 
     return t
 
@@ -543,13 +411,13 @@ def thr_and_binary(data, method):
     for d in data:
         # compute thrs
         if method == 'basc':
-            thr_arr.append(BASC_A(np.array(d)))
+            thr_arr.append(call_C_BASC(np.array(d)))
         elif method == 'kmeans':
             thr_arr.append(K_Means(np.array(d)))
         elif method == 'onestep':
-            thr_arr.append(onestep(np.array(d)))
+            thr_arr.append(call_C_Stepminer(np.array(d)))
         else:
-            thr_arr.append(shmulevich(np.array(d)))
+            thr_arr.append(call_C_shmulevich(np.array(d)))
     
     # get binarizations 
     binary = binaryreturn(thr_arr, data)

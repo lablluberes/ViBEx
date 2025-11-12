@@ -81,36 +81,53 @@ def Metrics(ground_truth, inferred):
     return metrics_dict
 
 def dynamic_accuracy(df, df1):
-  columns_names = list(df.columns)
+    """
+        dynamic_accuracy - calculate dynamic accuracy 
 
-  #print(columns_names)
+        df - extracted path from inferred BN
+        df1 - path from binarization  
+    """
+    
+    # save names of genes 
+    columns_names = list(df.columns)
 
-  if len(df) != len(df1):
-      return None
+    #print(columns_names)
 
+    # if the length between paths are not the same return none
+    if len(df) != len(df1):
+        return None
 
-  C = []
-  
-  for c in columns_names:
+    # save the hamming/t of gene states 
+    C = []
+    
+    # iterate genes
+    for c in columns_names:
 
-    x = list(df[c].values[1:])
-    x1 = list(df1[c].values[1:])
-  
-    #print(x, x1)
+        # calculate hamming after the first state 
+        x = list(df[c].values[1:])
+        x1 = list(df1[c].values[1:])
+    
+        #print(x, x1)
 
-    s = 0
-    t = len(x)
+        # hamming count
+        s = 0
+        
+        # total states of gene
+        t = len(x)
 
-    for xi, xip in zip(x, x1):
-      s += abs(int(xi) - int(xip))
+        # save hamming distance of each state
+        for xi, xip in zip(x, x1):
+            s += abs(int(xi) - int(xip))
 
-    C.append(s/t)
+        # save the hamming/length states 
+        C.append(s/t)
 
-  #print(C)
+    #print(C)
 
-  dyn_acc = 1 - (sum(C)/len(columns_names))
+    # calculate dynamic accuracy 
+    dyn_acc = 1 - (sum(C)/len(columns_names))
 
-  return dyn_acc
+    return dyn_acc
 
 
 def getAdjMatrix_directed(rule_net):

@@ -6,7 +6,7 @@ import altair as alt
 import math
 from displacements.displacementMatrixes import getDisplacement
 from statistics_methods.ProbabilityPerm import probBin
-from statistics_methods.stringProbabilistic import call_C_statistics
+from statistics_methods.stringProbabilistic import call_C_statistics, run
 import dash_vega_components as dvc
 
 standard_dev = pd.read_csv("./statistics_methods/standard_dev.csv")
@@ -68,8 +68,8 @@ def get_stats_callback(app):
         sizeGene = len(gene)
         ogGene = pd.DataFrame({'x':np.arange(0,sizeGene),'y':gene, 'label': [f'{labels[selected_gene]}']* sizeGene})
         
-        if len(gene) > 25:
-            return html.Div("Most probable string cant be computed because the gene expression is too long. Performence issues arise.")
+        #if len(gene) > 25:
+        #    return html.Div("Most probable string cant be computed because the gene expression is too long. Performence issues arise.")
         
         xx = np.arange(0,sizeGene)
         #dict of thresholds and labels for graph display
@@ -180,7 +180,7 @@ def get_stats_callback(app):
                     #probBin function 
                     #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
 
-                    high_p, high_string, p = call_C_statistics(gene, d.iloc[0], "k-means", bin)
+                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'k-means', bin) #call_C_statistics(gene, d.iloc[0], "k-means", bin)
 
 
                     #extract probability of selected string
@@ -219,7 +219,7 @@ def get_stats_callback(app):
                     #probBin function 
                     #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
 
-                    high_p, high_string, p = call_C_statistics(gene, d.iloc[0], "onestep", bin)
+                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'onestep', bin) #call_C_statistics(gene, d.iloc[0], "onestep", bin)
 
 
                     #extract probability of selected string
@@ -260,7 +260,7 @@ def get_stats_callback(app):
                     #probBin function 
                     #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
 
-                    high_p, high_string, p = call_C_statistics(gene, d.iloc[0], "shmulevich", bin)
+                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'shmulevich', bin) #call_C_statistics(gene, d.iloc[0], "shmulevich", bin)
 
 
                     #extract probability of selected string
@@ -300,7 +300,7 @@ def get_stats_callback(app):
                     #probBin function 
                     #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
 
-                    high_p, high_string, p = call_C_statistics(gene, d.iloc[0], "BASC_A", bin)
+                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'BASC_A', bin) #call_C_statistics(gene, d.iloc[0], "BASC_A", bin)
 
 
                     #extract probability of selected string

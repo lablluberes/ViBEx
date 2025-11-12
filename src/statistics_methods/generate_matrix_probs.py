@@ -9,7 +9,7 @@ import scipy
 ######################################
 
 
-from threshold_methods.methods import K_Means, BASC_A, onestep, shmulevich, call_C_BASC, call_C_Stepminer
+from threshold_methods.methods import K_Means, BASC_A, shmulevich, call_C_BASC, call_C_Stepminer
 
 #algos -> list of algorithms
 #n -> size of gene

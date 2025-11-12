@@ -13,7 +13,7 @@ import math
 # import get displacement function
 from displacements.displacementMatrixes import getDisplacement
 # import string probabilistic function
-from statistics_methods.stringProbabilistic import probabilistic, call_C_statistics
+from statistics_methods.stringProbabilistic import call_C_statistics, run #probabilistic
 # import missforest imputation 
 from imputation.imputation_ml import imputate_missforest, imputate_mice_logictic
 
@@ -660,7 +660,7 @@ def get_imputation_callbacks(app):
 
                     binary = "".join(str(x) for x in og_binarization)
 
-                    high_p, high_string, p = call_C_statistics(genes[i], d, 'BASC_A', binary)
+                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'BASC_A', binary) #call_C_statistics(genes[i], d, 'BASC_A', binary)
 
                     #probDF = probDF.sort_values(by=['prob'])
 
@@ -676,7 +676,7 @@ def get_imputation_callbacks(app):
 
                     binary = "".join(str(x) for x in og_binarization)
 
-                    high_p, high_string, p = call_C_statistics(genes[i], d, 'k-means', binary)
+                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'k-means', binary) #call_C_statistics(genes[i], d, 'k-means', binary)
 
                     #probDF = probDF.sort_values(by=['prob'])
 
@@ -692,7 +692,7 @@ def get_imputation_callbacks(app):
 
                     binary = "".join(str(x) for x in og_binarization)
 
-                    high_p, high_string, p = call_C_statistics(genes[i], d, 'onestep', binary)
+                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'onestep', binary) #call_C_statistics(genes[i], d, 'onestep', binary)
 
                     #probDF = probDF.sort_values(by=['prob'])
 
@@ -719,7 +719,7 @@ def get_imputation_callbacks(app):
 
                             binary = "".join(str(x) for x in og_bina)
 
-                            high_p, high_string, p = call_C_statistics(genes[i], d, 'BASC_A', binary)
+                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'BASC_A', binary) #(genes[i], d, 'BASC_A', binary)
 
                             #probDF = probDF.sort_values(by=['prob'])
 
@@ -736,7 +736,7 @@ def get_imputation_callbacks(app):
 
                             binary = "".join(str(x) for x in og_bina)
 
-                            high_p, high_string, p = call_C_statistics(genes[i], d, 'onestep', binary)
+                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'onestep', binary) #call_C_statistics(genes[i], d, 'onestep', binary)
 
                             #probDF = probDF.sort_values(by=['prob'])
 
@@ -753,7 +753,7 @@ def get_imputation_callbacks(app):
 
                             binary = "".join(str(x) for x in og_bin)
 
-                            high_p, high_string, p = call_C_statistics(genes[i], d, 'k-means', binary)
+                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'k-means', binary) #(genes[i], d, 'k-means', binary)
 
                             #probDF = probDF.sort_values(by=['prob'])
 
@@ -769,7 +769,7 @@ def get_imputation_callbacks(app):
 
                             binary = "".join(str(x) for x in og_bin)
 
-                            high_p, high_string, p = call_C_statistics(genes[i], d, 'shmulevich', binary)
+                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'shmulevich', binary) #call_C_statistics(genes[i], d, 'shmulevich', binary)
 
                             #probDF = probDF.sort_values(by=['prob'])
 
@@ -792,7 +792,7 @@ def get_imputation_callbacks(app):
 
                     binary = "".join(str(x) for x in og_binarization)
 
-                    high_p, high_string, p = call_C_statistics(genes[i], d, 'shmulevich', binary)
+                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'shmulevich', binary) #call_C_statistics(genes[i], d, 'shmulevich', binary)
 
                     #probDF = probDF.sort_values(by=['prob'])
 

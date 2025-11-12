@@ -1,0 +1,320 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Grammar
+
+Rule 0     S' -> expression
+Rule 1     expression -> NOT expression
+Rule 2     expression -> expression AND expression
+Rule 3     expression -> expression OR expression
+Rule 4     expression -> expression XOR expression
+Rule 5     expression -> LPAREN expression RPAREN
+Rule 6     expression -> NAME
+Rule 7     expression -> TRUE
+Rule 8     expression -> FALSE
+
+Terminals, with rules where they appear
+
+AND                  : 2
+FALSE                : 8
+LPAREN               : 5
+NAME                 : 6
+NOT                  : 1
+OR                   : 3
+RPAREN               : 5
+TRUE                 : 7
+XOR                  : 4
+error                : 
+
+Nonterminals, with rules where they appear
+
+expression           : 1 2 2 3 3 4 4 5 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . expression
+    (1) expression -> . NOT expression
+    (2) expression -> . expression AND expression
+    (3) expression -> . expression OR expression
+    (4) expression -> . expression XOR expression
+    (5) expression -> . LPAREN expression RPAREN
+    (6) expression -> . NAME
+    (7) expression -> . TRUE
+    (8) expression -> . FALSE
+
+    NOT             shift and go to state 2
+    LPAREN          shift and go to state 3
+    NAME            shift and go to state 4
+    TRUE            shift and go to state 5
+    FALSE           shift and go to state 6
+
+    expression                     shift and go to state 1
+
+state 1
+
+    (0) S' -> expression .
+    (2) expression -> expression . AND expression
+    (3) expression -> expression . OR expression
+    (4) expression -> expression . XOR expression
+
+    AND             shift and go to state 7
+    OR              shift and go to state 8
+    XOR             shift and go to state 9
+
+
+state 2
+
+    (1) expression -> NOT . expression
+    (1) expression -> . NOT expression
+    (2) expression -> . expression AND expression
+    (3) expression -> . expression OR expression
+    (4) expression -> . expression XOR expression
+    (5) expression -> . LPAREN expression RPAREN
+    (6) expression -> . NAME
+    (7) expression -> . TRUE
+    (8) expression -> . FALSE
+
+    NOT             shift and go to state 2
+    LPAREN          shift and go to state 3
+    NAME            shift and go to state 4
+    TRUE            shift and go to state 5
+    FALSE           shift and go to state 6
+
+    expression                     shift and go to state 10
+
+state 3
+
+    (5) expression -> LPAREN . expression RPAREN
+    (1) expression -> . NOT expression
+    (2) expression -> . expression AND expression
+    (3) expression -> . expression OR expression
+    (4) expression -> . expression XOR expression
+    (5) expression -> . LPAREN expression RPAREN
+    (6) expression -> . NAME
+    (7) expression -> . TRUE
+    (8) expression -> . FALSE
+
+    NOT             shift and go to state 2
+    LPAREN          shift and go to state 3
+    NAME            shift and go to state 4
+    TRUE            shift and go to state 5
+    FALSE           shift and go to state 6
+
+    expression                     shift and go to state 11
+
+state 4
+
+    (6) expression -> NAME .
+
+    AND             reduce using rule 6 (expression -> NAME .)
+    OR              reduce using rule 6 (expression -> NAME .)
+    XOR             reduce using rule 6 (expression -> NAME .)
+    $end            reduce using rule 6 (expression -> NAME .)
+    RPAREN          reduce using rule 6 (expression -> NAME .)
+
+
+state 5
+
+    (7) expression -> TRUE .
+
+    AND             reduce using rule 7 (expression -> TRUE .)
+    OR              reduce using rule 7 (expression -> TRUE .)
+    XOR             reduce using rule 7 (expression -> TRUE .)
+    $end            reduce using rule 7 (expression -> TRUE .)
+    RPAREN          reduce using rule 7 (expression -> TRUE .)
+
+
+state 6
+
+    (8) expression -> FALSE .
+
+    AND             reduce using rule 8 (expression -> FALSE .)
+    OR              reduce using rule 8 (expression -> FALSE .)
+    XOR             reduce using rule 8 (expression -> FALSE .)
+    $end            reduce using rule 8 (expression -> FALSE .)
+    RPAREN          reduce using rule 8 (expression -> FALSE .)
+
+
+state 7
+
+    (2) expression -> expression AND . expression
+    (1) expression -> . NOT expression
+    (2) expression -> . expression AND expression
+    (3) expression -> . expression OR expression
+    (4) expression -> . expression XOR expression
+    (5) expression -> . LPAREN expression RPAREN
+    (6) expression -> . NAME
+    (7) expression -> . TRUE
+    (8) expression -> . FALSE
+
+    NOT             shift and go to state 2
+    LPAREN          shift and go to state 3
+    NAME            shift and go to state 4
+    TRUE            shift and go to state 5
+    FALSE           shift and go to state 6
+
+    expression                     shift and go to state 12
+
+state 8
+
+    (3) expression -> expression OR . expression
+    (1) expression -> . NOT expression
+    (2) expression -> . expression AND expression
+    (3) expression -> . expression OR expression
+    (4) expression -> . expression XOR expression
+    (5) expression -> . LPAREN expression RPAREN
+    (6) expression -> . NAME
+    (7) expression -> . TRUE
+    (8) expression -> . FALSE
+
+    NOT             shift and go to state 2
+    LPAREN          shift and go to state 3
+    NAME            shift and go to state 4
+    TRUE            shift and go to state 5
+    FALSE           shift and go to state 6
+
+    expression                     shift and go to state 13
+
+state 9
+
+    (4) expression -> expression XOR . expression
+    (1) expression -> . NOT expression
+    (2) expression -> . expression AND expression
+    (3) expression -> . expression OR expression
+    (4) expression -> . expression XOR expression
+    (5) expression -> . LPAREN expression RPAREN
+    (6) expression -> . NAME
+    (7) expression -> . TRUE
+    (8) expression -> . FALSE
+
+    NOT             shift and go to state 2
+    LPAREN          shift and go to state 3
+    NAME            shift and go to state 4
+    TRUE            shift and go to state 5
+    FALSE           shift and go to state 6
+
+    expression                     shift and go to state 14
+
+state 10
+
+    (1) expression -> NOT expression .
+    (2) expression -> expression . AND expression
+    (3) expression -> expression . OR expression
+    (4) expression -> expression . XOR expression
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for XOR resolved as shift
+    $end            reduce using rule 1 (expression -> NOT expression .)
+    RPAREN          reduce using rule 1 (expression -> NOT expression .)
+    AND             shift and go to state 7
+    OR              shift and go to state 8
+    XOR             shift and go to state 9
+
+  ! AND             [ reduce using rule 1 (expression -> NOT expression .) ]
+  ! OR              [ reduce using rule 1 (expression -> NOT expression .) ]
+  ! XOR             [ reduce using rule 1 (expression -> NOT expression .) ]
+
+
+state 11
+
+    (5) expression -> LPAREN expression . RPAREN
+    (2) expression -> expression . AND expression
+    (3) expression -> expression . OR expression
+    (4) expression -> expression . XOR expression
+
+    RPAREN          shift and go to state 15
+    AND             shift and go to state 7
+    OR              shift and go to state 8
+    XOR             shift and go to state 9
+
+
+state 12
+
+    (2) expression -> expression AND expression .
+    (2) expression -> expression . AND expression
+    (3) expression -> expression . OR expression
+    (4) expression -> expression . XOR expression
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for XOR resolved as shift
+    $end            reduce using rule 2 (expression -> expression AND expression .)
+    RPAREN          reduce using rule 2 (expression -> expression AND expression .)
+    AND             shift and go to state 7
+    OR              shift and go to state 8
+    XOR             shift and go to state 9
+
+  ! AND             [ reduce using rule 2 (expression -> expression AND expression .) ]
+  ! OR              [ reduce using rule 2 (expression -> expression AND expression .) ]
+  ! XOR             [ reduce using rule 2 (expression -> expression AND expression .) ]
+
+
+state 13
+
+    (3) expression -> expression OR expression .
+    (2) expression -> expression . AND expression
+    (3) expression -> expression . OR expression
+    (4) expression -> expression . XOR expression
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for XOR resolved as shift
+    $end            reduce using rule 3 (expression -> expression OR expression .)
+    RPAREN          reduce using rule 3 (expression -> expression OR expression .)
+    AND             shift and go to state 7
+    OR              shift and go to state 8
+    XOR             shift and go to state 9
+
+  ! AND             [ reduce using rule 3 (expression -> expression OR expression .) ]
+  ! OR              [ reduce using rule 3 (expression -> expression OR expression .) ]
+  ! XOR             [ reduce using rule 3 (expression -> expression OR expression .) ]
+
+
+state 14
+
+    (4) expression -> expression XOR expression .
+    (2) expression -> expression . AND expression
+    (3) expression -> expression . OR expression
+    (4) expression -> expression . XOR expression
+
+  ! shift/reduce conflict for AND resolved as shift
+  ! shift/reduce conflict for OR resolved as shift
+  ! shift/reduce conflict for XOR resolved as shift
+    $end            reduce using rule 4 (expression -> expression XOR expression .)
+    RPAREN          reduce using rule 4 (expression -> expression XOR expression .)
+    AND             shift and go to state 7
+    OR              shift and go to state 8
+    XOR             shift and go to state 9
+
+  ! AND             [ reduce using rule 4 (expression -> expression XOR expression .) ]
+  ! OR              [ reduce using rule 4 (expression -> expression XOR expression .) ]
+  ! XOR             [ reduce using rule 4 (expression -> expression XOR expression .) ]
+
+
+state 15
+
+    (5) expression -> LPAREN expression RPAREN .
+
+    AND             reduce using rule 5 (expression -> LPAREN expression RPAREN .)
+    OR              reduce using rule 5 (expression -> LPAREN expression RPAREN .)
+    XOR             reduce using rule 5 (expression -> LPAREN expression RPAREN .)
+    $end            reduce using rule 5 (expression -> LPAREN expression RPAREN .)
+    RPAREN          reduce using rule 5 (expression -> LPAREN expression RPAREN .)
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for AND in state 10 resolved as shift
+WARNING: shift/reduce conflict for OR in state 10 resolved as shift
+WARNING: shift/reduce conflict for XOR in state 10 resolved as shift
+WARNING: shift/reduce conflict for AND in state 12 resolved as shift
+WARNING: shift/reduce conflict for OR in state 12 resolved as shift
+WARNING: shift/reduce conflict for XOR in state 12 resolved as shift
+WARNING: shift/reduce conflict for AND in state 13 resolved as shift
+WARNING: shift/reduce conflict for OR in state 13 resolved as shift
+WARNING: shift/reduce conflict for XOR in state 13 resolved as shift
+WARNING: shift/reduce conflict for AND in state 14 resolved as shift
+WARNING: shift/reduce conflict for OR in state 14 resolved as shift
+WARNING: shift/reduce conflict for XOR in state 14 resolved as shift

@@ -17,9 +17,10 @@ def getDisplacement(algos, gene):
     mxx = max(gene)
     mnn = min(gene)
     Range = int(np.ceil((mxx-mnn) * 10) - 1)
+    #Range1 = int(np.ceil(mxx / 0.1)) - 1
     disps = pd.read_csv("./displacements/Displacements.csv")
     
-    
+    #print(gene, Range, Range1)
     
     #n = len(gene)
     #matrixes = np.random.rand(100,n)

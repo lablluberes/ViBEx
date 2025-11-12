@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import scipy
-from threshold_methods.methods import K_Means, BASC_A, onestep, shmulevich
+from threshold_methods.methods import K_Means, BASC_A, shmulevich
 
 methods = [K_Means, onestep, BASC_A, shmulevich]
 vals = np.arange(1,11)

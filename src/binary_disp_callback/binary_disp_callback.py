@@ -91,7 +91,7 @@ def get_bin_disp_callback(app):
         legend = True
 
         # colors for displacements
-        fillcolor = ['#dae5ef', '#ffdddd', '#ddf5dd', '#ffe7d2']
+        fillcolor = ["#f0e0f8", "#ddf7ff", '#ddf5dd', '#ffe7d2'] #['#dae5ef', '#ffdddd', '#ddf5dd', '#ffe7d2'] 
         
         # iterate selected thr methods
         for i in range(len(methods)):
@@ -204,8 +204,8 @@ def get_bin_disp_callback(app):
         fig = go.Figure()
 
         # color for lines 
-        fillcolor = ['#dae5ef', '#ffdddd', '#ddf5dd', '#ffe7d2']
-        fillcolor = ['red', 'blue', 'green', 'orange']
+        fillcolor = ["#f0e0f8", "#fdddff", '#ddf5dd', '#ffe7d2']
+        fillcolor = ['purple', 'cyan', 'green', 'orange']
         
         # extract gene spline
         ySpline = splineGenes[str(gene)]
@@ -477,6 +477,7 @@ def get_bin_disp_callback(app):
     
         #print(gene, t, d)
         # generate voting (elected string) of the gene based on thr, and displacements
+        print(gene, t, d, selected_method)
         votes = election_strings(gene, t, d)
         
         rows_data = []
@@ -484,6 +485,12 @@ def get_bin_disp_callback(app):
         # append each binarization (voting table) as a row 
         for line in votes[0]:
             rows_data.append(line)
+            
+            count = line.count('?')
+            totalEle = len(line)
+            
+            print("Percentage of undecided", (count/totalEle)*100)
+            
             
         # append final (elected) vote as last row
         rows_data.append(votes[1])
