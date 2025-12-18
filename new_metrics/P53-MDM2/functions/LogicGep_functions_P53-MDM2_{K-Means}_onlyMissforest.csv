@@ -1,0 +1,5 @@
+Gene,Rule
+ATM,not ATM or not MDM2
+p53,ATM and p53
+WIP1,ATM or WIP1
+MDM2,ATM and WIP1 and (MDM2 or p53)

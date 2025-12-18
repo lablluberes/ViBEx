@@ -115,9 +115,9 @@ double BASCA (double vect[], const int size) {
     //double time = omp_get_wtime();
 
     // sort one of the vectors
-    quicksort(vect, 0, size-1);
+    //quicksort(vect, 0, size-1);
 
-                //const int size = sizeof(vect) / sizeof(vect[0]);
+    //const int size = sizeof(vect) / sizeof(vect[0]);
 
     // Initialize variables and matrixes
     double min_value, curr_value;

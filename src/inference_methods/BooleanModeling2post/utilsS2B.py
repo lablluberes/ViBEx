@@ -942,59 +942,60 @@ class BestFit(object):
 		return bestsFunc, bestsScore
 	
 	def getText(self, bestsFunc, order, answers1, answers2, answers3, header):
-		text = str(header)
-		km = KarnaughMaps()
-		allTexts = {}
-		texts2return = []
-		
-		for k, funcs in bestsFunc.items(): 
-			idx = order.index(k)
-			for f in funcs: 
-				if len(f) == 1:
-					myOutputs  = answers1[f][idx]
-				elif len(f) == 2:
-					myOutputs  = answers2[f][idx]
-				else:
-					myOutputs  = answers3[f][idx]
-				myData = {0:[], 1:[]}
-				if len(f) == 1:
-					for i, comb in enumerate(self.rowCombinations1):
-						if myOutputs[i] == 0:
-							myData[0].append(comb)
-						else:
-							myData[1].append(comb)
-				elif len(f) == 2:
-					for i, comb in enumerate(self.rowCombinations2):
-						if myOutputs[i] == 0:
-							myData[0].append(comb)
-						else:
-							myData[1].append(comb)
-				else:
-					for i, comb in enumerate(self.rowCombinations3):
-						if myOutputs[i] == 0:
-							myData[0].append(comb)
-						else:
-							myData[1].append(comb)
+			text = str(header)
+			km = KarnaughMaps()
+			allTexts = {}
+			texts2return = []
 			
-				#print name, func
-				if len(f) == 1:
-					f = km.getFunction1(k, f, myData)
-				elif len(f) == 2:
-					f = km.getFunction2(k, f, myData)
-				elif len(f) == 3:
-					f = km.getFunction3(k, f, myData)
-			
-				if len(f) > 0:
-					if k in allTexts:
-						allTexts[k].append(f)
+			for k, funcs in bestsFunc.items(): 
+				idx = order.index(k)
+				for f in funcs: 
+					if len(f) == 1:
+						myOutputs  = answers1[f][idx]
+					elif len(f) == 2:
+						myOutputs  = answers2[f][idx]
 					else:
-						allTexts[k] = [f]
-		for zz in range(100):
-			text = ''
-			for k in allTexts.keys():
-				rText = random.choice(allTexts[k])
-				if rText != '':
-					text += random.choice(allTexts[k]) +'\n'
-			if text not in texts2return and text != '':
-				texts2return.append(text)
-		return texts2return
+						myOutputs  = answers3[f][idx]
+					myData = {0:[], 1:[]}
+					if len(f) == 1:
+						for i, comb in enumerate(self.rowCombinations1):
+							if myOutputs[i] == 0:
+								myData[0].append(comb)
+							else:
+								myData[1].append(comb)
+					elif len(f) == 2:
+						for i, comb in enumerate(self.rowCombinations2):
+							if myOutputs[i] == 0:
+								myData[0].append(comb)
+							else:
+								myData[1].append(comb)
+					else:
+						for i, comb in enumerate(self.rowCombinations3):
+							if myOutputs[i] == 0:
+								myData[0].append(comb)
+							else:
+								myData[1].append(comb)
+				
+					#print name, func
+					if len(f) == 1:
+						f = km.getFunction1(k, f, myData)
+					elif len(f) == 2:
+						f = km.getFunction2(k, f, myData)
+					elif len(f) == 3:
+						f = km.getFunction3(k, f, myData)
+				
+					if len(f) > 0:
+						if k in allTexts:
+							allTexts[k].append(f)
+						else:
+							allTexts[k] = [f]
+			random.seed(42)
+			for zz in range(100):
+				text = ''
+				for k in allTexts.keys():
+					rText = random.choice(allTexts[k])
+					if rText != '':
+						text += random.choice(allTexts[k]) +'\n'
+				if text not in texts2return and text != '':
+					texts2return.append(text)
+			return texts2return

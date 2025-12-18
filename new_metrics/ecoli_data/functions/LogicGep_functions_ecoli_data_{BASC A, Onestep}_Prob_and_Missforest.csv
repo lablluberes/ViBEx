@@ -1,0 +1,7 @@
+Gene,Rule
+lexA,uvrA
+uvrD,lexA or uvrD
+recA,uvrA
+uvrA,uvrA
+polB,polB
+umuD,uvrA

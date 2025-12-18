@@ -10,6 +10,8 @@ import pandas as pd
 from binarization.voting_algos import  election_strings
 from threshold_methods.methods import K_Means, shmulevich, BASC_A, call_C_BASC, call_C_Stepminer
 import math
+import numpy as np
+from displacements.displacementMatrixes import getDisplacement
 
 # function to create dataframe with the binarization of each gene done by algorithm 
 # arguments: selected - rows to create network, method - method to create network, data - dataset, tolerance - number of iterations
@@ -46,66 +48,44 @@ def create_boolean_network(selected, method, data, displacement, thr_k, thr_o, t
 
     vote_binary = []
     
+    method_labels = {'BASC A': ['BASC_A', thr_b], 'Onestep': ['onestep', thr_o], 'K-Means':['k-means', thr_k], 'Shmulevich':['shmulevich', thr_s]}
+    
     # iterate by each gene and find the thresholds based on the number of interpolations
-    for gene in genes:
-
-        range_displacement_index = math.ceil((max(gene)-min(gene))*10) - 1
-
-        if(method == "K-Means"):
-            
-            # append threshold of the original gene
-            t.append(thr_k[str(selected[index])])
-
-            # save displacement of that gene 
-            d.append(displacement['k-means'].iloc[range_displacement_index])
-
-        elif(method == "Shmulevich"):
+    for row, gene in enumerate(genes):
         
-            # append threshold of the original gene
-            t.append(thr_s[str(selected[index])])
-            
-            # save displacement of that gene 
-            d.append(displacement['shmulevich'].iloc[range_displacement_index])
-            
-        elif(method == "Onestep"):
-            
-            # append threshold of the original gene
-            t.append(thr_o[str(selected[index])])
+        # extract displacement based on gene range
+        disps = getDisplacement([method],gene)
 
-            # save displacement of that gene 
-            d.append(displacement['onestep'].iloc[range_displacement_index])
-
-
-        else:
-           
-            # append threshold of the original gene
-            t.append(thr_b[str(selected[index])])
-
-            # save displacement of that gene 
-            d.append(displacement['BASC_A'].iloc[range_displacement_index])
-
-        # get voting based on the gene expression, thresholds, and displacement
-        votes =  election_strings(gene, t, d)
-            
-        # get the final vote 
-        final = votes[1]
-
-        # change -1 of the final vote to ?
-        for i in range(len(final)):
-            if(final[i] != '?'):
-                final[i] = int(final[i])
-            
-        # save the final vote to a dataframe. 
-        df[labels[selected[index]]] = final
+        #print(disps)
+        
         t = []
         d = []
-        index += 1
-        binarize = []
+        #votes = [[]]
+        
+        # extract thr, and disp of each method of the gene
+            
+        thr = method_labels[method][1][str(selected[row])]
+        dis = disps[method_labels[method][0]].iloc[0]
+        t.append(thr)
+            
+        d.append(dis)
+                
+        el = election_strings(gene, [thr], [dis])
+                
+        el = ['?' if np.isnan(e) else int(e) for e in el]
+        #votes[0].append(el)
+                
+        df[labels[selected[row]]] = el
+        
+        #print(gene, t, d)
+        # generate voting (elected string) of the gene based on thr, and displacements
+        #print(gene, t, d, selected_method)
 
     
     #print(df)
 
     # return created dataframe of the final vote of each gene
+    
     return df
 
 # function to create dataframe with the binarization of elected 
@@ -136,73 +116,49 @@ def create_boolean_network_votes(selected, data, methods, displacement, thr_k, t
     
     index = 0
     
+    method_labels = {'BASC A': ['BASC_A', thr_b], 'Onestep': ['onestep', thr_o], 'K-Means':['k-means', thr_k], 'Shmulevich':['shmulevich', thr_s]}
+    
     # for each gene find the vote by the given methods 
-    for gene in genes:
+    for row, gene in enumerate(genes):
+        
+        # extract displacement based on gene range
+
+        #print(disps)
         
         t = []
         d = []
-
-        vote_binary = []
-
-        selected_range = max(gene) - min(gene)
-    
-        range_displacement_index = math.ceil((max(gene)-min(gene))*10) - 1
-
-        #_, geneSpline = three_interpolation(gene, 'K-Means', 4)
-
-        # go through each method and find thresholds, and displacement
+        #votes = [[]]
+        
+        # go through each method and extract the thr, and disp
+       
         for method in methods:
-            if(method == 'BASC A'):
+            
+            #print(gene)
+            #print("MMEEEETTOOOOODOOOOOO", method)
+            disps = getDisplacement([method],gene)
+           
 
-                # save threshold of original gene
-                t.append(thr_b[str(selected[index])])
-
-                # save displacement of that gene 
-                d.append(displacement['BASC_A'].iloc[range_displacement_index])
-
-            elif(method == 'K-Means'):
-
-                # save threshold of original gene
-                t.append(thr_k[str(selected[index])])
-
-                # save displacement of that gene 
-                d.append(displacement['k-means'].iloc[range_displacement_index])
+            # extract thr, and disp of each method of the gene
+            
+            thr = method_labels[method][1][str(selected[row])]
+            
+            #print("aqui")
+            dis = disps[method_labels[method][0]].iloc[0]
+            
+       
+            t.append(thr)
+      
+            d.append(dis)
+                   
+        #print(gene, t, d)
+        # generate voting (elected string) of the gene based on thr, and displacements
+        #print(gene, t, d, selected_method)
         
-
-            elif(method == 'Onestep'):
-
-                # save threshold of original gene
-                t.append(thr_o[str(selected[index])])
+        el = election_strings(gene, t, d)
                 
-                # save displacement of that gene 
-                d.append(displacement['onestep'].iloc[range_displacement_index])
-                
-
-            else:
-
-                # save threshold of original gene
-                t.append(thr_s[str(selected[index])])
-                
-                # save displacement of that gene
-                d.append(displacement['shmulevich'].iloc[range_displacement_index])
-
-
-        # based on the gene and the methods find the voting table 
-        # pass the list of thresholds, and displacements
-        # each element of the list is of a different algorithm 
-        votes = election_strings(gene, t, d)
+        el = ['?' if np.isnan(e) else int(e) for e in el]
         
-        # get the final vote of the gene 
-        final = votes[1]
-        
-        # change -1 to ?
-        for i in range(len(final)):
-            if(final[i] != '?'):
-                final[i] = int(final[i])
-                
-        # save gene to a dataframe as a column
-        df[labels[selected[index]]] = final
-        index += 1
+        df[labels[selected[row]]] = el
     
     #print(df)
 

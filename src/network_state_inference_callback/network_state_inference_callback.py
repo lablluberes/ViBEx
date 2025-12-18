@@ -833,7 +833,7 @@ def get_network_inf_callbacks(app):
                                 dbc.Card(
                                     dbc.CardBody([
                                         html.P("This section provides the Boolean Network of the Binarization by each selected method and elected method."),
-                                        html.P("Each number in the edges are the time series steps until the final state. The table representation of these networks are in 'Binarization State Table',"),
+                                        html.P("Each number in the edges are the time series steps until the final state. The table representation of these networks are in 'Binarization Table',"),
                                     ]),
                                     className="mb-3",
                                 ),
@@ -1181,7 +1181,7 @@ def get_network_inf_callbacks(app):
                                         html.Div([
                                         html.B("Network Based on Inferred Boolean Functions"),
                                         html.P("Grey nodes are attractors, and green nodes are"),
-                                        html.P("the extracted path based on first state of the selected method"),
+                                        html.P("the extracted path based on first state of the selected binarization"),
                                     
                                         html.Iframe(
                                                         srcDoc=net.generate_html(), # here https://stackoverflow.com/questions/68269257/local-html-file-wont-load-properly-into-dash-application
@@ -1260,7 +1260,7 @@ def get_network_inf_callbacks(app):
         """
         # if button not pressed return none
         if n_clicks is None:
-            return [None, dcc.Store(id='inferred_net_rules', data={}), ], None
+            return [None, dcc.Store(id='inferred-rules-table', data={}), ], None
         
         # sort selected genes
         selected_rows.sort()
@@ -1397,7 +1397,7 @@ def get_network_inf_callbacks(app):
         return  html.Div([
 
                 # save inferred rules
-                dcc.Store(id='inferred_net_rules', data=df_infer_rules.to_dict('records')), 
+                #dcc.Store(id='inferred_net_rules', data=df_infer_rules.to_dict('records')), 
                 dbc.Card(
                         dbc.CardBody([
                                 html.B("Table of Inferred Boolean Functions"),

@@ -75,7 +75,7 @@ def generateDisplacement(methods, genes):
                         if m == 'K-Means':
                             kmeans_thr.append(K_Means(g_spline))
                         elif m == 'BASC A':
-                            basc_thr.append(call_C_BASC(g_spline))
+                            basc_thr.append(call_C_BASC(g_spline.copy()))
                         elif m == 'Onestep':
                             onestep_thr.append(call_C_Stepminer(g_spline))
                         else:

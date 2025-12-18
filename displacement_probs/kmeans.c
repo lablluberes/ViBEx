@@ -1,0 +1,176 @@
+ /******************************************************************************/
+    /*										  *
+     *   Purpose:     This code implements OpenMP in the k-means algorithm.
+                      The main function reads a txt file with each row being a gene
+                      expression. It then sends each row to the kmeans function where
+                      the algorithm is implemented using OpenMP. To modify the file to be read
+                      change the #define FILENAME line 
+     *   Compile:     gcc-13 -fopenmp KMeans.c -o kmeans	  *
+     *   Run:         ./kmeans
+     *   Author:   						  *
+     *   Course:						  *
+     *   Last update: 
+     *   
+     ******************************************************************************/
+    
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <time.h>
+#include <omp.h>
+#include <string.h>
+
+// K-Means function where the method is implemented
+// The function takes a vector as an argument
+double KMeans(double G[], const int size){
+
+    srand(42);
+
+    omp_set_num_threads(omp_get_max_threads());
+
+    //printf("\nk-means\n");
+
+    double cn_j[2], co_j[2];
+
+    int index1 = rand()%size;
+    //int index2 = rand()%size;
+
+    //printf("%d, %d ", index1, index2);
+
+    cn_j[0] = G[index1];
+
+    int index2;
+    do{
+        index2 = rand()%size;
+        cn_j[1] = G[index2];
+    }while (cn_j[0] == cn_j[1]);
+    
+    //printf("%d, %d ", index1, index2);
+    
+    co_j[0] = -1;
+    co_j[1] = -1;
+
+    int S[size];
+    int iter = 0;
+
+    double sum1;
+    double sum2;
+    int count1;
+    int count2;
+
+    double dis_1, dis_2;
+
+    //printf("centroids init %f, %f\n", cn_j[0], cn_j[1]);
+
+    while((cn_j[0] != co_j[0] || cn_j[1] != co_j[1]) && iter < 1000){
+        
+        co_j[0] = cn_j[0];
+        co_j[1] = cn_j[1];
+
+        //printf("prev centroids: %f, %f\n", co_j[0], co_j[1]);
+
+        iter += 1;
+
+        sum1 = 0;
+        sum2 = 0;
+        count1 = 0;
+        count2 = 0;
+
+        #pragma omp parallel for shared(S, sum1, count1, count2, sum2, co_j) private(dis_1, dis_2)
+        for(int i = 0; i < size; i++){
+            //printf("index %d\n", i);
+            dis_1 = fabs(G[i] - co_j[0]) * fabs(G[i] - co_j[0]);
+            dis_2 = fabs(G[i] - co_j[1]) * fabs(G[i] - co_j[1]);
+            
+            //#pragma omp critial
+            if(dis_1 < dis_2){
+                S[i] = 1;
+                //sum1 += G[i];
+                //count1 += 1;
+            }
+            else{
+                S[i] = 2;
+                //sum2 += G[i];
+                //count2 += 1;
+            }
+        }
+
+        //#pragma omp parallel for reduction(+:sum1, sum2, count1, count2)
+        for(int i = 0; i < size; i++){
+
+            if(S[i] == 1){
+                sum1 += G[i];
+                count1 += 1;
+            }
+            else{
+                sum2 += G[i];
+                count2 += 1;
+            }
+        }
+
+        //printf("ya\n");
+        if(count1 > 0){
+      
+            cn_j[0] = sum1 / count1;
+        }
+
+        if(count2 > 0){
+        
+            cn_j[1] = sum2 / count2;
+        }
+
+        //for(int i = 0; i < size; i++){
+        //    printf("%d ", S[i]);
+        //}
+        //printf("\n");
+
+        //printf("new centroids: %f, %f\n", cn_j[0], cn_j[1]);
+
+    
+    }
+
+    //printf("iters: %d\n", iter);
+
+    //printf("last centroids: %f, %f\n", cn_j[0], cn_j[1]);
+
+    return (cn_j[0]+cn_j[1]) / 2;
+}
+
+/*
+int main(){
+
+    double gene[5] = {1772.47, 2108.5, 3205.1, 1133.63, 185.885};
+
+    double data[97] = {0.7566794133, 0.7455017481385997, 0.7355852386575561, 0.7268633690762257, 0.7192696236139648, 0.71273748649013, 0.7072004419240775, 0.7025919741351639, 0.6988455673427455, 0.6958947057661788, 0.6936728736248203, 0.6921135551380263, 0.6911502345251533, 0.6907163960055579, 0.6907455237985961, 0.6911711021236248, 0.6919266152, 0.6929455472470784, 0.6941613824842163, 0.6955076051307701, 0.6969176994060966, 0.6983251495295517, 0.699663439720492, 0.7008660541982743, 0.7018664771822544, 0.7025981928917893, 0.702994685546235, 0.7029894393649482, 0.7025159385672852, 0.7015076673726024, 0.6998981100002564, 0.6976207506696035, 0.6946090736, 0.6908286995316317, 0.6863737952880005, 0.6813706642134375, 0.675945609652274, 0.670224934948841, 0.6643349434474697, 0.6584019384924912, 0.6525522234282367, 0.6469121015990372, 0.6416078763492241, 0.6367658510231282, 0.6325123289650809, 0.6289736135194134, 0.6262760080304565, 0.6245458158425417, 0.6239093403, 0.6244522305796908, 0.6260975191885864, 0.6287275844661876, 0.6322248047519949, 0.6364715583855092, 0.6413502237062308, 0.6467431790536606, 0.6525328027672991, 0.6586014731866471, 0.6648315686512051, 0.6711054675004736, 0.6773055480739536, 0.6833141887111458, 0.6890137677515503, 0.6942866635346683, 0.6990152544, 0.7031079984245564, 0.7065776726353881, 0.7094631337970562, 0.7118032386741211, 0.7136368440311439, 0.7150028066326851, 0.715939983243306, 0.7164872306275669, 0.716683405550029, 0.7165673647752528, 0.7161779650677993, 0.7155540631922294, 0.7147345159131037, 0.7137581799949829, 0.7126639122024281, 0.7114905693, 0.7102770080522594, 0.7090620852237671, 0.7078846575790839, 0.7067835818827707, 0.7057977148993881, 0.7049659133934971, 0.7043270341296585, 0.703919933872433, 0.7037834693863816, 0.7039564974360648, 0.7044778747860435, 0.7053864582008789, 0.7067211044451314, 0.7085206702833619, 0.7108240124801312, 0.7136699878};
+
+    double data2[5] = {1772.47, 1772.47, 1772.47, 1772.47, 0};
+
+    double thr;
+
+    double thr2 = KMeans(data, 97, 1);
+
+    // se supone que sea kmeans {0: 0.6737218344374016}
+    for(int i = 0; i < 10; i++){
+
+        for(int j = 0; j < 100; j++){
+
+            thr = KMeans(data, 97, i+1);
+
+            printf(" thr: %.20lf threads numbers: %d iter: %d\n\n", thr, i+1, j+1);
+
+
+            if(thr != thr2){
+                printf("NOT SAME\n");
+                break;
+            }
+        }
+        if(thr != thr2){
+                printf("NOT SAME\n");
+                break;
+            }
+
+    }
+
+
+}*/

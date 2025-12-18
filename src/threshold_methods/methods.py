@@ -251,6 +251,8 @@ def call_C_BASC(data):
 
     # Define your data
     data = np.asarray(data, dtype=np.float64)
+    
+    data.sort()
 
     # Call the BASCA function
     t = basca_lib.BASCA(data, len(data))

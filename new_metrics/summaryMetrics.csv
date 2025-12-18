@@ -1,0 +1,631 @@
+,Method,Binarization,impuType,dataset,metricName,metricNumber
+0,MIBNI,{BASC A},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.8333333333333334
+1,MIBNI,{K-Means},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.5833333333333334
+2,MIBNI,{Onestep},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.5416666666666667
+3,MIBNI,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.8333333333333334
+4,MIBNI,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.8333333333333334
+5,MIBNI,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.5416666666666667
+6,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.5416666666666667
+7,LogicGep,{BASC A},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.8333333333333334
+8,LogicGep,{K-Means},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.5416666666666666
+9,LogicGep,{Onestep},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+10,LogicGep,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.8333333333333334
+11,LogicGep,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.8333333333333334
+12,LogicGep,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+13,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+14,Bestfit,{BASC A},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.625
+15,Bestfit,{K-Means},missforestMetrics,P53-MDM2,Dynamic Accuracy,0.5
+16,Bestfit,{Onestep},missforestMetrics,P53-MDM2,Dynamic Accuracy,
+17,Bestfit,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.625
+18,Bestfit,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,0.625
+19,Bestfit,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,
+20,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Dynamic Accuracy,
+21,MIBNI,{BASC A},probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+22,MIBNI,{K-Means},probsMetrics,P53-MDM2,Dynamic Accuracy,0.75
+23,MIBNI,{Onestep},probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+24,MIBNI,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+25,MIBNI,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+26,MIBNI,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+27,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+28,LogicGep,{BASC A},probsMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+29,LogicGep,{K-Means},probsMetrics,P53-MDM2,Dynamic Accuracy,0.375
+30,LogicGep,{Onestep},probsMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+31,LogicGep,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+32,LogicGep,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+33,LogicGep,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+34,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,0.7916666666666667
+35,Bestfit,{BASC A},probsMetrics,P53-MDM2,Dynamic Accuracy,
+36,Bestfit,{K-Means},probsMetrics,P53-MDM2,Dynamic Accuracy,
+37,Bestfit,{Onestep},probsMetrics,P53-MDM2,Dynamic Accuracy,
+38,Bestfit,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Dynamic Accuracy,
+39,Bestfit,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,
+40,Bestfit,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,
+41,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Dynamic Accuracy,
+42,MIBNI,{BASC A},missforestMetrics,ecoli_data,Dynamic Accuracy,0.8194444444444444
+43,MIBNI,{K-Means},missforestMetrics,ecoli_data,Dynamic Accuracy,0.7951388888888888
+44,MIBNI,{Onestep},missforestMetrics,ecoli_data,Dynamic Accuracy,0.78125
+45,MIBNI,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.8194444444444444
+46,MIBNI,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.7881944444444444
+47,MIBNI,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.78125
+48,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.7847222222222222
+49,LogicGep,{BASC A},missforestMetrics,ecoli_data,Dynamic Accuracy,0.298611111111111
+50,LogicGep,{K-Means},missforestMetrics,ecoli_data,Dynamic Accuracy,0.2291666666666666
+51,LogicGep,{Onestep},missforestMetrics,ecoli_data,Dynamic Accuracy,0.2222222222222222
+52,LogicGep,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.298611111111111
+53,LogicGep,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.2152777777777776
+54,LogicGep,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.2222222222222222
+55,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+56,Bestfit,{BASC A},missforestMetrics,ecoli_data,Dynamic Accuracy,0.21875
+57,Bestfit,{K-Means},missforestMetrics,ecoli_data,Dynamic Accuracy,0.2291666666666666
+58,Bestfit,{Onestep},missforestMetrics,ecoli_data,Dynamic Accuracy,0.1979166666666666
+59,Bestfit,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.21875
+60,Bestfit,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.1909722222222222
+61,Bestfit,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.1979166666666666
+62,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+63,MIBNI,{BASC A},probsMetrics,ecoli_data,Dynamic Accuracy,0.7916666666666666
+64,MIBNI,{K-Means},probsMetrics,ecoli_data,Dynamic Accuracy,0.7847222222222222
+65,MIBNI,{Onestep},probsMetrics,ecoli_data,Dynamic Accuracy,0.78125
+66,MIBNI,"{BASC A, K-Means}",probsMetrics,ecoli_data,Dynamic Accuracy,0.7916666666666666
+67,MIBNI,"{BASC A, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.7881944444444444
+68,MIBNI,"{K-Means, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.78125
+69,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.7847222222222222
+70,LogicGep,{BASC A},probsMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+71,LogicGep,{K-Means},probsMetrics,ecoli_data,Dynamic Accuracy,0.2222222222222222
+72,LogicGep,{Onestep},probsMetrics,ecoli_data,Dynamic Accuracy,0.2222222222222222
+73,LogicGep,"{BASC A, K-Means}",probsMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+74,LogicGep,"{BASC A, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.2152777777777776
+75,LogicGep,"{K-Means, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.2222222222222222
+76,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+77,Bestfit,{BASC A},probsMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+78,Bestfit,{K-Means},probsMetrics,ecoli_data,Dynamic Accuracy,0.2222222222222222
+79,Bestfit,{Onestep},probsMetrics,ecoli_data,Dynamic Accuracy,0.1979166666666666
+80,Bestfit,"{BASC A, K-Means}",probsMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+81,Bestfit,"{BASC A, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.1909722222222222
+82,Bestfit,"{K-Means, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.1979166666666666
+83,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Dynamic Accuracy,0.2916666666666666
+84,MIBNI,{BASC A},missforestMetrics,yeast_cell,Dynamic Accuracy,0.6153846153846154
+85,MIBNI,{K-Means},missforestMetrics,yeast_cell,Dynamic Accuracy,0.717948717948718
+86,MIBNI,{Onestep},missforestMetrics,yeast_cell,Dynamic Accuracy,0.6239316239316239
+87,MIBNI,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.6153846153846154
+88,MIBNI,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.7264957264957266
+89,MIBNI,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.6239316239316239
+90,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.6068376068376068
+91,LogicGep,{BASC A},missforestMetrics,yeast_cell,Dynamic Accuracy,0.8376068376068376
+92,LogicGep,{K-Means},missforestMetrics,yeast_cell,Dynamic Accuracy,0.6581196581196581
+93,LogicGep,{Onestep},missforestMetrics,yeast_cell,Dynamic Accuracy,0.8376068376068376
+94,LogicGep,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.8376068376068376
+95,LogicGep,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.8376068376068376
+96,LogicGep,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.8376068376068376
+97,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,0.8205128205128205
+98,Bestfit,{BASC A},missforestMetrics,yeast_cell,Dynamic Accuracy,
+99,Bestfit,{K-Means},missforestMetrics,yeast_cell,Dynamic Accuracy,0.46153846153846145
+100,Bestfit,{Onestep},missforestMetrics,yeast_cell,Dynamic Accuracy,
+101,Bestfit,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Dynamic Accuracy,
+102,Bestfit,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,
+103,Bestfit,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,
+104,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Dynamic Accuracy,
+105,MIBNI,{BASC A},probsMetrics,yeast_cell,Dynamic Accuracy,0.7777777777777778
+106,MIBNI,{K-Means},probsMetrics,yeast_cell,Dynamic Accuracy,0.7179487179487178
+107,MIBNI,{Onestep},probsMetrics,yeast_cell,Dynamic Accuracy,0.7692307692307692
+108,MIBNI,"{BASC A, K-Means}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7777777777777778
+109,MIBNI,"{BASC A, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.8034188034188035
+110,MIBNI,"{K-Means, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7692307692307692
+111,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7521367521367521
+112,LogicGep,{BASC A},probsMetrics,yeast_cell,Dynamic Accuracy,0.7692307692307692
+113,LogicGep,{K-Means},probsMetrics,yeast_cell,Dynamic Accuracy,0.6923076923076923
+114,LogicGep,{Onestep},probsMetrics,yeast_cell,Dynamic Accuracy,0.7692307692307692
+115,LogicGep,"{BASC A, K-Means}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7692307692307692
+116,LogicGep,"{BASC A, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7948717948717948
+117,LogicGep,"{K-Means, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7692307692307692
+118,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7350427350427351
+119,Bestfit,{BASC A},probsMetrics,yeast_cell,Dynamic Accuracy,0.7094017094017093
+120,Bestfit,{K-Means},probsMetrics,yeast_cell,Dynamic Accuracy,0.4786324786324786
+121,Bestfit,{Onestep},probsMetrics,yeast_cell,Dynamic Accuracy,0.6495726495726495
+122,Bestfit,"{BASC A, K-Means}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7094017094017093
+123,Bestfit,"{BASC A, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.7350427350427351
+124,Bestfit,"{K-Means, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.6495726495726495
+125,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Dynamic Accuracy,0.5128205128205128
+126,MIBNI,{BASC A},missforestMetrics,P53-MDM2,Accuracy,0.6
+127,MIBNI,{K-Means},missforestMetrics,P53-MDM2,Accuracy,0.6
+128,MIBNI,{Onestep},missforestMetrics,P53-MDM2,Accuracy,0.7
+129,MIBNI,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Accuracy,0.6
+130,MIBNI,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.6
+131,MIBNI,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.7
+132,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.7
+133,LogicGep,{BASC A},missforestMetrics,P53-MDM2,Accuracy,0.5
+134,LogicGep,{K-Means},missforestMetrics,P53-MDM2,Accuracy,0.6
+135,LogicGep,{Onestep},missforestMetrics,P53-MDM2,Accuracy,0.5
+136,LogicGep,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Accuracy,0.5
+137,LogicGep,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.5
+138,LogicGep,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.5
+139,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.5
+140,Bestfit,{BASC A},missforestMetrics,P53-MDM2,Accuracy,0.6
+141,Bestfit,{K-Means},missforestMetrics,P53-MDM2,Accuracy,0.6
+142,Bestfit,{Onestep},missforestMetrics,P53-MDM2,Accuracy,0.4
+143,Bestfit,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Accuracy,0.6
+144,Bestfit,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.6
+145,Bestfit,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.4
+146,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Accuracy,0.4
+147,MIBNI,{BASC A},probsMetrics,P53-MDM2,Accuracy,0.6
+148,MIBNI,{K-Means},probsMetrics,P53-MDM2,Accuracy,0.7
+149,MIBNI,{Onestep},probsMetrics,P53-MDM2,Accuracy,0.6
+150,MIBNI,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Accuracy,0.6
+151,MIBNI,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.6
+152,MIBNI,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.6
+153,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.6
+154,LogicGep,{BASC A},probsMetrics,P53-MDM2,Accuracy,0.4
+155,LogicGep,{K-Means},probsMetrics,P53-MDM2,Accuracy,0.8
+156,LogicGep,{Onestep},probsMetrics,P53-MDM2,Accuracy,0.4
+157,LogicGep,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Accuracy,0.4
+158,LogicGep,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.4
+159,LogicGep,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.4
+160,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.4
+161,Bestfit,{BASC A},probsMetrics,P53-MDM2,Accuracy,0.3
+162,Bestfit,{K-Means},probsMetrics,P53-MDM2,Accuracy,0.4
+163,Bestfit,{Onestep},probsMetrics,P53-MDM2,Accuracy,0.3
+164,Bestfit,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Accuracy,0.3
+165,Bestfit,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.3
+166,Bestfit,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.3
+167,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Accuracy,0.3
+168,MIBNI,{BASC A},missforestMetrics,ecoli_data,Accuracy,0.238095238095238
+169,MIBNI,{K-Means},missforestMetrics,ecoli_data,Accuracy,0.2857142857142857
+170,MIBNI,{Onestep},missforestMetrics,ecoli_data,Accuracy,0.238095238095238
+171,MIBNI,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Accuracy,0.238095238095238
+172,MIBNI,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.238095238095238
+173,MIBNI,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.238095238095238
+174,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.238095238095238
+175,LogicGep,{BASC A},missforestMetrics,ecoli_data,Accuracy,0.7619047619047619
+176,LogicGep,{K-Means},missforestMetrics,ecoli_data,Accuracy,0.6190476190476191
+177,LogicGep,{Onestep},missforestMetrics,ecoli_data,Accuracy,0.6190476190476191
+178,LogicGep,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Accuracy,0.7619047619047619
+179,LogicGep,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.6190476190476191
+180,LogicGep,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.6190476190476191
+181,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.6666666666666666
+182,Bestfit,{BASC A},missforestMetrics,ecoli_data,Accuracy,0.4285714285714285
+183,Bestfit,{K-Means},missforestMetrics,ecoli_data,Accuracy,0.6666666666666666
+184,Bestfit,{Onestep},missforestMetrics,ecoli_data,Accuracy,0.6666666666666666
+185,Bestfit,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Accuracy,0.4285714285714285
+186,Bestfit,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.6666666666666666
+187,Bestfit,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.6666666666666666
+188,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Accuracy,0.6666666666666666
+189,MIBNI,{BASC A},probsMetrics,ecoli_data,Accuracy,0.238095238095238
+190,MIBNI,{K-Means},probsMetrics,ecoli_data,Accuracy,0.2857142857142857
+191,MIBNI,{Onestep},probsMetrics,ecoli_data,Accuracy,0.238095238095238
+192,MIBNI,"{BASC A, K-Means}",probsMetrics,ecoli_data,Accuracy,0.238095238095238
+193,MIBNI,"{BASC A, Onestep}",probsMetrics,ecoli_data,Accuracy,0.238095238095238
+194,MIBNI,"{K-Means, Onestep}",probsMetrics,ecoli_data,Accuracy,0.238095238095238
+195,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Accuracy,0.238095238095238
+196,LogicGep,{BASC A},probsMetrics,ecoli_data,Accuracy,0.7619047619047619
+197,LogicGep,{K-Means},probsMetrics,ecoli_data,Accuracy,0.5714285714285714
+198,LogicGep,{Onestep},probsMetrics,ecoli_data,Accuracy,0.6190476190476191
+199,LogicGep,"{BASC A, K-Means}",probsMetrics,ecoli_data,Accuracy,0.7619047619047619
+200,LogicGep,"{BASC A, Onestep}",probsMetrics,ecoli_data,Accuracy,0.6190476190476191
+201,LogicGep,"{K-Means, Onestep}",probsMetrics,ecoli_data,Accuracy,0.6190476190476191
+202,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Accuracy,0.6666666666666666
+203,Bestfit,{BASC A},probsMetrics,ecoli_data,Accuracy,0.5714285714285714
+204,Bestfit,{K-Means},probsMetrics,ecoli_data,Accuracy,0.6666666666666666
+205,Bestfit,{Onestep},probsMetrics,ecoli_data,Accuracy,0.6666666666666666
+206,Bestfit,"{BASC A, K-Means}",probsMetrics,ecoli_data,Accuracy,0.5714285714285714
+207,Bestfit,"{BASC A, Onestep}",probsMetrics,ecoli_data,Accuracy,0.6666666666666666
+208,Bestfit,"{K-Means, Onestep}",probsMetrics,ecoli_data,Accuracy,0.6666666666666666
+209,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Accuracy,0.6666666666666666
+210,MIBNI,{BASC A},missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+211,MIBNI,{K-Means},missforestMetrics,yeast_cell,Accuracy,0.4
+212,MIBNI,{Onestep},missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+213,MIBNI,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+214,MIBNI,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+215,MIBNI,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+216,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+217,LogicGep,{BASC A},missforestMetrics,yeast_cell,Accuracy,0.3777777777777777
+218,LogicGep,{K-Means},missforestMetrics,yeast_cell,Accuracy,0.4444444444444444
+219,LogicGep,{Onestep},missforestMetrics,yeast_cell,Accuracy,0.5111111111111111
+220,LogicGep,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Accuracy,0.3777777777777777
+221,LogicGep,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.4444444444444444
+222,LogicGep,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.5111111111111111
+223,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.4
+224,Bestfit,{BASC A},missforestMetrics,yeast_cell,Accuracy,0.5555555555555556
+225,Bestfit,{K-Means},missforestMetrics,yeast_cell,Accuracy,0.4666666666666667
+226,Bestfit,{Onestep},missforestMetrics,yeast_cell,Accuracy,0.4888888888888889
+227,Bestfit,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Accuracy,0.5555555555555556
+228,Bestfit,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.5333333333333333
+229,Bestfit,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.4888888888888889
+230,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Accuracy,0.5111111111111111
+231,MIBNI,{BASC A},probsMetrics,yeast_cell,Accuracy,0.4888888888888889
+232,MIBNI,{K-Means},probsMetrics,yeast_cell,Accuracy,0.4
+233,MIBNI,{Onestep},probsMetrics,yeast_cell,Accuracy,0.4
+234,MIBNI,"{BASC A, K-Means}",probsMetrics,yeast_cell,Accuracy,0.4888888888888889
+235,MIBNI,"{BASC A, Onestep}",probsMetrics,yeast_cell,Accuracy,0.4
+236,MIBNI,"{K-Means, Onestep}",probsMetrics,yeast_cell,Accuracy,0.4
+237,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Accuracy,0.4222222222222222
+238,LogicGep,{BASC A},probsMetrics,yeast_cell,Accuracy,0.5555555555555556
+239,LogicGep,{K-Means},probsMetrics,yeast_cell,Accuracy,0.5555555555555556
+240,LogicGep,{Onestep},probsMetrics,yeast_cell,Accuracy,0.6444444444444445
+241,LogicGep,"{BASC A, K-Means}",probsMetrics,yeast_cell,Accuracy,0.5555555555555556
+242,LogicGep,"{BASC A, Onestep}",probsMetrics,yeast_cell,Accuracy,0.5555555555555556
+243,LogicGep,"{K-Means, Onestep}",probsMetrics,yeast_cell,Accuracy,0.6444444444444445
+244,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Accuracy,0.6
+245,Bestfit,{BASC A},probsMetrics,yeast_cell,Accuracy,0.5333333333333333
+246,Bestfit,{K-Means},probsMetrics,yeast_cell,Accuracy,0.4222222222222222
+247,Bestfit,{Onestep},probsMetrics,yeast_cell,Accuracy,0.4666666666666667
+248,Bestfit,"{BASC A, K-Means}",probsMetrics,yeast_cell,Accuracy,0.5333333333333333
+249,Bestfit,"{BASC A, Onestep}",probsMetrics,yeast_cell,Accuracy,0.4888888888888889
+250,Bestfit,"{K-Means, Onestep}",probsMetrics,yeast_cell,Accuracy,0.4666666666666667
+251,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Accuracy,0.5111111111111111
+252,MIBNI,{BASC A},missforestMetrics,P53-MDM2,Precision,0.7142857142857143
+253,MIBNI,{K-Means},missforestMetrics,P53-MDM2,Precision,0.7142857142857143
+254,MIBNI,{Onestep},missforestMetrics,P53-MDM2,Precision,0.7
+255,MIBNI,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Precision,0.7142857142857143
+256,MIBNI,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Precision,0.7142857142857143
+257,MIBNI,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Precision,0.7
+258,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Precision,0.7
+259,LogicGep,{BASC A},missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+260,LogicGep,{K-Means},missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+261,LogicGep,{Onestep},missforestMetrics,P53-MDM2,Precision,0.75
+262,LogicGep,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+263,LogicGep,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+264,LogicGep,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Precision,0.75
+265,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Precision,0.75
+266,Bestfit,{BASC A},missforestMetrics,P53-MDM2,Precision,0.8
+267,Bestfit,{K-Means},missforestMetrics,P53-MDM2,Precision,0.7142857142857143
+268,Bestfit,{Onestep},missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+269,Bestfit,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Precision,0.8
+270,Bestfit,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Precision,0.8
+271,Bestfit,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+272,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Precision,0.6666666666666666
+273,MIBNI,{BASC A},probsMetrics,P53-MDM2,Precision,0.6666666666666666
+274,MIBNI,{K-Means},probsMetrics,P53-MDM2,Precision,0.7
+275,MIBNI,{Onestep},probsMetrics,P53-MDM2,Precision,0.6666666666666666
+276,MIBNI,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Precision,0.6666666666666666
+277,MIBNI,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Precision,0.6666666666666666
+278,MIBNI,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Precision,0.6666666666666666
+279,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Precision,0.6666666666666666
+280,LogicGep,{BASC A},probsMetrics,P53-MDM2,Precision,0.6
+281,LogicGep,{K-Means},probsMetrics,P53-MDM2,Precision,1.0
+282,LogicGep,{Onestep},probsMetrics,P53-MDM2,Precision,0.6
+283,LogicGep,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Precision,0.6
+284,LogicGep,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Precision,0.6
+285,LogicGep,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Precision,0.6
+286,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Precision,0.6
+287,Bestfit,{BASC A},probsMetrics,P53-MDM2,Precision,0.5
+288,Bestfit,{K-Means},probsMetrics,P53-MDM2,Precision,0.6666666666666666
+289,Bestfit,{Onestep},probsMetrics,P53-MDM2,Precision,0.5
+290,Bestfit,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Precision,0.5
+291,Bestfit,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Precision,0.5
+292,Bestfit,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Precision,0.5
+293,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Precision,0.5
+294,MIBNI,{BASC A},missforestMetrics,ecoli_data,Precision,0.238095238095238
+295,MIBNI,{K-Means},missforestMetrics,ecoli_data,Precision,0.25
+296,MIBNI,{Onestep},missforestMetrics,ecoli_data,Precision,0.238095238095238
+297,MIBNI,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Precision,0.238095238095238
+298,MIBNI,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Precision,0.238095238095238
+299,MIBNI,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Precision,0.238095238095238
+300,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Precision,0.238095238095238
+301,LogicGep,{BASC A},missforestMetrics,ecoli_data,Precision,0.5
+302,LogicGep,{K-Means},missforestMetrics,ecoli_data,Precision,0.3333333333333333
+303,LogicGep,{Onestep},missforestMetrics,ecoli_data,Precision,0.2857142857142857
+304,LogicGep,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Precision,0.5
+305,LogicGep,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Precision,0.2857142857142857
+306,LogicGep,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Precision,0.2857142857142857
+307,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Precision,0.3333333333333333
+308,Bestfit,{BASC A},missforestMetrics,ecoli_data,Precision,0.1111111111111111
+309,Bestfit,{K-Means},missforestMetrics,ecoli_data,Precision,0.375
+310,Bestfit,{Onestep},missforestMetrics,ecoli_data,Precision,0.375
+311,Bestfit,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Precision,0.1111111111111111
+312,Bestfit,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Precision,0.375
+313,Bestfit,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Precision,0.375
+314,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Precision,0.3333333333333333
+315,MIBNI,{BASC A},probsMetrics,ecoli_data,Precision,0.238095238095238
+316,MIBNI,{K-Means},probsMetrics,ecoli_data,Precision,0.25
+317,MIBNI,{Onestep},probsMetrics,ecoli_data,Precision,0.238095238095238
+318,MIBNI,"{BASC A, K-Means}",probsMetrics,ecoli_data,Precision,0.238095238095238
+319,MIBNI,"{BASC A, Onestep}",probsMetrics,ecoli_data,Precision,0.238095238095238
+320,MIBNI,"{K-Means, Onestep}",probsMetrics,ecoli_data,Precision,0.238095238095238
+321,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Precision,0.238095238095238
+322,LogicGep,{BASC A},probsMetrics,ecoli_data,Precision,0.5
+323,LogicGep,{K-Means},probsMetrics,ecoli_data,Precision,0.25
+324,LogicGep,{Onestep},probsMetrics,ecoli_data,Precision,0.2857142857142857
+325,LogicGep,"{BASC A, K-Means}",probsMetrics,ecoli_data,Precision,0.5
+326,LogicGep,"{BASC A, Onestep}",probsMetrics,ecoli_data,Precision,0.2857142857142857
+327,LogicGep,"{K-Means, Onestep}",probsMetrics,ecoli_data,Precision,0.2857142857142857
+328,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Precision,0.3333333333333333
+329,Bestfit,{BASC A},probsMetrics,ecoli_data,Precision,0.1666666666666666
+330,Bestfit,{K-Means},probsMetrics,ecoli_data,Precision,0.375
+331,Bestfit,{Onestep},probsMetrics,ecoli_data,Precision,0.375
+332,Bestfit,"{BASC A, K-Means}",probsMetrics,ecoli_data,Precision,0.1666666666666666
+333,Bestfit,"{BASC A, Onestep}",probsMetrics,ecoli_data,Precision,0.375
+334,Bestfit,"{K-Means, Onestep}",probsMetrics,ecoli_data,Precision,0.375
+335,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Precision,0.3333333333333333
+336,MIBNI,{BASC A},missforestMetrics,yeast_cell,Precision,0.4
+337,MIBNI,{K-Means},missforestMetrics,yeast_cell,Precision,0.4
+338,MIBNI,{Onestep},missforestMetrics,yeast_cell,Precision,0.4210526315789473
+339,MIBNI,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Precision,0.4
+340,MIBNI,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Precision,0.4
+341,MIBNI,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Precision,0.4210526315789473
+342,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Precision,0.4210526315789473
+343,LogicGep,{BASC A},missforestMetrics,yeast_cell,Precision,0.25
+344,LogicGep,{K-Means},missforestMetrics,yeast_cell,Precision,0.2666666666666666
+345,LogicGep,{Onestep},missforestMetrics,yeast_cell,Precision,0.3888888888888889
+346,LogicGep,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Precision,0.25
+347,LogicGep,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Precision,0.3478260869565217
+348,LogicGep,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Precision,0.3888888888888889
+349,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Precision,0.2
+350,Bestfit,{BASC A},missforestMetrics,yeast_cell,Precision,0.4
+351,Bestfit,{K-Means},missforestMetrics,yeast_cell,Precision,0.3333333333333333
+352,Bestfit,{Onestep},missforestMetrics,yeast_cell,Precision,0.3333333333333333
+353,Bestfit,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Precision,0.4
+354,Bestfit,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Precision,0.3333333333333333
+355,Bestfit,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Precision,0.3333333333333333
+356,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Precision,0.375
+357,MIBNI,{BASC A},probsMetrics,yeast_cell,Precision,0.4358974358974359
+358,MIBNI,{K-Means},probsMetrics,yeast_cell,Precision,0.4
+359,MIBNI,{Onestep},probsMetrics,yeast_cell,Precision,0.3953488372093023
+360,MIBNI,"{BASC A, K-Means}",probsMetrics,yeast_cell,Precision,0.4358974358974359
+361,MIBNI,"{BASC A, Onestep}",probsMetrics,yeast_cell,Precision,0.3846153846153846
+362,MIBNI,"{K-Means, Onestep}",probsMetrics,yeast_cell,Precision,0.3953488372093023
+363,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Precision,0.4047619047619047
+364,LogicGep,{BASC A},probsMetrics,yeast_cell,Precision,0.4444444444444444
+365,LogicGep,{K-Means},probsMetrics,yeast_cell,Precision,0.4166666666666667
+366,LogicGep,{Onestep},probsMetrics,yeast_cell,Precision,0.5833333333333334
+367,LogicGep,"{BASC A, K-Means}",probsMetrics,yeast_cell,Precision,0.4444444444444444
+368,LogicGep,"{BASC A, Onestep}",probsMetrics,yeast_cell,Precision,0.45
+369,LogicGep,"{K-Means, Onestep}",probsMetrics,yeast_cell,Precision,0.5833333333333334
+370,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Precision,0.5
+371,Bestfit,{BASC A},probsMetrics,yeast_cell,Precision,0.4
+372,Bestfit,{K-Means},probsMetrics,yeast_cell,Precision,0.2777777777777778
+373,Bestfit,{Onestep},probsMetrics,yeast_cell,Precision,0.2857142857142857
+374,Bestfit,"{BASC A, K-Means}",probsMetrics,yeast_cell,Precision,0.4
+375,Bestfit,"{BASC A, Onestep}",probsMetrics,yeast_cell,Precision,0.3076923076923077
+376,Bestfit,"{K-Means, Onestep}",probsMetrics,yeast_cell,Precision,0.2857142857142857
+377,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Precision,0.3888888888888889
+378,MIBNI,{BASC A},missforestMetrics,P53-MDM2,Recall,0.7142857142857143
+379,MIBNI,{K-Means},missforestMetrics,P53-MDM2,Recall,0.7142857142857143
+380,MIBNI,{Onestep},missforestMetrics,P53-MDM2,Recall,1.0
+381,MIBNI,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Recall,0.7142857142857143
+382,MIBNI,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Recall,0.7142857142857143
+383,MIBNI,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Recall,1.0
+384,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Recall,1.0
+385,LogicGep,{BASC A},missforestMetrics,P53-MDM2,Recall,0.5714285714285714
+386,LogicGep,{K-Means},missforestMetrics,P53-MDM2,Recall,0.8571428571428571
+387,LogicGep,{Onestep},missforestMetrics,P53-MDM2,Recall,0.4285714285714285
+388,LogicGep,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Recall,0.5714285714285714
+389,LogicGep,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Recall,0.5714285714285714
+390,LogicGep,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Recall,0.4285714285714285
+391,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Recall,0.4285714285714285
+392,Bestfit,{BASC A},missforestMetrics,P53-MDM2,Recall,0.5714285714285714
+393,Bestfit,{K-Means},missforestMetrics,P53-MDM2,Recall,0.7142857142857143
+394,Bestfit,{Onestep},missforestMetrics,P53-MDM2,Recall,0.2857142857142857
+395,Bestfit,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,Recall,0.5714285714285714
+396,Bestfit,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,Recall,0.5714285714285714
+397,Bestfit,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,Recall,0.2857142857142857
+398,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,Recall,0.2857142857142857
+399,MIBNI,{BASC A},probsMetrics,P53-MDM2,Recall,0.8571428571428571
+400,MIBNI,{K-Means},probsMetrics,P53-MDM2,Recall,1.0
+401,MIBNI,{Onestep},probsMetrics,P53-MDM2,Recall,0.8571428571428571
+402,MIBNI,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Recall,0.8571428571428571
+403,MIBNI,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Recall,0.8571428571428571
+404,MIBNI,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Recall,0.8571428571428571
+405,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Recall,0.8571428571428571
+406,LogicGep,{BASC A},probsMetrics,P53-MDM2,Recall,0.4285714285714285
+407,LogicGep,{K-Means},probsMetrics,P53-MDM2,Recall,0.7142857142857143
+408,LogicGep,{Onestep},probsMetrics,P53-MDM2,Recall,0.4285714285714285
+409,LogicGep,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Recall,0.4285714285714285
+410,LogicGep,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Recall,0.4285714285714285
+411,LogicGep,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Recall,0.4285714285714285
+412,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Recall,0.4285714285714285
+413,Bestfit,{BASC A},probsMetrics,P53-MDM2,Recall,0.1428571428571428
+414,Bestfit,{K-Means},probsMetrics,P53-MDM2,Recall,0.2857142857142857
+415,Bestfit,{Onestep},probsMetrics,P53-MDM2,Recall,0.1428571428571428
+416,Bestfit,"{BASC A, K-Means}",probsMetrics,P53-MDM2,Recall,0.1428571428571428
+417,Bestfit,"{BASC A, Onestep}",probsMetrics,P53-MDM2,Recall,0.1428571428571428
+418,Bestfit,"{K-Means, Onestep}",probsMetrics,P53-MDM2,Recall,0.1428571428571428
+419,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,Recall,0.1428571428571428
+420,MIBNI,{BASC A},missforestMetrics,ecoli_data,Recall,1.0
+421,MIBNI,{K-Means},missforestMetrics,ecoli_data,Recall,1.0
+422,MIBNI,{Onestep},missforestMetrics,ecoli_data,Recall,1.0
+423,MIBNI,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Recall,1.0
+424,MIBNI,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Recall,1.0
+425,MIBNI,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Recall,1.0
+426,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Recall,1.0
+427,LogicGep,{BASC A},missforestMetrics,ecoli_data,Recall,0.8
+428,LogicGep,{K-Means},missforestMetrics,ecoli_data,Recall,0.6
+429,LogicGep,{Onestep},missforestMetrics,ecoli_data,Recall,0.4
+430,LogicGep,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Recall,0.8
+431,LogicGep,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Recall,0.4
+432,LogicGep,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Recall,0.4
+433,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Recall,0.4
+434,Bestfit,{BASC A},missforestMetrics,ecoli_data,Recall,0.2
+435,Bestfit,{K-Means},missforestMetrics,ecoli_data,Recall,0.6
+436,Bestfit,{Onestep},missforestMetrics,ecoli_data,Recall,0.6
+437,Bestfit,"{BASC A, K-Means}",missforestMetrics,ecoli_data,Recall,0.2
+438,Bestfit,"{BASC A, Onestep}",missforestMetrics,ecoli_data,Recall,0.6
+439,Bestfit,"{K-Means, Onestep}",missforestMetrics,ecoli_data,Recall,0.6
+440,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,Recall,0.4
+441,MIBNI,{BASC A},probsMetrics,ecoli_data,Recall,1.0
+442,MIBNI,{K-Means},probsMetrics,ecoli_data,Recall,1.0
+443,MIBNI,{Onestep},probsMetrics,ecoli_data,Recall,1.0
+444,MIBNI,"{BASC A, K-Means}",probsMetrics,ecoli_data,Recall,1.0
+445,MIBNI,"{BASC A, Onestep}",probsMetrics,ecoli_data,Recall,1.0
+446,MIBNI,"{K-Means, Onestep}",probsMetrics,ecoli_data,Recall,1.0
+447,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Recall,1.0
+448,LogicGep,{BASC A},probsMetrics,ecoli_data,Recall,0.6
+449,LogicGep,{K-Means},probsMetrics,ecoli_data,Recall,0.4
+450,LogicGep,{Onestep},probsMetrics,ecoli_data,Recall,0.4
+451,LogicGep,"{BASC A, K-Means}",probsMetrics,ecoli_data,Recall,0.6
+452,LogicGep,"{BASC A, Onestep}",probsMetrics,ecoli_data,Recall,0.4
+453,LogicGep,"{K-Means, Onestep}",probsMetrics,ecoli_data,Recall,0.4
+454,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Recall,0.4
+455,Bestfit,{BASC A},probsMetrics,ecoli_data,Recall,0.2
+456,Bestfit,{K-Means},probsMetrics,ecoli_data,Recall,0.6
+457,Bestfit,{Onestep},probsMetrics,ecoli_data,Recall,0.6
+458,Bestfit,"{BASC A, K-Means}",probsMetrics,ecoli_data,Recall,0.2
+459,Bestfit,"{BASC A, Onestep}",probsMetrics,ecoli_data,Recall,0.6
+460,Bestfit,"{K-Means, Onestep}",probsMetrics,ecoli_data,Recall,0.6
+461,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,Recall,0.4
+462,MIBNI,{BASC A},missforestMetrics,yeast_cell,Recall,0.6666666666666666
+463,MIBNI,{K-Means},missforestMetrics,yeast_cell,Recall,1.0
+464,MIBNI,{Onestep},missforestMetrics,yeast_cell,Recall,0.8888888888888888
+465,MIBNI,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Recall,0.6666666666666666
+466,MIBNI,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Recall,0.6666666666666666
+467,MIBNI,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Recall,0.8888888888888888
+468,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Recall,0.8888888888888888
+469,LogicGep,{BASC A},missforestMetrics,yeast_cell,Recall,0.2777777777777778
+470,LogicGep,{K-Means},missforestMetrics,yeast_cell,Recall,0.2222222222222222
+471,LogicGep,{Onestep},missforestMetrics,yeast_cell,Recall,0.3888888888888889
+472,LogicGep,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Recall,0.2777777777777778
+473,LogicGep,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Recall,0.4444444444444444
+474,LogicGep,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Recall,0.3888888888888889
+475,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Recall,0.1666666666666666
+476,Bestfit,{BASC A},missforestMetrics,yeast_cell,Recall,0.2222222222222222
+477,Bestfit,{K-Means},missforestMetrics,yeast_cell,Recall,0.3333333333333333
+478,Bestfit,{Onestep},missforestMetrics,yeast_cell,Recall,0.2777777777777778
+479,Bestfit,"{BASC A, K-Means}",missforestMetrics,yeast_cell,Recall,0.2222222222222222
+480,Bestfit,"{BASC A, Onestep}",missforestMetrics,yeast_cell,Recall,0.1666666666666666
+481,Bestfit,"{K-Means, Onestep}",missforestMetrics,yeast_cell,Recall,0.2777777777777778
+482,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,Recall,0.3333333333333333
+483,MIBNI,{BASC A},probsMetrics,yeast_cell,Recall,0.9444444444444444
+484,MIBNI,{K-Means},probsMetrics,yeast_cell,Recall,1.0
+485,MIBNI,{Onestep},probsMetrics,yeast_cell,Recall,0.9444444444444444
+486,MIBNI,"{BASC A, K-Means}",probsMetrics,yeast_cell,Recall,0.9444444444444444
+487,MIBNI,"{BASC A, Onestep}",probsMetrics,yeast_cell,Recall,0.8333333333333334
+488,MIBNI,"{K-Means, Onestep}",probsMetrics,yeast_cell,Recall,0.9444444444444444
+489,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Recall,0.9444444444444444
+490,LogicGep,{BASC A},probsMetrics,yeast_cell,Recall,0.4444444444444444
+491,LogicGep,{K-Means},probsMetrics,yeast_cell,Recall,0.2777777777777778
+492,LogicGep,{Onestep},probsMetrics,yeast_cell,Recall,0.3888888888888889
+493,LogicGep,"{BASC A, K-Means}",probsMetrics,yeast_cell,Recall,0.4444444444444444
+494,LogicGep,"{BASC A, Onestep}",probsMetrics,yeast_cell,Recall,0.5
+495,LogicGep,"{K-Means, Onestep}",probsMetrics,yeast_cell,Recall,0.3888888888888889
+496,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Recall,0.3333333333333333
+497,Bestfit,{BASC A},probsMetrics,yeast_cell,Recall,0.3333333333333333
+498,Bestfit,{K-Means},probsMetrics,yeast_cell,Recall,0.2777777777777778
+499,Bestfit,{Onestep},probsMetrics,yeast_cell,Recall,0.2222222222222222
+500,Bestfit,"{BASC A, K-Means}",probsMetrics,yeast_cell,Recall,0.3333333333333333
+501,Bestfit,"{BASC A, Onestep}",probsMetrics,yeast_cell,Recall,0.2222222222222222
+502,Bestfit,"{K-Means, Onestep}",probsMetrics,yeast_cell,Recall,0.2222222222222222
+503,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,Recall,0.3888888888888889
+504,MIBNI,{BASC A},missforestMetrics,P53-MDM2,F1-Score,0.7142857142857143
+505,MIBNI,{K-Means},missforestMetrics,P53-MDM2,F1-Score,0.7142857142857143
+506,MIBNI,{Onestep},missforestMetrics,P53-MDM2,F1-Score,0.8235294117647058
+507,MIBNI,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,F1-Score,0.7142857142857143
+508,MIBNI,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.7142857142857143
+509,MIBNI,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.8235294117647058
+510,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.8235294117647058
+511,LogicGep,{BASC A},missforestMetrics,P53-MDM2,F1-Score,0.6153846153846154
+512,LogicGep,{K-Means},missforestMetrics,P53-MDM2,F1-Score,0.75
+513,LogicGep,{Onestep},missforestMetrics,P53-MDM2,F1-Score,0.5454545454545454
+514,LogicGep,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,F1-Score,0.6153846153846154
+515,LogicGep,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.6153846153846154
+516,LogicGep,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.5454545454545454
+517,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.5454545454545454
+518,Bestfit,{BASC A},missforestMetrics,P53-MDM2,F1-Score,0.6666666666666666
+519,Bestfit,{K-Means},missforestMetrics,P53-MDM2,F1-Score,0.7142857142857143
+520,Bestfit,{Onestep},missforestMetrics,P53-MDM2,F1-Score,0.4
+521,Bestfit,"{BASC A, K-Means}",missforestMetrics,P53-MDM2,F1-Score,0.6666666666666666
+522,Bestfit,"{BASC A, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.6666666666666666
+523,Bestfit,"{K-Means, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.4
+524,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,P53-MDM2,F1-Score,0.4
+525,MIBNI,{BASC A},probsMetrics,P53-MDM2,F1-Score,0.75
+526,MIBNI,{K-Means},probsMetrics,P53-MDM2,F1-Score,0.8235294117647058
+527,MIBNI,{Onestep},probsMetrics,P53-MDM2,F1-Score,0.75
+528,MIBNI,"{BASC A, K-Means}",probsMetrics,P53-MDM2,F1-Score,0.75
+529,MIBNI,"{BASC A, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.75
+530,MIBNI,"{K-Means, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.75
+531,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.75
+532,LogicGep,{BASC A},probsMetrics,P53-MDM2,F1-Score,0.5
+533,LogicGep,{K-Means},probsMetrics,P53-MDM2,F1-Score,0.8333333333333334
+534,LogicGep,{Onestep},probsMetrics,P53-MDM2,F1-Score,0.5
+535,LogicGep,"{BASC A, K-Means}",probsMetrics,P53-MDM2,F1-Score,0.5
+536,LogicGep,"{BASC A, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.5
+537,LogicGep,"{K-Means, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.5
+538,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.5
+539,Bestfit,{BASC A},probsMetrics,P53-MDM2,F1-Score,0.2222222222222222
+540,Bestfit,{K-Means},probsMetrics,P53-MDM2,F1-Score,0.4
+541,Bestfit,{Onestep},probsMetrics,P53-MDM2,F1-Score,0.2222222222222222
+542,Bestfit,"{BASC A, K-Means}",probsMetrics,P53-MDM2,F1-Score,0.2222222222222222
+543,Bestfit,"{BASC A, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.2222222222222222
+544,Bestfit,"{K-Means, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.2222222222222222
+545,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,P53-MDM2,F1-Score,0.2222222222222222
+546,MIBNI,{BASC A},missforestMetrics,ecoli_data,F1-Score,0.3846153846153846
+547,MIBNI,{K-Means},missforestMetrics,ecoli_data,F1-Score,0.4
+548,MIBNI,{Onestep},missforestMetrics,ecoli_data,F1-Score,0.3846153846153846
+549,MIBNI,"{BASC A, K-Means}",missforestMetrics,ecoli_data,F1-Score,0.3846153846153846
+550,MIBNI,"{BASC A, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3846153846153846
+551,MIBNI,"{K-Means, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3846153846153846
+552,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3846153846153846
+553,LogicGep,{BASC A},missforestMetrics,ecoli_data,F1-Score,0.6153846153846154
+554,LogicGep,{K-Means},missforestMetrics,ecoli_data,F1-Score,0.4285714285714285
+555,LogicGep,{Onestep},missforestMetrics,ecoli_data,F1-Score,0.3333333333333333
+556,LogicGep,"{BASC A, K-Means}",missforestMetrics,ecoli_data,F1-Score,0.6153846153846154
+557,LogicGep,"{BASC A, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3333333333333333
+558,LogicGep,"{K-Means, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3333333333333333
+559,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3636363636363636
+560,Bestfit,{BASC A},missforestMetrics,ecoli_data,F1-Score,0.1428571428571428
+561,Bestfit,{K-Means},missforestMetrics,ecoli_data,F1-Score,0.4615384615384615
+562,Bestfit,{Onestep},missforestMetrics,ecoli_data,F1-Score,0.4615384615384615
+563,Bestfit,"{BASC A, K-Means}",missforestMetrics,ecoli_data,F1-Score,0.1428571428571428
+564,Bestfit,"{BASC A, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.4615384615384615
+565,Bestfit,"{K-Means, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.4615384615384615
+566,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,ecoli_data,F1-Score,0.3636363636363636
+567,MIBNI,{BASC A},probsMetrics,ecoli_data,F1-Score,0.3846153846153846
+568,MIBNI,{K-Means},probsMetrics,ecoli_data,F1-Score,0.4
+569,MIBNI,{Onestep},probsMetrics,ecoli_data,F1-Score,0.3846153846153846
+570,MIBNI,"{BASC A, K-Means}",probsMetrics,ecoli_data,F1-Score,0.3846153846153846
+571,MIBNI,"{BASC A, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3846153846153846
+572,MIBNI,"{K-Means, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3846153846153846
+573,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3846153846153846
+574,LogicGep,{BASC A},probsMetrics,ecoli_data,F1-Score,0.5454545454545454
+575,LogicGep,{K-Means},probsMetrics,ecoli_data,F1-Score,0.3076923076923077
+576,LogicGep,{Onestep},probsMetrics,ecoli_data,F1-Score,0.3333333333333333
+577,LogicGep,"{BASC A, K-Means}",probsMetrics,ecoli_data,F1-Score,0.5454545454545454
+578,LogicGep,"{BASC A, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3333333333333333
+579,LogicGep,"{K-Means, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3333333333333333
+580,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3636363636363636
+581,Bestfit,{BASC A},probsMetrics,ecoli_data,F1-Score,0.1818181818181818
+582,Bestfit,{K-Means},probsMetrics,ecoli_data,F1-Score,0.4615384615384615
+583,Bestfit,{Onestep},probsMetrics,ecoli_data,F1-Score,0.4615384615384615
+584,Bestfit,"{BASC A, K-Means}",probsMetrics,ecoli_data,F1-Score,0.1818181818181818
+585,Bestfit,"{BASC A, Onestep}",probsMetrics,ecoli_data,F1-Score,0.4615384615384615
+586,Bestfit,"{K-Means, Onestep}",probsMetrics,ecoli_data,F1-Score,0.4615384615384615
+587,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,ecoli_data,F1-Score,0.3636363636363636
+588,MIBNI,{BASC A},missforestMetrics,yeast_cell,F1-Score,0.5
+589,MIBNI,{K-Means},missforestMetrics,yeast_cell,F1-Score,0.5714285714285714
+590,MIBNI,{Onestep},missforestMetrics,yeast_cell,F1-Score,0.5714285714285714
+591,MIBNI,"{BASC A, K-Means}",missforestMetrics,yeast_cell,F1-Score,0.5
+592,MIBNI,"{BASC A, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.5
+593,MIBNI,"{K-Means, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.5714285714285714
+594,MIBNI,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.5714285714285714
+595,LogicGep,{BASC A},missforestMetrics,yeast_cell,F1-Score,0.2631578947368421
+596,LogicGep,{K-Means},missforestMetrics,yeast_cell,F1-Score,0.2424242424242424
+597,LogicGep,{Onestep},missforestMetrics,yeast_cell,F1-Score,0.3888888888888889
+598,LogicGep,"{BASC A, K-Means}",missforestMetrics,yeast_cell,F1-Score,0.2631578947368421
+599,LogicGep,"{BASC A, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.3902439024390244
+600,LogicGep,"{K-Means, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.3888888888888889
+601,LogicGep,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.1818181818181818
+602,Bestfit,{BASC A},missforestMetrics,yeast_cell,F1-Score,0.2857142857142857
+603,Bestfit,{K-Means},missforestMetrics,yeast_cell,F1-Score,0.3333333333333333
+604,Bestfit,{Onestep},missforestMetrics,yeast_cell,F1-Score,0.303030303030303
+605,Bestfit,"{BASC A, K-Means}",missforestMetrics,yeast_cell,F1-Score,0.2857142857142857
+606,Bestfit,"{BASC A, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.2222222222222222
+607,Bestfit,"{K-Means, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.303030303030303
+608,Bestfit,"{BASC A, K-Means, Onestep}",missforestMetrics,yeast_cell,F1-Score,0.3529411764705882
+609,MIBNI,{BASC A},probsMetrics,yeast_cell,F1-Score,0.5964912280701754
+610,MIBNI,{K-Means},probsMetrics,yeast_cell,F1-Score,0.5714285714285714
+611,MIBNI,{Onestep},probsMetrics,yeast_cell,F1-Score,0.5573770491803278
+612,MIBNI,"{BASC A, K-Means}",probsMetrics,yeast_cell,F1-Score,0.5964912280701754
+613,MIBNI,"{BASC A, Onestep}",probsMetrics,yeast_cell,F1-Score,0.5263157894736842
+614,MIBNI,"{K-Means, Onestep}",probsMetrics,yeast_cell,F1-Score,0.5573770491803278
+615,MIBNI,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,F1-Score,0.5666666666666667
+616,LogicGep,{BASC A},probsMetrics,yeast_cell,F1-Score,0.4444444444444444
+617,LogicGep,{K-Means},probsMetrics,yeast_cell,F1-Score,0.3333333333333333
+618,LogicGep,{Onestep},probsMetrics,yeast_cell,F1-Score,0.4666666666666667
+619,LogicGep,"{BASC A, K-Means}",probsMetrics,yeast_cell,F1-Score,0.4444444444444444
+620,LogicGep,"{BASC A, Onestep}",probsMetrics,yeast_cell,F1-Score,0.4736842105263157
+621,LogicGep,"{K-Means, Onestep}",probsMetrics,yeast_cell,F1-Score,0.4666666666666667
+622,LogicGep,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,F1-Score,0.4
+623,Bestfit,{BASC A},probsMetrics,yeast_cell,F1-Score,0.3636363636363636
+624,Bestfit,{K-Means},probsMetrics,yeast_cell,F1-Score,0.2777777777777778
+625,Bestfit,{Onestep},probsMetrics,yeast_cell,F1-Score,0.25
+626,Bestfit,"{BASC A, K-Means}",probsMetrics,yeast_cell,F1-Score,0.3636363636363636
+627,Bestfit,"{BASC A, Onestep}",probsMetrics,yeast_cell,F1-Score,0.2580645161290322
+628,Bestfit,"{K-Means, Onestep}",probsMetrics,yeast_cell,F1-Score,0.25
+629,Bestfit,"{BASC A, K-Means, Onestep}",probsMetrics,yeast_cell,F1-Score,0.3888888888888889

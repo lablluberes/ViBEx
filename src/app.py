@@ -42,7 +42,7 @@ app = dash.Dash(
 )
 
 # give title to app
-app.title = "ViBEx: A Visualization Tool for Gene Expression Analysis"
+app.title = "ViBEx: A Visualization Tool for Gene Expression and Analysis"
 
 # set up server and callbacks exceptions
 server = app.server
@@ -62,7 +62,7 @@ def description_card():
             html.H3("Welcome to ViBEx"),
             html.Div(
                 id="intro",
-                children=[html.H5('A Visualization Tool for Gene Expression Analysis', style={'textAlign': 'center'}), "ViBEx is a tool for the analysis and exploration of gene expression binarization. Upload a dataset of gene expression and select one, many or all out of four methods for the computation of a threshold for binarization. Visualize Boolean networks of resulting states.",
+                children=[html.H5('A Visualization Tool for Gene Expression and Boolean Network Analysis', style={'textAlign': 'center'}), "ViBEx is a tool for the analysis and exploration of gene expression binarization. Upload a dataset of gene expression and select one, many or all out of four methods for the computation of a threshold for binarization. Visualize Boolean Networks of resulting states.",
                           html.P("This tool only accepts CSV files. The files need to be formated in the next manner. The first column are the genes names (they need to be strings). The rest of the columns need to be the gene expressions of the corresponding genes. The dataset cannot have header names, only a matrix of gene expression with first column as gene names."),
                           html.P("Dataset will be preprocessed to convert data to [0,1] interval")],
             ),
@@ -103,7 +103,7 @@ def generate_control_card():
             html.Br(),
             html.P("Select threshold computation methods:"),
             # select all methods button
-            html.Button('Select all', id='methods-all'),
+            html.Button('Select all', id='methods-all'), #dbc.Button('Select all', id='methods-all'), #color="primary", className="me-2"),
 
             # dropdown selectable for threshold methods
             dcc.Dropdown(
@@ -228,7 +228,7 @@ def hidden_buttons():
                             options=[{'label': 'Global Imputation (ex: changes all "?" to either 0 or 1)', 'value':0},
                              {'label': 'Gene Imputation (ex: imputates a value for only one gene)', 'value':1},
                              {'label': 'Time Impuation (ex: imputates values based on time course)', 'value':2},
-                             {'label': 'Probabilistic Imputation', 'value':3}],
+                             {'label': 'ProbImpute', 'value':3}],
                             placeholder="Select option",
                             id="imputate-option",
                             multi=False,
@@ -308,7 +308,7 @@ def download_csv(n_clicks, data, selected_rows):
     # get threshold of selected rows and save to dataframe
     for i in range(len(selected_rows)):
             k_means = K_Means(genes[i])
-            basc_a = call_C_BASC(genes[i])
+            basc_a = call_C_BASC(genes[i].copy())
             one_step = call_C_Stepminer(genes[i])
             shmulevich_ = call_C_shmulevich(genes[i])
 
@@ -479,7 +479,7 @@ def network_nav():
             html.Div(style={"height": "20px"}),
             dbc.Card(
                     dbc.CardBody([
-                        html.P("This section includes the Binarization State tables based on each selected threshold method and elected methodlogy."),
+                        html.P("This section includes the Binarization tables based on each selected threshold method and elected methodlogy."),
                         html.P("Each row are a different binarized time course state of the original gene expression."),
                         html.P("The next dropdown allows the imputation of values on undecided states."),
                         #html.P("There are three options of imputation values: Global imputation, gene imputation, and time course based imputation."),
@@ -517,7 +517,7 @@ def network_nav():
                             html.P("This tab allows to infer the Boolean Functions of the set of selected genes."),
                             html.P("The Boolean Network based on the Boolean Functions infered are drawn."),
                             html.P("First, selected the inference method from a dropdown these are: Bestfit, LogicGep, and MIBNI."),
-                            html.P("In addition, selected which binarization to use (based on Binarization state tables). Make sure that the table in the 'Binarization State Tab' have no '?' values."),
+                            html.P("In addition, selected which binarization to use (based on Binarization tables). Make sure that the table in the 'Binarization Table Tab' have no '?' values."),
                         ]),
                     className="mb-3"),
 
@@ -565,7 +565,7 @@ def network_nav():
                             html.P("This tab provides the ability to upload a Boolean Function file representing a GRN."),
                             html.P("The file needs to be a CSV with two columns: Gene (gene names), Rule (corresponding boolean function). The rules need to be Python style boolean expressions."),
                             html.P("This means using 'and', 'or', 'not', '^'(xor)."),
-                            html.P("In addition, selecting a binarization method from the dropdown will create a comparison table of the path taken based on the first state of the binarization."),
+                            
                             html.P("Upload transition rules to create network"),
                         ]),
                 className="mb-3"),
@@ -623,10 +623,7 @@ def tabs_nav():
                     dcc.Loading(
                        children=[
                                 html.Div(style={"height": "20px"}),
-                                dbc.Card(
-                                    dbc.CardBody([html.Div(id="binarization-output")]),
-                                    className="mb-3",
-                                ),
+                                html.Div(id="binarization-output")
                        ], type="circle")
                     
                 ]),
@@ -639,7 +636,9 @@ def tabs_nav():
                 dcc.Tab(label='Probability', children=[
 
                     dcc.Loading(
-                       children=[html.Div(id='statistics-output')],
+                       children=[
+                           html.Div(id='statistics-output')
+                                 ],
                     type="circle"),
                 
                 ]),
@@ -702,7 +701,7 @@ def content_tabs(data):
             items=[
                 {"key": "1", "src": "/vibex/assets/table.png"},
                 {"key": "2", "src": "/vibex/assets/thr.png"},
-                {"key": "3", "src": "/vibex/assets/bn.png"},
+                #{"key": "3", "src": "/vibex/assets/bn.png"},
                 {"key": "4", "src": "/vibex/assets/inference.png"},
             ],
             controls=False,
@@ -789,8 +788,8 @@ def parse_contents(contents, filename, date):
             
             # name of file, buttons to select all and deselect all
             html.H5(filename),
-            html.Button('Select all', id='table-all'),
-            html.Button('Deselect all', id='table-deselect'),
+            html.Button('Select all', id='table-all'), #dbc.Button('Select all', id='table-all'), #color="primary", className="me-2"),
+            html.Button('Deselect all', id='table-deselect'), #dbc.Button('Deselect all', id='table-deselect'), #color="danger", className="me-2"),
 
             # interactiive table of the gene matrix (normalized)
             dash_table.DataTable(

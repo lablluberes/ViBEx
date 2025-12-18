@@ -1,0 +1,10 @@
+Gene,Rule
+FKH2,True
+ACE2,ACE2 and not MCM1
+SWI5,not FKH2 and SWI4 or FKH2 and not SWI4
+MCM1,CLN3 and SWI6
+CLN3,ACE2 and not CLN3 and not SWI6 or not ACE2 and SWI6 or CLN3 and SWI6
+MBP1,not FKH2
+SWI4,not MBP1 and not NDD1 or MBP1 and NDD1
+SWI6,ACE2 and not CLN3
+NDD1,not CLN3 and not FKH2 and not NDD1 or CLN3 and FKH2 or FKH2 and NDD1

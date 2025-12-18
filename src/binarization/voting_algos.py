@@ -1,8 +1,6 @@
 ################################
 ## Code to generate the voting table 
-## Function - binVoting, voting mechanism based on Lluberes and Seguel paper. 
-## Function - binarizationVoting, voting mechanism created by  
-## Function - election_strings, voting mechanism based on Lluberes thesis (made by )
+## Function - election_strings, voting mechanism based on Lluberes thesis (made by Michael)
 ###############################
 
 import math
@@ -13,264 +11,55 @@ import pandas as pd
 #for different algorithms
 
 
-#Algorithm in Lluberes paper
+###### Added function for elected string alg
 
-def binVoting(gene, threshold, displacement):
-    
-    alg = len(threshold)
-    x = len(gene)
-    #NULL STRING TO STORE RESULT BIN STRING
-    z = []
-    #NULL 2D ARRAY TO STORE VOTING RESULTS 
-    res = np.empty([alg,3])
-    
-    for j in range(x):
-        for i in range(alg):
-        #CALCULATE RESULTS
-            U = (gene[j] + displacement[i] < threshold[i]) and (abs(threshold[i] - gene[j]) > displacement[i])
-            N = abs(threshold[i] - gene[j]) <= displacement[i]
-            E = not (U or N)
-            
-            res[i][0] = U
-            res[i][1] = N
-            res[i][2] = E
-        #COMPUTE MAJORITY VOTE 
-        
-        E = sum(res[:,2]) > alg/2
-        N = sum(res[:,1]) > alg/2
-        U = sum(res[:,0]) > alg/2
-        
-        if ((E != (not(U or N))) or (N)):
-            z.append('?')
-        elif E:
-            z.append(1)
-        else:
-            z.append(0)
-       
-    return z
-
-#'s algorithm (i made it myself based on the table!!!)
-
-def binarizationVoting(gene, threshold, displacement):
-
-    #2d array that stores algorithm results
-    #x axis is gene
-    #y axis is algorithm
-
-    alg = len(threshold)
-    n = len(gene)
-
-    algos = np.zeros([alg, n], dtype=int)
-
-    #get results for every algorithm
-    for i in range(alg): 
-        for j in range(n):
-            # if this is true the expression is not expressed
-            if (gene[j] + displacement[i] < threshold[i]) and (abs(threshold[i] - gene[j]) > displacement[i]):
-                #algos[i][j] = 1
-                algos[i][j] = 0
-            # if true the expression is undecided
-            elif(abs(threshold[i] - gene[j]) <= displacement[i]):
-                #algos[i][j] = 2
-                algos[i][j] = -1
-            # else the expression is expressed
-            else:
-                #algos[i][j] = 3
-                algos[i][j] = 1
-
-    #id 
-    # 1 -> U
-    # 2 -> N
-    # 3 -> E
-    
-    # new ids
-    # unexpresed -> 0
-    # expresed -> 1
-    # undefined -> nan
-
-    # start counting votes
-    majority = np.zeros(n, dtype=int)
-       
-    for i in range(n):
-
-        #array of tally votes
-        results = algos[:,i]
-        #U = np.count_nonzero(results == 1)
-        #N = np.count_nonzero(results == 2)
-        #E = np.count_nonzero(results == 3)
-        
-        U = np.count_nonzero(results == 0)
-        N = np.count_nonzero(results == -1)
-        E = np.count_nonzero(results == 1)
-
-        #binarize tally votes
-        tally = [U,N,E]
-        for j in range(3):
-            #if algorithms is an even number this will be half, else itll be a
-            #number rounded up from half ex. 3 -> 1.5 becomes 2
-            if tally[j] >= math.ceil(alg/2):
-                tally[j] = 1
-            else:
-                tally[j] = 0
-
-        #first check if final tally contradicts itself
-        if sum(tally) != 1:
-            majority[i] = -1
-        #then check other cases
-        else:
-            if tally[0] == 1:
-                majority[i] = 0
-            elif tally[1] == 1:
-                majority[i] = -1
-            else:
-                majority[i] = 1
-
-    algo = []
-    majority = list(majority)
-    
-    for row in algos:
-        line = list(row)
-        for i in range(len(line)):
-            if line[i] == -1:
-                line[i] = '?'
-        
-        algo.append(line)
-    
-    for i in range(len(majority)):
-        if majority[i] == -1:
-            majority[i] = '?'
-
-     #return 2d array of votes + final votes
-    return algo, majority
-
-def majority(N, U, E, thr):
-    """
-        majority - verifies which state have a majority of tie 
-
-        N: 
-        U:
-        E:
-        thr: thr values 
-    """
-
-    tie = False
-
-    U_true = U.count(True)
-    N_true = N.count(True)
-    E_true = E.count(True)
-
-    U_false = U.count(False) 
-    N_false = N.count(False) 
-    E_false = E.count(False) 
-
-    if U_true == U_false:
-
-        tie = True
-
-    if N_true == N_false:
-
-        tie = True
-    
-    if E_true == E_false:
-
-        tie = True
-
-    if U_true >= U_false:
-
-        U = True
-    
-    else:
-
-        U = False
-
-    if N_true >= N_false:
-
-        N = True
-
-    else:
-
-        N = False
-
-    if E_true >= E_false:
-
-        E = True
-    
-    else:
-
-        E = False
-
-    return U, N, E, tie
-    
-
-def election_strings(G, thr, disp):
+def election_strings(gene, thr_list, disp_list):
     """
         election_strings - makes election strings and binarizes genes
 
-        G: gene expression
-        thr: threshold values
-        disp: displacement of gene 
+        gene: gene expression
+        thr_list: list of threshold values
+        disp_list: list of displacement of gene
     """
 
-    # to stpre elecred string
-    Z_e = []
+    z_e = []
 
-    # to save each thr binarization 
-    collective = [[] for _ in range(len(thr))]
+    for j in range(len(gene)):
 
-    U = []
-    N = []
-    E = []
+      store = []
 
-    # iterates over gene expression
-    for j in range(len(G)):
-        # iterate over selected thr methods 
-        for i in range(len(thr)):
+      for i in range(len(thr_list)):
 
-            uvar = ((G[j] + disp[i]) < thr[i]) and (abs(thr[i] - G[j]) > disp[i])
+        U = (gene[j]+disp_list[i] < thr_list[i]) and (abs(thr_list[i] - gene[j]) > disp_list[i])
+        N = abs(thr_list[i] - gene[j]) <= disp_list[i]
+        E = not(U or N)
 
-            nvar = abs(thr[i] - G[j]) <= disp[i]
-        
-            evar = not(uvar or nvar)
+        store.append(np.array([N, U, E]))
 
-            U.append(uvar)
-            N.append(nvar)
-            E.append(evar)
+      store = np.array(store)
 
-            # assigns to thr method undecided state
-            if (evar != (not(uvar or nvar))) or nvar == True:
-                collective[i].append('?')
+      # verify ties for N, U, E
+      count1N = list(store[:,0]).count(1)
+      count0N = list(store[:,0]).count(0)
+      count1U = list(store[:,1]).count(1)
+      count0U = list(store[:,1]).count(0)
+      count1E = list(store[:,2]).count(1)
+      count0E = list(store[:,2]).count(0)
 
-            # assigns 1s 
-            elif evar == True:
-                collective[i].append(1)
 
-            # assigns 0s 
-            else:
-                collective[i].append(0)
+      # get majority for N, U, E
+      majN = max(set(store[:,0]), key=list(store[:,0]).count)
+      majU = max(set(store[:,1]), key=list(store[:,1]).count)
+      majE = max(set(store[:,2]), key=list(store[:,2]).count)
 
-        # verifies that there is a tie or majority 
-        U, N, E, tie = majority(N, U, E, thr)
+      if majE != (not(majU or majN)) or majN == 1 or (count0N == count1N) or (count1E == count0E) or (count0U == count1U):
+        z_e.append(np.nan)
+      elif majE == 1:
+        z_e.append(1)
+      else:
+        z_e.append(0)
 
-        # assigns undecided to elected
-        if (E != (not(U or N))) or N == True:
-            
-            Z_e.append("?")
-
-        # assigns 1s to elected string
-        elif E == True:
-
-            Z_e.append(1)
-
-        # assigns 0s to elected string
-        else:
-
-            Z_e.append(0)
-
-        U = []
-        N = []
-        E = []
-    
-    return collective, Z_e
+    return z_e
 
 """
 if __name__ == "__main__":

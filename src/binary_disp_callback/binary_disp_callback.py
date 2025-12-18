@@ -11,6 +11,7 @@ import pandas as pd
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
+from itertools import chain, combinations
 
 # import displacement and voting methods
 from displacements.displacementMatrixes import getDisplacement
@@ -337,8 +338,8 @@ def get_bin_disp_callback(app):
         # return dash components for displacement tab
         return [ html.Div(style={"height": "20px"}), dbc.Card(
                     dbc.CardBody([
-                        html.Hr(),html.P("Spline approximation of gene expression and threshold displacement for every algorithm. The voting table shows the binarization using selected algorithms and the consensus binarization.", style={'textAlign': 'center'}),
-                        html.Br(), html.P("*Values that are too close to the threshold will be considered undecided with a (?) on the table."),
+                        html.Hr(),html.P("Spline approximation of gene expression and threshold displacement for every algorithm.", style={'textAlign': 'center'}),
+                        html.Br(), html.P("*Values inside displacement range will be considered undecided with a (?) on the table."),
                     ]),
                     className="mb-3",
                 ),
@@ -446,39 +447,35 @@ def get_bin_disp_callback(app):
         
         t = []
         d = []
-
+        votes = [[]]
+        
+        method_labels = {'BASC A': ['BASC_A', thr_b], 'Onestep': ['onestep', thr_o], 'K-Means':['k-means', thr_k], 'Shmulevich':['shmulevich', thr_s]}
+        
         # go through each method and extract the thr, and disp
         for method in selected_method:
 
             # extract thr, and disp of each method of the gene
-            if(method == 'BASC A'):
-           
-                t.append(thr_b[str(row)])
             
-                d.append(disps['BASC_A'].iloc[0])
-    
-            elif(method == 'K-Means'):
+            thr = method_labels[method][1][str(row)]
+            dis = disps[method_labels[method][0]].iloc[0]
+            t.append(thr)
             
-                t.append(thr_k[str(row)])
-            
-                d.append(disps['k-means'].iloc[0])
-        
-            elif(method == 'Onestep'):
-            
-                t.append(thr_o[str(row)])
-            
-                d.append(disps['onestep'].iloc[0])
+            d.append(dis)
                 
-            else:
-             
-                t.append(thr_s[str(row)])
+            el = election_strings(gene, [thr], [dis])
                 
-                d.append(disps['shmulevich'].iloc[0])
-    
+            el = ['?' if np.isnan(e) else int(e) for e in el]
+            votes[0].append(el)
+                
+            
         #print(gene, t, d)
         # generate voting (elected string) of the gene based on thr, and displacements
-        print(gene, t, d, selected_method)
-        votes = election_strings(gene, t, d)
+        #print(gene, t, d, selected_method)
+        
+        el = election_strings(gene, t, d)
+                
+        el = ['?' if np.isnan(e) else int(e) for e in el]
+        votes.append(el)
         
         rows_data = []
         
@@ -496,15 +493,65 @@ def get_bin_disp_callback(app):
         rows_data.append(votes[1])
 
         
+        power_set = list(chain.from_iterable(combinations(selected_method, r) for r in range(len(selected_method) + 1)))
+        
         # append final label
         selected_method.append("Elected")
         
+        
+        power_set_rows = []
+        labels_power_set = []
+        
+        for p in power_set:
+            
+            if len(p) != 0:
+                
+                labels_power_set.append("{" + ", ".join(p) + "}")
+                
+                t = []
+                d = []
+                votes = [[]]
+                # go through each method and extract the thr, and disp
+                for method in p:
+
+                    # extract thr, and disp of each method of the gene
+            
+                    thr = method_labels[method][1][str(row)]
+                    dis = disps[method_labels[method][0]].iloc[0]
+                    t.append(thr)
+                    
+                    d.append(dis)
+                        
+                    el = election_strings(gene, [thr], [dis])
+                        
+                    el = ['?' if np.isnan(e) else int(e) for e in el]
+                    votes[0].append(el)
+                        
+                    
+                #print(gene, t, d)
+                # generate voting (elected string) of the gene based on thr, and displacements
+                #print(gene, t, d, selected_method)
+                
+                el = election_strings(gene, t, d)
+                        
+                el = ['?' if np.isnan(e) else int(e) for e in el]
+                votes.append(el)
+                
+                # append final (elected) vote as last row
+                power_set_rows.append(votes[1])
+                    
+                    
         # create dataframe of voting table 
         vote_df = pd.DataFrame(data=rows_data, index=selected_method)
         vote_df.reset_index(inplace=True)
+        
+        perm_df = pd.DataFrame(data=power_set_rows, index=labels_power_set)
+        perm_df.reset_index(inplace=True)
     
         # return components and voting table. colors 0s to red, 1s to green, and ? to yellow 
-        return  html.B('Voting Table of ' + labels[row]), dash_table.DataTable(vote_df.to_dict('records'), [{"name": str(i), "id": str(i)} for i in vote_df.columns],
+
+        return dbc.Card(
+                    dbc.CardBody([html.B('Voting Table of ' + labels[row]), dash_table.DataTable(vote_df.to_dict('records'), [{"name": str(i), "id": str(i)} for i in vote_df.columns],
                 style_data = {'borderBottom': '5px solid white'},
                 style_cell={'minWidth': '50px', 'maxWidth': '50px'},
                 style_data_conditional=[
@@ -569,4 +616,74 @@ def get_bin_disp_callback(app):
                     } for col in vote_df.columns
                 ],
                 style_table={'height': '300px', 'overflowY': 'auto', 'overflowX':'auto'}
-                ), 
+                )]),
+            className="mb-3",
+        ),  dbc.Card(
+                    dbc.CardBody([html.B('Power Set Table of ' + labels[row]), dash_table.DataTable(perm_df.to_dict('records'), [{"name": str(i), "id": str(i)} for i in perm_df.columns],
+                style_data = {'borderBottom': '5px solid white'},
+                style_cell={'minWidth': '50px', 'maxWidth': '500px'},
+                style_data_conditional=[
+                {
+                    'if': {
+                        'filter_query': '{{{col}}} = "?"'.format(col=str(col)),
+                        'column_id': str(col),
+                        'row_index': 'odd'
+                    },
+                    'backgroundColor': 'rgb(255, 255, 192, 0.3)',
+                } for col in perm_df.columns
+                ] +
+                [
+                {
+                    'if': {
+                        'filter_query': '{{{col}}} = "?"'.format(col=str(col)),
+                        'column_id': str(col),
+                        'row_index': 'even'
+                    },
+                    'backgroundColor': 'rgb(255, 255, 192, 0.3)',
+                } for col in perm_df.columns
+                ] +
+                
+                [
+                    {
+                        'if': {
+                            'filter_query': '{{{col}}} = 1'.format(col=str(col)),
+                            'column_id': str(col),
+                            'row_index': 'odd'
+                        },
+                        'backgroundColor': 'rgb(113, 209, 129, 0.3)',
+                    } for col in perm_df.columns
+                ] +
+                [
+                    {
+                        'if': {
+                            'filter_query': '{{{col}}} = 0'.format(col=str(col)),
+                            'column_id': str(col),
+                            'row_index': 'odd'
+                        },
+                        'backgroundColor': 'rgb(191, 102, 99, 0.3)',
+                    } for col in perm_df.columns
+                ] +
+                [
+                    {
+                        'if': {
+                            'filter_query': '{{{col}}} = 0'.format(col=str(col)),
+                            'column_id': str(col),
+                            'row_index': 'even'
+                        },
+                        'backgroundColor': 'rgb(191, 102, 99, 0.3)',
+                    } for col in perm_df.columns
+                ] +
+                [
+                    {
+                        'if': {
+                            'filter_query': '{{{col}}} = 1'.format(col=str(col)),
+                            'column_id': str(col),
+                            'row_index': 'even'
+                        },
+                        'backgroundColor': 'rgb(113, 209, 129, 0.3)',
+                    } for col in perm_df.columns
+                ],
+                style_table={'height': '300px', 'overflowY': 'auto', 'overflowX':'auto'}
+                )]),
+            className="mb-3",
+        ),

@@ -258,7 +258,7 @@ def hamming_score_chain(network, network_rules):
 
     # calculate similarity and transition match
     similarity = np.round(((total_states - count_dif)/total_states) * 100, 2)
-    transition = np.round((perc_dif/num_state) * 100, 2)
+    transition = np.round((perc_dif/(num_state-1)) * 100, 2)
     
     return [similarity, transition]
 

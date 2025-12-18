@@ -10,14 +10,17 @@ This tool works as a visualizer, and probabilistic analysis for different binari
 - Two value imputations strategies were done as a case study comparing performance. These are:
   - (1) probabilistic imputation and MissForest imputation
   - (2) only MissForest imputation
-- After value imputation we went to tab "Network", and subtab "Inference Boolean Network" and pressed button "Run Script to Download Metrics"
+- To run experiments we created the following script to simulate the app. This script is at src folder:
+```
+python script.py
+```
 - As a result a csv file will download once metrics evaluation is finished. Here the dynamic accuracy, accuracy, precision, recall, and F1-score for each inference method and binarization are downloaded. 
-- E coli sos dataset was only imputated using (2) only MissForest  because probabilistic imputation takes a lot of time to imputate. 
 
 - To run experiments follow the previous explination of the experiments to obtain results. 
-- We added a script called framework.py to allow the performance evaluation be done without the tool. We recommend that if experiments are to be run, use the tool instead of the script. The following are how to use the tool. 
+- We added a script called script.py to allow the performance evaluation be done without the tool. We recommend that if experiments are to be run, use the tool instead of the script. The following are how to use the tool. 
 
-- Command to run framework.py: python framework.py data=P53-MDM2/data.csv,yeast_cell/yeast_data_elu.csv,ecoli_data/Exp4.csv rules=P53-MDM2/rules.csv,yeast_cell/rules.csv,ecoli_data/rules.csv inf=MIBNI,LogicGep,Bestfit bin=BASCA,K-Means,Onestep impu=1,1,1
+## TOOL ONLINE:
+- The tool is available online at https://fury.hpcf.upr.edu/vibex/
 
 ## TO RUN LOCALLY:
 
@@ -44,7 +47,7 @@ python app.py
 
 ## HOW TO USE
 
-1. Click on **UPLOAD GENE EXPRESSION FILE** and upload a time series dataset in CSV format first column should be gene names (each row is a gene expression). It should have no column names only the matrix with gene names as first column and expressions.
+1. Click on **UPLOAD GENE EXPRESSION FILE** and upload a time series dataset in CSV format first column should be gene names (each row is a gene expression).
 2. Select individual genes by clicking on the checkboxes. Deselect by clicking the checkbox again
   - Select all genes by clicking **SELECT ALL**
   - Deselect all selections by clicking **DESELECT ALL**
@@ -53,7 +56,6 @@ python app.py
   - Click on **SELECT ALL** to select all available algorithms
   - Click on **DOWNLOAD CSV** to obtain a CSV file of the threshold for each gene calculated by
 	each selected algorithm
-4. Click on **UPLOAD RULES** to upload Boolean functions CSV file in "Network" > "Upload Boolean Functions" tab. Boolean functions should be coded in python style boolean expression. For example: A or B. This means using *and*, *or*, and *not*. First column should be named *Gene* and should have the genes names. The second column should be called *Rule* and each value is the boolean function expression of the corresponding gene. 
 
 ### BINARIZATION TAB
 
@@ -84,7 +86,7 @@ python app.py
 
 ### NETWORK TAB
 
-1. Binarization State Table
+1. Binarization Table
 - Shows each threshold method binarization as a table
 - Allows values imputation for undecided states
 2. Binarization State Path

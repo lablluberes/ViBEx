@@ -36,7 +36,7 @@ double stepminer(double x[], int N){
 
     double xmean = mean(x, 0, N);
 
-    double SSTOT = calcSSTOT(x, N, xmean);
+    //double SSTOT = calcSSTOT(x, N, xmean);
 
     double SSEmin = 0;
 
@@ -75,6 +75,7 @@ double stepminer(double x[], int N){
 
         if(i == 0){
                 SSEmin = SSE;
+                t = (leftMean + rightMean)/2;
         }
 
 
@@ -128,6 +129,7 @@ double stepminer(double x[], int N){
             #pragma omp critical
             if(i == 0){
                 SSEmin = SSE;
+                t = (leftMean + rightMean)/2;
             }
 
 

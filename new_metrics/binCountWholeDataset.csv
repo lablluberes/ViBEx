@@ -1,0 +1,148 @@
+,dataset,binarization,impu,binary,freq
+0,P53-MDM2,{BASC A},og_bin,?,16
+1,P53-MDM2,{BASC A},og_bin,0,6
+2,P53-MDM2,{BASC A},og_bin,1,6
+3,P53-MDM2,{BASC A},bin_onlyMissForest,0,19
+4,P53-MDM2,{BASC A},bin_onlyMissForest,1,9
+5,P53-MDM2,{BASC A},bin_Prob_and_MissForest,0,6
+6,P53-MDM2,{BASC A},bin_Prob_and_MissForest,1,22
+7,P53-MDM2,{K-Means},og_bin,?,3
+8,P53-MDM2,{K-Means},og_bin,0,11
+9,P53-MDM2,{K-Means},og_bin,1,14
+10,P53-MDM2,{K-Means},bin_onlyMissForest,0,12
+11,P53-MDM2,{K-Means},bin_onlyMissForest,1,16
+12,P53-MDM2,{K-Means},bin_Prob_and_MissForest,0,11
+13,P53-MDM2,{K-Means},bin_Prob_and_MissForest,1,17
+14,P53-MDM2,{Onestep},og_bin,?,12
+15,P53-MDM2,{Onestep},og_bin,0,6
+16,P53-MDM2,{Onestep},og_bin,1,10
+17,P53-MDM2,{Onestep},bin_onlyMissForest,0,12
+18,P53-MDM2,{Onestep},bin_onlyMissForest,1,16
+19,P53-MDM2,{Onestep},bin_Prob_and_MissForest,0,6
+20,P53-MDM2,{Onestep},bin_Prob_and_MissForest,1,22
+21,P53-MDM2,"{BASC A, K-Means}",og_bin,?,16
+22,P53-MDM2,"{BASC A, K-Means}",og_bin,0,6
+23,P53-MDM2,"{BASC A, K-Means}",og_bin,1,6
+24,P53-MDM2,"{BASC A, K-Means}",bin_onlyMissForest,0,19
+25,P53-MDM2,"{BASC A, K-Means}",bin_onlyMissForest,1,9
+26,P53-MDM2,"{BASC A, K-Means}",bin_Prob_and_MissForest,0,6
+27,P53-MDM2,"{BASC A, K-Means}",bin_Prob_and_MissForest,1,22
+28,P53-MDM2,"{BASC A, Onestep}",og_bin,?,16
+29,P53-MDM2,"{BASC A, Onestep}",og_bin,0,6
+30,P53-MDM2,"{BASC A, Onestep}",og_bin,1,6
+31,P53-MDM2,"{BASC A, Onestep}",bin_onlyMissForest,0,19
+32,P53-MDM2,"{BASC A, Onestep}",bin_onlyMissForest,1,9
+33,P53-MDM2,"{BASC A, Onestep}",bin_Prob_and_MissForest,0,6
+34,P53-MDM2,"{BASC A, Onestep}",bin_Prob_and_MissForest,1,22
+35,P53-MDM2,"{K-Means, Onestep}",og_bin,?,12
+36,P53-MDM2,"{K-Means, Onestep}",og_bin,0,6
+37,P53-MDM2,"{K-Means, Onestep}",og_bin,1,10
+38,P53-MDM2,"{K-Means, Onestep}",bin_onlyMissForest,0,12
+39,P53-MDM2,"{K-Means, Onestep}",bin_onlyMissForest,1,16
+40,P53-MDM2,"{K-Means, Onestep}",bin_Prob_and_MissForest,0,6
+41,P53-MDM2,"{K-Means, Onestep}",bin_Prob_and_MissForest,1,22
+42,P53-MDM2,"{BASC A, K-Means, Onestep}",og_bin,?,12
+43,P53-MDM2,"{BASC A, K-Means, Onestep}",og_bin,0,6
+44,P53-MDM2,"{BASC A, K-Means, Onestep}",og_bin,1,10
+45,P53-MDM2,"{BASC A, K-Means, Onestep}",bin_onlyMissForest,0,12
+46,P53-MDM2,"{BASC A, K-Means, Onestep}",bin_onlyMissForest,1,16
+47,P53-MDM2,"{BASC A, K-Means, Onestep}",bin_Prob_and_MissForest,0,6
+48,P53-MDM2,"{BASC A, K-Means, Onestep}",bin_Prob_and_MissForest,1,22
+49,ecoli_data,{BASC A},og_bin,?,117
+50,ecoli_data,{BASC A},og_bin,0,119
+51,ecoli_data,{BASC A},og_bin,1,58
+52,ecoli_data,{BASC A},bin_onlyMissForest,0,228
+53,ecoli_data,{BASC A},bin_onlyMissForest,1,66
+54,ecoli_data,{BASC A},bin_Prob_and_MissForest,0,236
+55,ecoli_data,{BASC A},bin_Prob_and_MissForest,1,58
+56,ecoli_data,{K-Means},og_bin,?,17
+57,ecoli_data,{K-Means},og_bin,0,210
+58,ecoli_data,{K-Means},og_bin,1,67
+59,ecoli_data,{K-Means},bin_onlyMissForest,0,224
+60,ecoli_data,{K-Means},bin_onlyMissForest,1,70
+61,ecoli_data,{K-Means},bin_Prob_and_MissForest,0,227
+62,ecoli_data,{K-Means},bin_Prob_and_MissForest,1,67
+63,ecoli_data,{Onestep},og_bin,?,35
+64,ecoli_data,{Onestep},og_bin,0,201
+65,ecoli_data,{Onestep},og_bin,1,58
+66,ecoli_data,{Onestep},bin_onlyMissForest,0,236
+67,ecoli_data,{Onestep},bin_onlyMissForest,1,58
+68,ecoli_data,{Onestep},bin_Prob_and_MissForest,0,236
+69,ecoli_data,{Onestep},bin_Prob_and_MissForest,1,58
+70,ecoli_data,"{BASC A, K-Means}",og_bin,?,117
+71,ecoli_data,"{BASC A, K-Means}",og_bin,0,119
+72,ecoli_data,"{BASC A, K-Means}",og_bin,1,58
+73,ecoli_data,"{BASC A, K-Means}",bin_onlyMissForest,0,228
+74,ecoli_data,"{BASC A, K-Means}",bin_onlyMissForest,1,66
+75,ecoli_data,"{BASC A, K-Means}",bin_Prob_and_MissForest,0,236
+76,ecoli_data,"{BASC A, K-Means}",bin_Prob_and_MissForest,1,58
+77,ecoli_data,"{BASC A, Onestep}",og_bin,?,119
+78,ecoli_data,"{BASC A, Onestep}",og_bin,0,119
+79,ecoli_data,"{BASC A, Onestep}",og_bin,1,56
+80,ecoli_data,"{BASC A, Onestep}",bin_onlyMissForest,0,238
+81,ecoli_data,"{BASC A, Onestep}",bin_onlyMissForest,1,56
+82,ecoli_data,"{BASC A, Onestep}",bin_Prob_and_MissForest,0,238
+83,ecoli_data,"{BASC A, Onestep}",bin_Prob_and_MissForest,1,56
+84,ecoli_data,"{K-Means, Onestep}",og_bin,?,35
+85,ecoli_data,"{K-Means, Onestep}",og_bin,0,201
+86,ecoli_data,"{K-Means, Onestep}",og_bin,1,58
+87,ecoli_data,"{K-Means, Onestep}",bin_onlyMissForest,0,236
+88,ecoli_data,"{K-Means, Onestep}",bin_onlyMissForest,1,58
+89,ecoli_data,"{K-Means, Onestep}",bin_Prob_and_MissForest,0,236
+90,ecoli_data,"{K-Means, Onestep}",bin_Prob_and_MissForest,1,58
+91,ecoli_data,"{BASC A, K-Means, Onestep}",og_bin,?,33
+92,ecoli_data,"{BASC A, K-Means, Onestep}",og_bin,0,201
+93,ecoli_data,"{BASC A, K-Means, Onestep}",og_bin,1,60
+94,ecoli_data,"{BASC A, K-Means, Onestep}",bin_onlyMissForest,0,234
+95,ecoli_data,"{BASC A, K-Means, Onestep}",bin_onlyMissForest,1,60
+96,ecoli_data,"{BASC A, K-Means, Onestep}",bin_Prob_and_MissForest,0,234
+97,ecoli_data,"{BASC A, K-Means, Onestep}",bin_Prob_and_MissForest,1,60
+98,yeast_cell,{BASC A},og_bin,?,73
+99,yeast_cell,{BASC A},og_bin,0,26
+100,yeast_cell,{BASC A},og_bin,1,27
+101,yeast_cell,{BASC A},bin_onlyMissForest,0,67
+102,yeast_cell,{BASC A},bin_onlyMissForest,1,59
+103,yeast_cell,{BASC A},bin_Prob_and_MissForest,0,99
+104,yeast_cell,{BASC A},bin_Prob_and_MissForest,1,27
+105,yeast_cell,{K-Means},og_bin,?,50
+106,yeast_cell,{K-Means},og_bin,0,40
+107,yeast_cell,{K-Means},og_bin,1,36
+108,yeast_cell,{K-Means},bin_onlyMissForest,0,86
+109,yeast_cell,{K-Means},bin_onlyMissForest,1,40
+110,yeast_cell,{K-Means},bin_Prob_and_MissForest,0,90
+111,yeast_cell,{K-Means},bin_Prob_and_MissForest,1,36
+112,yeast_cell,{Onestep},og_bin,?,66
+113,yeast_cell,{Onestep},og_bin,0,33
+114,yeast_cell,{Onestep},og_bin,1,27
+115,yeast_cell,{Onestep},bin_onlyMissForest,0,80
+116,yeast_cell,{Onestep},bin_onlyMissForest,1,46
+117,yeast_cell,{Onestep},bin_Prob_and_MissForest,0,99
+118,yeast_cell,{Onestep},bin_Prob_and_MissForest,1,27
+119,yeast_cell,"{BASC A, K-Means}",og_bin,?,74
+120,yeast_cell,"{BASC A, K-Means}",og_bin,0,25
+121,yeast_cell,"{BASC A, K-Means}",og_bin,1,27
+122,yeast_cell,"{BASC A, K-Means}",bin_onlyMissForest,0,67
+123,yeast_cell,"{BASC A, K-Means}",bin_onlyMissForest,1,59
+124,yeast_cell,"{BASC A, K-Means}",bin_Prob_and_MissForest,0,99
+125,yeast_cell,"{BASC A, K-Means}",bin_Prob_and_MissForest,1,27
+126,yeast_cell,"{BASC A, Onestep}",og_bin,?,76
+127,yeast_cell,"{BASC A, Onestep}",og_bin,0,26
+128,yeast_cell,"{BASC A, Onestep}",og_bin,1,24
+129,yeast_cell,"{BASC A, Onestep}",bin_onlyMissForest,0,80
+130,yeast_cell,"{BASC A, Onestep}",bin_onlyMissForest,1,46
+131,yeast_cell,"{BASC A, Onestep}",bin_Prob_and_MissForest,0,102
+132,yeast_cell,"{BASC A, Onestep}",bin_Prob_and_MissForest,1,24
+133,yeast_cell,"{K-Means, Onestep}",og_bin,?,67
+134,yeast_cell,"{K-Means, Onestep}",og_bin,0,32
+135,yeast_cell,"{K-Means, Onestep}",og_bin,1,27
+136,yeast_cell,"{K-Means, Onestep}",bin_onlyMissForest,0,80
+137,yeast_cell,"{K-Means, Onestep}",bin_onlyMissForest,1,46
+138,yeast_cell,"{K-Means, Onestep}",bin_Prob_and_MissForest,0,99
+139,yeast_cell,"{K-Means, Onestep}",bin_Prob_and_MissForest,1,27
+140,yeast_cell,"{BASC A, K-Means, Onestep}",og_bin,?,63
+141,yeast_cell,"{BASC A, K-Means, Onestep}",og_bin,0,33
+142,yeast_cell,"{BASC A, K-Means, Onestep}",og_bin,1,30
+143,yeast_cell,"{BASC A, K-Means, Onestep}",bin_onlyMissForest,0,78
+144,yeast_cell,"{BASC A, K-Means, Onestep}",bin_onlyMissForest,1,48
+145,yeast_cell,"{BASC A, K-Means, Onestep}",bin_Prob_and_MissForest,0,96
+146,yeast_cell,"{BASC A, K-Means, Onestep}",bin_Prob_and_MissForest,1,30

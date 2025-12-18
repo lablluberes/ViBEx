@@ -1,0 +1,10 @@
+Gene,Rule
+FKH2,(ACE2) and (NDD1) and (SWI6) and (CLN3) and (SWI5) and (not SWI4) and (not MCM1) and (not MBP1) and (not FKH2)
+ACE2,(NDD1) and (not CLN3) and (SWI5) and (ACE2) and (not SWI6) and (not SWI4) and (MCM1) and (not MBP1) and (not FKH2)
+SWI5,(ACE2) or (NDD1) or (SWI6) or (CLN3) or (SWI5) or (not SWI4) or (MCM1) or (MBP1) or (FKH2)
+MCM1,(SWI6) and (ACE2) and (NDD1) and (SWI5) and (CLN3) and (not SWI4) and (not MCM1) and (not MBP1) and (not FKH2)
+CLN3,(SWI5) and (ACE2) and (NDD1) and (SWI6) and (CLN3) and (not SWI4) and (not MCM1) and (not MBP1) and (not FKH2)
+MBP1,(not SWI5) and (not ACE2) and (not NDD1) and (not SWI6) and (not CLN3) and (not SWI4) and (not MCM1) and (MBP1) and (not FKH2)
+SWI4,(not ACE2) and (not NDD1) and (not SWI6) and (CLN3) and (not SWI5) and (SWI4) and (not MCM1) and (not MBP1) and (not FKH2)
+SWI6,(ACE2) and (NDD1) and (not SWI6) and (not CLN3) and (SWI5) and (not SWI4) and (MCM1) and (not MBP1) and (not FKH2)
+NDD1,(not CLN3) and (SWI5) and (ACE2) and (NDD1) and (not SWI6) and (not SWI4) and (MCM1) and (not MBP1) and (not FKH2)

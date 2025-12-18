@@ -8,6 +8,8 @@ from displacements.displacementMatrixes import getDisplacement
 from statistics_methods.ProbabilityPerm import probBin
 from statistics_methods.stringProbabilistic import call_C_statistics, run
 import dash_vega_components as dvc
+from binarization.voting_algos import election_strings
+from statistics_methods.probImpute import binarize_and_impute_matrix_with_probs_multi_methods, generateCDF
 
 standard_dev = pd.read_csv("./statistics_methods/standard_dev.csv")
 
@@ -147,178 +149,69 @@ def get_stats_callback(app):
         #highest -> string with highest probability
         #highestprob -> prob of said string
             
-        prob_dict = {'label':[],'string':[],'prob':[],'mean':[],'sd':[],'res':[],'highest':[],'highestprob':[]}
+        prob_dict = {'label':[],'string':[],'prob':[],'mean':[],'sd':[],'res':[],'highest':[],'highestprob':[], 'highImpu':[], 'ImpuProb':[]}
 
-        #range for displacement
-        rangeIndex = math.ceil((max(gene)-min(gene))*10) - 1
-
+   
         #get PDF for gene
-        probden = pd.read_csv("./statistics_methods/cdf_"+str(rangeIndex+1)+".csv")
+        #probden = pd.read_csv("./statistics_methods/cdf_"+str(rangeIndex+1)+".csv")
         disps = getDisplacement(selected_method,gene)
 
         #print(disps)
         #print("aqui estoy2")
-
+        
+        method_labels = {'BASC A': ['BASC_A', thr_b], 'Onestep': ['onestep', thr_o], 'K-Means':['k-means', thr_k], 'Shmulevich':['shmulevich', thr_s]}
+        cdf = generateCDF()
+        
         for method in selected_method:
-            if method == 'K-Means':
-            #if thr_k is not None:
-                    
+        
                     #get binarized gene string
                     count = 0
-                    bin = ""
-                    d = disps['k-means']
-                    for g in gene:
-                        if g > thr_k + d.iloc[0]:
-                            bin += "1"
-                        elif g < thr_k - d.iloc[0]:
-                            bin += "0"
-                        else:
-                            bin += "?"
+                    #bin = ""
+                    d = list(disps[method_labels[method][0]])
+                    
+                    #print(d)
+                    
+                    #print(gene, [method_labels[method]], d)
+                    
+                    ternary, probs, highestS, highP = binarize_and_impute_matrix_with_probs_multi_methods([gene], [cdf[method]], [method_labels[method][1]], d, 0.5, 2)  
+                    
+                    imputedS, impuP, impuProb_list = binarize_and_impute_matrix_with_probs_multi_methods([gene], [cdf[method]], [method_labels[method][1]], d, 0.5, 3)     
+                       
+                    #print(imputedS, impuP, impuProb_list)
+                    ternary = ['?' if np.isnan(e) else str(int(e)) for e in ternary]   
+                    highestS = ['?' if np.isnan(e) else str(int(e)) for e in highestS]
+                    imputedS = ['?' if np.isnan(e) else str(int(e)) for e in imputedS]
+                    
+                    for e in ternary:
+                        if e == '?':
                             count += 1
 
                     #generate dataframe with all possible strings and their probabilities
                     #probBin function 
                     #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
 
-                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'k-means', bin) #call_C_statistics(gene, d.iloc[0], "k-means", bin)
+                    #high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'k-means', bin) #call_C_statistics(gene, d.iloc[0], "k-means", bin)
 
 
                     #extract probability of selected string
                     #from dataframe probBin
-                    binProb = p #probDF.loc[probDF['string']==bin]['prob'].iloc[0]
+                    binProb = np.prod(probs) #probDF.loc[probDF['string']==bin]['prob'].iloc[0]
                     
                     #append selected val
-                    prob_dict['label'].append('k-means')
-                    prob_dict['string'].append(bin)
+                    prob_dict['label'].append(method)
+                    prob_dict['string'].append("".join(ternary))
                     prob_dict['prob'].append(binProb)
                     prob_dict['res'].append((len(gene)-count)/len(gene))
                     prob_dict['mean'].append(1/(3**sizeGene))
-                    prob_dict['sd'].append(standard_dev['k-means'].iloc[0])
+                    prob_dict['sd'].append(standard_dev[method_labels[method][0]].iloc[0])
                     
                     #append highest string prob and its prob
                     #probDF = probDF.sort_values(by=['prob'])
-                    prob_dict['highest'].append(high_string)#probDF['string'].iloc[-1])
-                    prob_dict['highestprob'].append(high_p)#probDF['prob'].iloc[-1])
-                
-            if method == 'Onestep': 
-            #if thr_o is not None:
-                    #get binarized gene
-                    count = 0
-                    bin = ""
-                    d = disps['onestep']
-                    for g in gene:
-                        if g > thr_o + d.iloc[0]:
-                            bin += '1'
-                        elif g < thr_o - d.iloc[0]:
-                            bin += '0'
-                        else:
-                            bin += '?'
-                            count += 1
-
-                    #generate dataframe with all possible strings and their probabilities
-                    #probBin function 
-                    #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
-
-                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'onestep', bin) #call_C_statistics(gene, d.iloc[0], "onestep", bin)
-
-
-                    #extract probability of selected string
-                    #from dataframe probBin
-                    binProb = p #probDF.loc[probDF['string']==bin]['prob'].iloc[0]
-                    
-                    #append selected val
-                    prob_dict['label'].append('onestep')
-                    prob_dict['string'].append(bin)
-                    prob_dict['prob'].append(binProb)
-                    prob_dict['res'].append((len(gene)-count)/len(gene))
-                    prob_dict['mean'].append(1/(3**sizeGene))
-                    prob_dict['sd'].append(standard_dev['onestep'].iloc[0])
-                    
-                    #append highest string prob and its prob
-                    #probDF = probDF.sort_values(by=['prob'])
-                    prob_dict['highest'].append(high_string)#probDF['string'].iloc[-1])
-                    prob_dict['highestprob'].append(high_p)#probDF['prob'].iloc[-1])
-
-            #DO THE SAME FOR ALL ALGORITHMS
-            if method == 'Shmulevich': 
-            #if thr_s is not None:
-                    #get binarized gene
-                    count = 0
-                    bin = ""
-                    d = disps['shmulevich']
-                    for g in gene:
-                        if g > thr_s + d.iloc[0]:
-                            bin += '1'
-                        elif g < thr_s - d.iloc[0]:
-                            bin += '0'
-                        else:
-                            bin += '?'
-                            count += 1
-                    
-                    
-                    #generate dataframe with all possible strings and their probabilities
-                    #probBin function 
-                    #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
-
-                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'shmulevich', bin) #call_C_statistics(gene, d.iloc[0], "shmulevich", bin)
-
-
-                    #extract probability of selected string
-                    #from dataframe probBin
-                    binProb = p #probDF.loc[probDF['string']==bin]['prob'].iloc[0]
-                    
-                    #append selected val
-                    prob_dict['label'].append('shmulevich')
-                    prob_dict['string'].append(bin)
-                    prob_dict['prob'].append(binProb)
-                    prob_dict['res'].append((len(gene)-count)/len(gene))
-                    prob_dict['mean'].append(1/(3**sizeGene))
-                    prob_dict['sd'].append(standard_dev['shmulevich'].iloc[0])
-                    
-                    #append highest string prob and its prob
-                    #probDF = probDF.sort_values(by=['prob'])
-                    prob_dict['highest'].append(high_string)#probDF['string'].iloc[-1])
-                    prob_dict['highestprob'].append(high_p)#probDF['prob'].iloc[-1])
-
-            if method == 'BASC A': 
-            #if thr_b is not None:
-                    #get binarized gene
-                    count = 0
-                    bin = ""
-                    d = disps['BASC_A']
-                    for g in gene:
-                        if g > thr_b + d.iloc[0]:
-                            bin += '1'
-                        elif g < thr_b - d.iloc[0]:
-                            bin += '0'
-                        else:
-                            bin += '?'
-                            count += 1
-                    
-                    
-                    #generate dataframe with all possible strings and their probabilities
-                    #probBin function 
-                    #probDF = probBin(gene,d.iloc[0],sizeGene,'k-means',probden)
-
-                    high_p, high_string, p = run(gene, d.iloc[0], len(gene), 'BASC_A', bin) #call_C_statistics(gene, d.iloc[0], "BASC_A", bin)
-
-
-                    #extract probability of selected string
-                    #from dataframe probBin
-                    binProb = p #probDF.loc[probDF['string']==bin]['prob'].iloc[0]
-                    
-                    #append selected val
-                    prob_dict['label'].append('BASC_A')
-                    prob_dict['string'].append(bin)
-                    prob_dict['prob'].append(binProb)
-                    prob_dict['res'].append((len(gene)-count)/len(gene))
-                    prob_dict['mean'].append(1/(3**sizeGene))
-                    prob_dict['sd'].append(standard_dev['BASC_A'].iloc[0])
-                    
-                    #append highest string prob and its prob
-                    #probDF = probDF.sort_values(by=['prob'])
-                    prob_dict['highest'].append(high_string)#probDF['string'].iloc[-1])
-                    prob_dict['highestprob'].append(high_p)#probDF['prob'].iloc[-1])
+                    prob_dict['highest'].append("".join(highestS))#probDF['string'].iloc[-1])
+                    prob_dict['highestprob'].append(np.prod(highP))#probDF['prob'].iloc[-1])
+                    prob_dict['highImpu'].append("".join(imputedS))#probDF['prob'].iloc[-1])
+                    prob_dict['ImpuProb'].append(impuP)#probDF['prob'].iloc[-1])
+      
                 
         #create dataframe from dict
         df = pd.DataFrame.from_dict(prob_dict)
@@ -330,7 +223,7 @@ def get_stats_callback(app):
         #FOR STATS
         df['dif'] = df['mean'] - df['prob']
         df['z'] = df['dif']/df['sd']
-        df = df.drop(columns=['highest','highestprob'])
+        df = df.drop(columns=['highest','highestprob','highImpu', 'ImpuProb'])
         df = df.round(5)
         
         # return only the selected gene plot with threshold if number of interpolation is not selected

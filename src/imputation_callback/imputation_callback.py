@@ -18,6 +18,7 @@ from statistics_methods.stringProbabilistic import call_C_statistics, run #proba
 from imputation.imputation_ml import imputate_missforest, imputate_mice_logictic
 
 from statistics_methods.ProbabilityPerm import probBin
+from statistics_methods.probImpute import binarize_and_impute_matrix_with_probs_multi_methods, generateCDF
 
 # function to return components 
 def get_imputation_callbacks(app):
@@ -74,7 +75,7 @@ def get_imputation_callbacks(app):
                                 options=[
                                 {'label': 'MissForest Imputation', 'value':4},
                                 #{'label': 'IterativeImputer (MICE with LogReg) Imputation', 'value':5},
-                                {'label': 'Probabilistic Imputation', 'value':3},
+                                {'label': 'ProbImpute', 'value':3},
                                 {'label': 'Global Imputation (ex: changes all "?" to either 0 or 1)', 'value':0},
                                 {'label': 'Gene Imputation (ex: imputates a value for only one gene)', 'value':1},
                                 {'label': 'Time Impuation (ex: imputates values based on time course)', 'value':2},
@@ -299,7 +300,9 @@ def get_imputation_callbacks(app):
             df = pd.DataFrame(data)
 
             # number of time points
-            df = len(df['Gene ID'])
+            df = len(list(df.columns))-1
+            
+            #print(df)
 
             # create dropdown options 
             options = [{'label':"Time " + str(i), 'value': i} for i in np.arange(0, df)]
@@ -595,8 +598,12 @@ def get_imputation_callbacks(app):
         State('Onestep-table', 'data'),
         Input('dropdown-method', 'value'),
         State('Elected-table', 'data'),
+        Input('thr_k', 'data'),
+        Input('thr_o', 'data'),
+        Input('thr_s', 'data'),
+        Input('thr_b', 'data'),
         prevent_initial_call=True)
-    def imputate_based_statistics(n_clicks, method, dataset, rows, basc, kmeans, shmulevich, onestep, thr_methods_selected, elected):
+    def imputate_based_statistics(n_clicks, method, dataset, rows, basc, kmeans, shmulevich, onestep, thr_methods_selected, elected, thr_k, thr_o, thr_s, thr_b):
 
         """
             imputate_based_statistics - imputates table based on statistics 
@@ -635,196 +642,63 @@ def get_imputation_callbacks(app):
             # organize labels 
             labels = [labels[i] for i in rows]
 
-            string_dict = {} 
-
-
-            # iterate selected genes
-            for i in range(len(genes)):
-                
-                # displacement table
-                if method != 'Elected':
-                    disps = getDisplacement([method], genes[i])
-                rangeIndex = math.ceil((max(genes[i])-min(genes[i]))*10) - 1
-
-                #get PDF for gene
-                #probden = pd.read_csv("./statistics_methods/cdf_"+str(rangeIndex+1)+".csv")
-
-                # extracts displacement based on selected method
-                if(method == 'BASC A'):
-                    print("basc stats")
-                    d = disps['BASC_A'].iloc[0]
-
-                    df = pd.DataFrame(basc)
-
-                    og_binarization = df[labels[i]].values
-
-                    binary = "".join(str(x) for x in og_binarization)
-
-                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'BASC_A', binary) #call_C_statistics(genes[i], d, 'BASC_A', binary)
-
-                    #probDF = probDF.sort_values(by=['prob'])
-
-                    highest = high_string
-        
-                elif(method == 'K-Means'):
-                    print("kmeans stats")
-                    d = disps['k-means'].iloc[0]
-
-                    df = pd.DataFrame(kmeans)
-
-                    og_binarization = df[labels[i]].values
-
-                    binary = "".join(str(x) for x in og_binarization)
-
-                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'k-means', binary) #call_C_statistics(genes[i], d, 'k-means', binary)
-
-                    #probDF = probDF.sort_values(by=['prob'])
-
-                    highest = high_string
+            string_dict = {}
             
-                elif(method == 'Onestep'):
-                    print("onestep stats")
-                    d = disps['onestep'].iloc[0]
-
-                    df = pd.DataFrame(onestep)
-
-                    og_binarization = df[labels[i]].values
-
-                    binary = "".join(str(x) for x in og_binarization)
-
-                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'onestep', binary) #call_C_statistics(genes[i], d, 'onestep', binary)
-
-                    #probDF = probDF.sort_values(by=['prob'])
-
-                    highest = high_string
-
-                elif method == 'Elected':
-                    
-                    high_probs = []
-                    strings_probs = []
-
-                    df1 = pd.DataFrame(elected)
-
-                    og_binarization = df1[labels[i]].values
-
-                    print("doing elected stats")
-                    for m in thr_methods_selected:
-                        disps = getDisplacement([m], genes[i])
-                        if m == 'BASC A':
-                            d = disps['BASC_A'].iloc[0]
-
-                            df = pd.DataFrame(basc)
-
-                            og_bina = df[labels[i]].values
-
-                            binary = "".join(str(x) for x in og_bina)
-
-                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'BASC_A', binary) #(genes[i], d, 'BASC_A', binary)
-
-                            #probDF = probDF.sort_values(by=['prob'])
-
-                            high_probs.append(high_p)
-                            strings_probs.append(high_string)
-                        
-                        elif m == 'Onestep':
-
-                            d = disps['onestep'].iloc[0]
-
-                            df = pd.DataFrame(onestep)
-
-                            og_bina = df[labels[i]].values
-
-                            binary = "".join(str(x) for x in og_bina)
-
-                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'onestep', binary) #call_C_statistics(genes[i], d, 'onestep', binary)
-
-                            #probDF = probDF.sort_values(by=['prob'])
-
-                            high_probs.append(high_p)
-                            strings_probs.append(high_string)
-
-                        elif m == 'K-Means':
-
-                            d = disps['k-means'].iloc[0]
-
-                            df = pd.DataFrame(kmeans)
-
-                            og_bin = df[labels[i]].values
-
-                            binary = "".join(str(x) for x in og_bin)
-
-                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'k-means', binary) #(genes[i], d, 'k-means', binary)
-
-                            #probDF = probDF.sort_values(by=['prob'])
-
-                            high_probs.append(high_p)
-                            strings_probs.append(high_string)
-
-                        else:
-                            d = disps['shmulevich'].iloc[0]
-
-                            df = pd.DataFrame(shmulevich)
-
-                            og_bin = df[labels[i]].values
-
-                            binary = "".join(str(x) for x in og_bin)
-
-                            high_p, high_string, p = run(genes[i], d, len(genes[i]), 'shmulevich', binary) #call_C_statistics(genes[i], d, 'shmulevich', binary)
-
-                            #probDF = probDF.sort_values(by=['prob'])
-
-                            high_probs.append(high_p)
-                            strings_probs.append(high_string)
-
-                    max_value = max(high_probs)
-
-                    max_index = high_probs.index(max_value)
-                    print("ended elected stats")
-                    highest = strings_probs[max_index]
-                    
-                else:
-                    print("shmulevich stats")
-                    d = disps['shmulevich'].iloc[0]
-
-                    df = pd.DataFrame(shmulevich)
-
-                    og_binarization = df[labels[i]].values
-
-                    binary = "".join(str(x) for x in og_binarization)
-
-                    high_p, high_string, p = run(genes[i], d, len(genes[i]), 'shmulevich', binary) #call_C_statistics(genes[i], d, 'shmulevich', binary)
-
-                    #probDF = probDF.sort_values(by=['prob'])
-
-                    highest = high_string
-
-                array_high_P = []
-
-                for j in range(len(og_binarization)):
-
-                    if og_binarization[j] == '?' and highest[j] != '?':
-                        array_high_P.append(int(highest[j]))
-                    #elif str(og_binarization[j]) != highest[j]:
-                    #    array_high_P.append('?')
-                    else:
-                        array_high_P.append(og_binarization[j])
-
-                # get probability of strings 
-                #Z = probabilistic(np.array(genes[i]), [method], d)
-
-                # highest string probability 
-                #string_high_P = max(Z, key=Z.get)
+            method_labels = {'BASC A': ['BASC_A', thr_b, basc], 'Onestep': ['onestep', thr_o, onestep], 'K-Means':['k-means', thr_k, kmeans], 'Shmulevich':['shmulevich', thr_s, shmulevich]} 
+            
+            cdf = generateCDF()
+            
+            if method == 'Elected':
                 
-                # save string key to array
-                #array_high_P = [e for e in string_high_P]
+                df = pd.DataFrame(elected)
+                
+                for row, g, label in zip(rows, genes, labels):
+                    d = []
+                    t = []
+                    cdf_list = []
+                    for thr_m in thr_methods_selected:
+                        disps = getDisplacement([thr_m], g)
+                        
+                        d.append(disps[method_labels[thr_m][0]].iloc[0])
+                        t.append(method_labels[thr_m][1][str(row)])
+                        cdf_list.append(cdf[thr_m])
+                    
+                    imputationGene, _, _ = binarize_and_impute_matrix_with_probs_multi_methods([g], cdf_list, t, d, 0.5, 3)
+                    
+                    el = ['?' if np.isnan(e) else int(e) for e in imputationGene]
+                    
+                    df[label] = el
+            
+            else:
+                
+                df = pd.DataFrame(method_labels[method][2])
+                
+                # iterate by each gene and find the thresholds based on the number of interpolations
+                for row, gene, label in zip(rows, genes, labels):
+                    
+                    # extract displacement based on gene range
+                    disps = getDisplacement([method],gene)
 
-                # save highest prob string to each gene 
-                string_dict[labels[i]] = array_high_P
-
-            #print(string_dict)
-
-            # turn to imputation to dataframe
-            df = pd.DataFrame(string_dict)
+                    #print(disps)
+                    
+                    t = []
+                    d = []
+                    #votes = [[]]
+                    
+                    # extract thr, and disp of each method of the gene
+                        
+                    thr = method_labels[method][1][str(row)]
+                    dis = disps[method_labels[method][0]].iloc[0]
+                    t.append(thr)
+                        
+                    d.append(dis)
+                            
+                    imputationGene, _, _ = binarize_and_impute_matrix_with_probs_multi_methods([gene], [cdf[method]], t, d, 0.5, 3)
+                    
+                    el = ['?' if np.isnan(e) else int(e) for e in imputationGene]
+                    
+                    df[label] = el
+                    
             
             # returns imputation to a selected table 
             if(method == 'BASC A'):

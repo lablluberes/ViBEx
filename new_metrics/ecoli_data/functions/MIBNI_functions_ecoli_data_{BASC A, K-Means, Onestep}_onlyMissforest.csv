@@ -1,0 +1,7 @@
+Gene,Rule
+lexA,(recA) and (lexA) and (uvrA) and (umuD) and (uvrD) and (polB)
+uvrD,(polB) and (uvrD) and (not umuD) and (not lexA) and (not recA) and (not uvrA)
+recA,(lexA) and (recA) and (uvrA) and (umuD) and (uvrD) and (polB)
+uvrA,(lexA) and (recA) and (uvrA) and (umuD) and (uvrD) and (polB)
+polB,(uvrD) or (polB) or (umuD) or (lexA) or (recA) or (uvrA)
+umuD,(lexA) and (recA) and (uvrA) and (umuD) and (uvrD) and (polB)

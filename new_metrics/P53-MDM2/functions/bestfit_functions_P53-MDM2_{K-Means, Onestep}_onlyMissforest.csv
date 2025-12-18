@@ -1,0 +1,5 @@
+Gene,Rule
+ATM,True
+p53,not ATM and WIP1 and not p53 or ATM and not WIP1 and not p53 or ATM and WIP1 and p53
+WIP1,True
+MDM2,False

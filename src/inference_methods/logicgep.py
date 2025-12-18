@@ -11,6 +11,8 @@
 import deap
 import random
 import pandas as pd
+import numpy as np
+
 
 def _validate_basic_toolbox(tb):
 	"""
@@ -32,29 +34,36 @@ def _validate_basic_toolbox(tb):
 						  category=UserWarning)
 
 def _apply_modification(population, operator, pb):
-	"""
-	Apply the modification given by *operator* to each individual in *population* with probability *pb* in place.
-	"""
-	for i in range(len(population)):
-		if random.random() < pb:
-			population[i], = operator(population[i])
-			del population[i].fitness.values
-	return population
+        random.seed(42)
+        np.random.seed(42)
+        """
+        Apply the modification given by *operator* to each individual in *population* with probability *pb* in place.
+        """
+        for i in range(len(population)):
+            if random.random() < pb:
+                population[i], = operator(population[i])
+                del population[i].fitness.values
+        return population
 
 def _apply_crossover(population, operator, pb):
-	"""
-	Mate the *population* in place using *operator* with probability *pb*.
-	"""
-	for i in range(1, len(population), 2):
-		if random.random() < pb:
-			population[i - 1], population[i] = operator(population[i - 1], population[i])
-			del population[i - 1].fitness.values
-			del population[i].fitness.values
-	return population
+        random.seed(42)
+        np.random.seed(42)
+        """
+        Mate the *population* in place using *operator* with probability *pb*.
+        """
+        for i in range(1, len(population), 2):
+            if random.random() < pb:
+                population[i - 1], population[i] = operator(population[i - 1], population[i])
+                del population[i - 1].fitness.values
+                del population[i].fitness.values
+        return population
 
 def gep_simple(population, toolbox, n_generations, n_elites,
 			   stats=None, hall_of_fame=None, verbose=__debug__):
-	"""
+    random.seed(42)
+    np.random.seed(42)
+    
+    """
 	This algorithm performs the simplest and standard gene expression programming.
 	The flowchart of this algorithm can be found
 	`here <https://www.gepsoft.com/gxpt4kb/Chapter06/Section1/SS1.htm>`_.
@@ -88,84 +97,84 @@ def gep_simple(population, toolbox, n_generations, n_elites,
 		including Dc-specific mutation/inversion/transposition and direct mutation of the RNC array associated with
 		each gene. These operators should be registered into the *toolbox*.
 	"""
-	_validate_basic_toolbox(toolbox)
-	logbook = deap.tools.Logbook()
-	logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
-
-	for gen in range(n_generations + 1):
+    _validate_basic_toolbox(toolbox)
+    logbook = deap.tools.Logbook()
+    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+    
+    for gen in range(n_generations + 1):
 		# evaluate: only evaluate the invalid ones, i.e., no need to reevaluate the unchanged ones
 
-		if gen != n_generations:
-			invalid_individuals = [ind for ind in population if not ind.fitness.valid]
-			# print(invalid_individuals)
-			fitnesses = toolbox.map(toolbox.evaluate, invalid_individuals)
-			# print(fitnesses)
-			for ind, fit in zip(invalid_individuals, fitnesses):
-				# print(fit)
-				ind.fitness.values = fit
-			if hall_of_fame is not None:
-				hall_of_fame.update2(population)
-			record = stats.compile(population) if stats else {}
-			logbook.record(gen=gen, nevals=len(invalid_individuals), **record)
-			#if verbose:
-				#print(logbook.stream)
+            if gen != n_generations:
+                invalid_individuals = [ind for ind in population if not ind.fitness.valid]
+                # print(invalid_individuals)
+                fitnesses = toolbox.map(toolbox.evaluate, invalid_individuals)
+                # print(fitnesses)
+                for ind, fit in zip(invalid_individuals, fitnesses):
+                    # print(fit)
+                    ind.fitness.values = fit
+                if hall_of_fame is not None:
+                    hall_of_fame.update2(population)
+                record = stats.compile(population) if stats else {}
+                logbook.record(gen=gen, nevals=len(invalid_individuals), **record)
+                #if verbose:
+                    #print(logbook.stream)
 
-			if gen == n_generations:
-				break
+                if gen == n_generations:
+                    break
 
-			elites =hall_of_fame[:n_elites]
-			offspring = toolbox.select(population, len(population) - n_elites,2)
+                elites =hall_of_fame[:n_elites]
+                offspring = toolbox.select(population, len(population) - n_elites,2)
 
-			# replication
-			offspring = [toolbox.clone(ind) for ind in offspring]
+                # replication
+                offspring = [toolbox.clone(ind) for ind in offspring]
 
-			# mutation
-			for op in toolbox.pbs:
-				if op.startswith('mut'):
-					offspring = _apply_modification(offspring, getattr(toolbox, op), toolbox.pbs[op])
+                # mutation
+                for op in toolbox.pbs:
+                    if op.startswith('mut'):
+                        offspring = _apply_modification(offspring, getattr(toolbox, op), toolbox.pbs[op])
 
-			# crossover
-			for op in toolbox.pbs:
-				if op.startswith('cx'):
-					offspring = _apply_crossover(offspring, getattr(toolbox, op), toolbox.pbs[op])
+                # crossover
+                for op in toolbox.pbs:
+                    if op.startswith('cx'):
+                        offspring = _apply_crossover(offspring, getattr(toolbox, op), toolbox.pbs[op])
 
-			# replace the current population with the offsprings
-			population = elites + offspring
+                # replace the current population with the offsprings
+                population = elites + offspring
 
-		else:
-			invalid_individuals = [ind for ind in population if not ind.fitness.valid]
-			# print(invalid_individuals)
-			fitnesses = toolbox.map(toolbox.evaluate, invalid_individuals)
-			# print(fitnesses)
-			for ind, fit in zip(invalid_individuals, fitnesses):
-				# print(fit)
-				ind.fitness.values = fit
-			if hall_of_fame is not None:
-				hall_of_fame.update2(population)
-			fitnesses1 = toolbox.map(toolbox.evaluate, hall_of_fame)
-			for ind, fit in zip(hall_of_fame, fitnesses1):
-				ind.fitness.values = fit
-			#if verbose:
-			#	print(logbook.stream)
-			if gen == n_generations:
-				break
-			elites = hall_of_fame[:n_elites]
-			offspring = toolbox.select(population, len(population) - n_elites, 2)
-			# replication
-			offspring = [toolbox.clone(ind) for ind in offspring]
-			# mutation
-			for op in toolbox.pbs:
-				if op.startswith('mut'):
-					offspring = _apply_modification(offspring, getattr(toolbox, op), toolbox.pbs[op])
-			# crossover
-			for op in toolbox.pbs:
-				if op.startswith('cx'):
-					offspring = _apply_crossover(offspring, getattr(toolbox, op), toolbox.pbs[op])
+            else:
+                invalid_individuals = [ind for ind in population if not ind.fitness.valid]
+                # print(invalid_individuals)
+                fitnesses = toolbox.map(toolbox.evaluate, invalid_individuals)
+                # print(fitnesses)
+                for ind, fit in zip(invalid_individuals, fitnesses):
+                    # print(fit)
+                    ind.fitness.values = fit
+                if hall_of_fame is not None:
+                    hall_of_fame.update2(population)
+                fitnesses1 = toolbox.map(toolbox.evaluate, hall_of_fame)
+                for ind, fit in zip(hall_of_fame, fitnesses1):
+                    ind.fitness.values = fit
+                #if verbose:
+                #	print(logbook.stream)
+                if gen == n_generations:
+                    break
+                elites = hall_of_fame[:n_elites]
+                offspring = toolbox.select(population, len(population) - n_elites, 2)
+                # replication
+                offspring = [toolbox.clone(ind) for ind in offspring]
+                # mutation
+                for op in toolbox.pbs:
+                    if op.startswith('mut'):
+                        offspring = _apply_modification(offspring, getattr(toolbox, op), toolbox.pbs[op])
+                # crossover
+                for op in toolbox.pbs:
+                    if op.startswith('cx'):
+                        offspring = _apply_crossover(offspring, getattr(toolbox, op), toolbox.pbs[op])
 
-			# replace the current population with the offsprings
-			population = elites + offspring
-
-	return population, logbook
+                # replace the current population with the offsprings
+                population = elites + offspring
+    
+    return population, logbook
 
 from operator import eq
 from copy import deepcopy
@@ -328,7 +337,6 @@ from sklearn.feature_selection import mutual_info_classif
 from xgboost import plot_importance
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-import numpy as np
 def data_pre (target,a):
     data_y = a.loc[ : ,target]
     #data_x=a.drop([target],axis=1)
@@ -349,7 +357,7 @@ def RF_XG_regulators(x,y,zz, target):
     np.random.seed(42)
     
     col = zz.columns
-    rfc = RandomForestClassifier(n_estimators=1000, min_samples_leaf=1, n_jobs=-1, random_state=42)
+    rfc = RandomForestClassifier(n_estimators=1000, min_samples_leaf=1, n_jobs=1, random_state=42)
     #print("error rf")
     
     rfc.fit(x, y[target])
@@ -362,7 +370,11 @@ def RF_XG_regulators(x,y,zz, target):
     #print("warning fittransform")
     y_train = le.fit_transform(y[target])
     model = xgb.XGBClassifier(max_depth=5, learning_rate=0.1, n_estimators=160, objective='binary:logistic',
-                              n_jobs=-1, random_state=42)
+                              n_jobs=1,               # <<< avoid nondeterministic threading
+    random_state=42,
+    seed=42,
+    tree_method="hist",     # <<< deterministic
+    grow_policy="depthwise")
     
     #print(len(np.unique(y_train)))
     
@@ -413,7 +425,6 @@ def Regulators(target,a):
 
     return RG_sets
 
-import numpy as np
 import pandas as pd
 import multiprocessing
 import operator
@@ -464,6 +475,7 @@ def mainn(target,Regulators_sets,data_Out,Input_data,binary_data,raw_dataIn,raw_
         Input_data = Input_data[Regulators_sets].values.tolist()
         #if target == "ATM":
         #    print(Regulators_sets)
+        #print("Gene:", target, "Regulators:", Regulators_sets)
     else:
         Input_data = Input_data[Regulators_sets].values.tolist()
 
@@ -566,7 +578,9 @@ def mainn(target,Regulators_sets,data_Out,Input_data,binary_data,raw_dataIn,raw_
     #with open(ss, 'a') as f:
     #    f.write(f'{target} = {symplified_best}\n')
 
-    rules[target] = symplified_best
+    #rules[target] = symplified_best
+    
+    return symplified_best
 
 
 def LogicGep(binary_data, raw_data):
@@ -587,17 +601,22 @@ def LogicGep(binary_data, raw_data):
     raw_dataOut = raw_data.loc[1:rows - 1]
     ss= "result.tsv"
     #open(ss, 'w')
-    manager = multiprocessing.Manager()
-    rules = manager.dict()
+    #manager = multiprocessing.Manager()
+    #rules = manager.dict()
+    rules = {}
 
-    list1=[(x1,Regulators_sets,data_Out,data_In,binary_data,raw_dataIn,raw_dataOut,ss,True)for x1 in list(binary_data.columns)]
-    processes = [ multiprocessing.Process(target= mainn, args=[name, count, data_Out, Input_data, binary_data,raw_dataIn,raw_dataOut, ss, rules, pre_RG])
-    for name, count,data_Out,Input_data, binary_data,raw_dataIn,raw_dataOut,ss,pre_RG in list1]
+    list1=[(x1,Regulators_sets,data_Out,data_In,binary_data,raw_dataIn,raw_dataOut,ss, {}, True)for x1 in list(binary_data.columns)]
+    #processes = [ multiprocessing.Process(target= mainn, args=[name, count, data_Out, Input_data, binary_data,raw_dataIn,raw_dataOut, ss, rules, True])
+    #for name, count,data_Out,Input_data, binary_data,raw_dataIn,raw_dataOut,ss,pre_RG in list1]
 
-    for p in processes:
-        p.start()
-    for p in processes:
-        p.join()
+    rules = {}
+    for g, args in zip(binary_data.columns, list1):
+        rules[g] = mainn(*args)
+    
+    #for p in processes:
+    #    p.start()
+    #or p in processes:
+    #    p.join()
 
     #print(rules)
 
