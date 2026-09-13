@@ -24,7 +24,7 @@ python script.py
 
 ## TO RUN LOCALLY:
 
-- Have Python3.10 or higher installed
+- Have Python3.10.16 or higher installed
 - Go to:
 ```
 cd src

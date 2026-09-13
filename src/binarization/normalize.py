@@ -34,8 +34,8 @@ def geneNorm(G):
         # max value of curr gene expr
         m = max(G.iloc[i].values)
 
-        # if its 1 then leave gene expr as it is
-        if m == 1:
+        # if less than 1 then leave gene expr as it is
+        if m < 1:
 
             G_norm[i] = G.iloc[i].values
 
