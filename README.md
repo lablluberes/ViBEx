@@ -25,6 +25,11 @@ python script.py
 ## TO RUN LOCALLY:
 
 - Have Python3.10.16 or higher installed
+- Create environment
+```
+python -m venv .venv
+source .venv/bin/activate
+```
 - Go to:
 ```
 cd src
